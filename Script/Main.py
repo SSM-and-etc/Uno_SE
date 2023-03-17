@@ -12,7 +12,7 @@ root_path = os.path.join(current_path, os.pardir)
 print(root_path)
 
 # 배경 이미지 불러오기(임시, 다른 클래스로 옮기는 것이 좋을지?)
-background      = pygame.image.load(os.path.join(root_path, "Material/BG/Title.png"))
+g_titleBG      = pygame.image.load(os.path.join(root_path, "Material/BG/title.png"))
 
 class GameMain():
     def __init__(self):
@@ -32,7 +32,7 @@ class GameMain():
         self.card_group.empty()
         
     def play_title(self):
-        self.screen.blit(background, (0, 0))
+        self.screen.blit(g_titleBG, (0, 0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
