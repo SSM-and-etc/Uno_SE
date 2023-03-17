@@ -3,7 +3,7 @@ import os
 
 import pygame
 
-from GameData.UserData import UserData
+from GameData.user_data import UserData
 
 
 # 현재 파일의 위치 반환
