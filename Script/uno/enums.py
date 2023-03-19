@@ -34,6 +34,9 @@ class CardType(StrEnum):
     def WILD(cls):
         return [cls.CARD_CHANGECOLOR]
 
+    def is_number(self):
+        return self in self.NUMBER()
+
     def is_special(self):
         return self in self.SPECIAL()
     
