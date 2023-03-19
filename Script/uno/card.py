@@ -13,3 +13,12 @@ class Card:
             return True
         else:
             return self.card_type == card.card_type or self.color == card.color
+        
+    def is_number(self):
+        return self.card_type.is_number()
+
+    def is_special(self):
+        return self.card_type.is_special()
+    
+    def is_wild(self):
+        return self.card_type.is_wild()

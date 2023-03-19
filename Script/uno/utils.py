@@ -2,9 +2,8 @@ class CycleIterator:
     def __init__(self, data):
         self.data = data
         self.n = len(data)
-        self.i = -1
+        self.i = 0
         self.forward = True
-        self.init_flag = True # 처음에 prev하면 두 칸 뒤로가버림
 
     def __iter__(self):
         return self
@@ -15,17 +14,22 @@ class CycleIterator:
         else:
             return self.prev()
 
+    def look_next(self):
+        if self.forward:
+            return self.data[(self.i + 1) % self.n]
+        else:
+            return self.data[(self.i - 1) % self.n]
+
     def reverse(self):
         self.forward = not self.forward
 
     def next(self, step=1):
-        self.init_flag = False
         self.i = (self.i + step) % self.n
         return self.data[self.i]
 
     def prev(self, step=1):
-        if self.init_flag:
-            self.i += 1
-            self.init_flag = False
         self.i = (self.i - step) % self.n
         return self.data[self.i]
+
+    def current(self):
+        return self.data[self.i] 
