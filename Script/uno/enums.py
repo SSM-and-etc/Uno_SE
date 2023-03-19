@@ -1,14 +1,4 @@
-from enum import Enum, auto
-
-class StrEnum(str, Enum):
-    def _generate_next_value_(name, start, count, last_values):
-        return name
-    
-    def __repr__(self):
-        return self.name
-
-    def __str__(self):
-        return self.name 
+from enum import auto, StrEnum
 
 class CardColor(StrEnum):
     RED = auto()
@@ -32,13 +22,21 @@ class CardType(StrEnum):
     CARD_PLUS2 = auto()
     CARD_CHANGECOLOR = auto()
 
-    NUMBER = [CARD_0, CARD_1, CARD_2, CARD_3, CARD_4, CARD_5, CARD_6, CARD_7, CARD_8, CARD_9]
-    SPECIAL = [CARD_SKIP, CARD_REVERSE, CARD_PLUS2, CARD_CHANGECOLOR]
-    WILD = [CARD_CHANGECOLOR]
+    @classmethod
+    def NUMBER(cls):
+        return [cls.CARD_0, cls.CARD_1, cls.CARD_2, cls.CARD_3, cls.CARD_4, cls.CARD_5, cls.CARD_6, cls.CARD_7, cls.CARD_8, cls.CARD_9]
 
-    def is_special(cardType):
-        return cardType in CardType.SPECIAL
+    @classmethod
+    def SPECIAL(cls):
+        return [cls.CARD_SKIP, cls.CARD_REVERSE, cls.CARD_PLUS2, cls.CARD_CHANGECOLOR]
+
+    @classmethod
+    def WILD(cls):
+        return [cls.CARD_CHANGECOLOR]
+
+    def is_special(self):
+        return self in self.SPECIAL()
     
-    def is_wild(cardType):
-        return cardType in CardType.WILD
+    def is_wild(self):
+        return self in self.WILD()
             
