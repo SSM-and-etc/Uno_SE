@@ -32,9 +32,13 @@ class CardType(StrEnum):
     CARD_PLUS2 = auto()
     CARD_CHANGECOLOR = auto()
 
-    def is_special(CardType):
-        return CardType in [CardType.CARD_SKIP, CardType.CARD_REVERSE, CardType.CARD_PLUS2, CardType.CARD_CHANGECOLOR]
+    NUMBER = [CARD_0, CARD_1, CARD_2, CARD_3, CARD_4, CARD_5, CARD_6, CARD_7, CARD_8, CARD_9]
+    SPECIAL = [CARD_SKIP, CARD_REVERSE, CARD_PLUS2, CARD_CHANGECOLOR]
+    WILD = [CARD_CHANGECOLOR]
+
+    def is_special(cardType):
+        return cardType in CardType.SPECIAL
     
-    def is_wild(CardType):
-        return CardType in [CardType.CARD_CHANGECOLOR]
+    def is_wild(cardType):
+        return cardType in CardType.WILD
             
