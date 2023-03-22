@@ -1,48 +1,35 @@
-# 배경 이미지 설정
 import os
 
 import pygame
 
 from GameData.user_data import UserData
+from Title.title import Title
 
-
-# 현재 파일의 위치 반환
-current_path = os.path.dirname(__file__) 
-root_path = os.path.join(current_path, os.pardir)
-print(root_path)
 
 # 배경 이미지 불러오기(임시, 다른 클래스로 옮기는 것이 좋을지?)
-g_titleBG      = pygame.image.load(os.path.join(root_path, "Material/BG/title.png"))
 
 class GameMain():
     def __init__(self):
+        current_path = os.path.dirname(__file__) 
+        root_path = os.path.join(current_path, os.pardir)
+        
         self.card_group       = pygame.sprite.Group()
         
         self.running = True
         
         self.user_data = UserData()
+        self.title = Title(root_path)
         
-        self.screen = pygame.display.set_mode((self.user_data.screen_width, self.user_data.screen_height))
+        self.set_screen(self.user_data.screen_width, self.user_data.screen_height)
         self.state = 0 # 0: Title, 1: play(single)
         self.clock = clock = pygame.time.Clock()
         
-        
+    def set_screen(self, width, height):
+        self.screen = pygame.display.set_mode((width, height))
         
     def group_reset(self):
         self.card_group.empty()
         
-    def play_title(self):
-        self.screen.blit(g_titleBG, (0, 0))
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.running = False
-                
-            if event.type == pygame.KEYDOWN:
-                pass
-            
-            if event.type == pygame.MOUSEBUTTONDOWN: 
-                pass
-                
         # self.class.update(self)
         self.card_group.update(self)
 
@@ -57,7 +44,7 @@ class GameMain():
         while self.running:
             
             if self.state == 0:
-                self.play_title()
+                self.title.display(self, self.screen)
             elif self.state == 1:
                 self.play_single_game()
                 
