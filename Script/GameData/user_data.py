@@ -7,6 +7,7 @@ class UserData():
         # else:
             self.reset_data()
             # self.save_data()
+            
         
         
     def load_data(self):
@@ -18,6 +19,9 @@ class UserData():
     def reset_data(self):
         self.screen_width        =   1280
         self.screen_height       =   720
+        self.key_left            =  pygame.K_LEFT
+        self.key_right            =  pygame.K_RIGHT
+        self.key_enter            =  pygame.K_RETURN
         
     def get_screen_size(self):
         return (self.screen_width, self.screen_height)
