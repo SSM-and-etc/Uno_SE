@@ -6,8 +6,6 @@ from GameData.user_data import UserData
 from Title.title import Title
 
 
-# 배경 이미지 불러오기(임시, 다른 클래스로 옮기는 것이 좋을지?)
-
 class GameMain():
     def __init__(self):
         current_path = os.path.dirname(__file__) 
@@ -18,11 +16,11 @@ class GameMain():
         self.running = True
         
         self.user_data = UserData()
-        self.title = Title(root_path)
+        self.title = Title(root_path, self.user_data.get_screen_size())
         
         self.set_screen(self.user_data.screen_width, self.user_data.screen_height)
         self.state = 0 # 0: Title, 1: play(single)
-        self.clock = clock = pygame.time.Clock()
+        self.clock = pygame.time.Clock()
         
     def set_screen(self, width, height):
         self.screen = pygame.display.set_mode((width, height))

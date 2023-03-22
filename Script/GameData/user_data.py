@@ -18,3 +18,6 @@ class UserData():
     def reset_data(self):
         self.screen_width        =   1280
         self.screen_height       =   720
+        
+    def get_screen_size(self):
+        return (self.screen_width, self.screen_height)
