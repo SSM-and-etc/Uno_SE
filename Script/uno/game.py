@@ -1,40 +1,42 @@
 from uno.enums import *
 from uno.card import Card
 from uno.deck import Deck
+from uno.table import Table
 from uno.player import Player
 from uno.utils import *
 
 class Game:
-    def __init__(self, players, n=7):
-        self.table = []
+    def __init__(self, players, callback, n=7):
         self.players = players
-        self.deck = Deck()
+        self.table = Table()
+        self.deck = Deck({"number": 1, "special": 1, "wild": 20})
         self.players_turn = CycleIterator(players)
+        self.callback = callback
 
         for player in self.players:
             self.draw(player, n)
-        self.table.append(self.deck.draw()) # TODO: 첫 카드가 숫자 카드가 아닐 때
+        self.table.put(self.deck.draw()) # TODO: 첫 카드가 숫자 카드가 아닐 때
 
     def draw(self, player, n=1):
         player.hand.extend([self.deck.draw() for _ in range(n)])
 
     def deal(self, player, card):
-        if self.table[-1].playable(card):
+        if self.table.playable(card):
             if card.is_number():
-               self.table.append(card) 
+               self.table.put(card) 
 
-            elif card.is_special():
-                if card == CardType.CARD_PLUS2:
+            else:
+                if card.card_type == CardType.CARD_PLUS2:
                     self.draw(self.players_turn.look_next(), 2)
 
-                elif card == CardType.CARD_REVERSE:
+                elif card.card_type == CardType.CARD_REVERSE:
                     self.players_turn.reverse()
 
-                elif card == CardType.CARD_SKIP:
+                elif card.card_type == CardType.CARD_SKIP:
                     next(self.players_turn)
 
-            #elif card.is_wild():
-            #    if card == CardType.CARD_CHANGECOLOR:
+                elif card.card_type == CardType.CARD_CHANGECOLOR:
+                    self.table.color = self.callback["select_color"]()
 
             player.hand.remove(card)
             return True
@@ -52,6 +54,7 @@ class Game:
                 next(self.players_turn)
         else:
             self.draw(player)
+            next(self.players_turn)
 
         return True
 
