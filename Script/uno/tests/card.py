@@ -1,14 +1,25 @@
 from uno.card import *
+from uno.table import *
 
 def test_playable():
-    card = Card(CardType.CARD_0, CardColor.RED)
-    card2 = Card(CardType.CARD_1, CardColor.BLUE)
-    card3 = Card(CardType.CARD_1, CardColor.RED)
+    card_0r = Card(CardType.CARD_0, CardColor.RED)
+    card_0b = Card(CardType.CARD_0, CardColor.BLUE)
+    card_1b = Card(CardType.CARD_1, CardColor.BLUE)
+    card_1r = Card(CardType.CARD_1, CardColor.RED)
+    card_specialr = Card(CardType.CARD_PLUS2, CardColor.RED)
+    card_wild = Card(CardType.CARD_CHANGECOLOR)
 
-    card_special = Card(CardType.CARD_PLUS2, CardColor.RED)
+    table = Table()
 
-    assert card.playable(card2) == False
-    assert card.playable(card3) == True
+    table.put(card_0r)
+    assert table.playable(card_0r) == True
+    assert table.playable(card_1b) == False
+    assert table.playable(card_0b) == True
+    assert table.playable(card_1r) == True
+    assert table.playable(card_specialr) == True
+    assert table.playable(card_wild) == True
 
-    assert card_special.playable(card) == True
-    assert card_special.playable(card2) == False
+    table.put(card_specialr)
+    assert table.playable(card_0r) == True
+    assert table.playable(card_1b) == False
+    assert table.playable(card_wild) == True
