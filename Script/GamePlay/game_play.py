@@ -2,6 +2,8 @@ import pygame
 
 from uno.game import Game
 from uno.player import Player
+from uno.enums import CardColor, CardType
+
 import random
 
 import os
@@ -20,8 +22,18 @@ class Asset:
     def set_image(self, img_path):
         self.img = pygame.image.load(img_path)
         self.img = pygame.transform.scale_by(self.img, self.mag)
+
         self.rect = self.img.get_rect().move(self.pos)
 
+    def copy(self, asset):
+        self.mag = asset.mag
+        self.pos = asset.pos
+        self.img = asset.img.copy()
+        self.rect = asset.rect
+
+class FakeAsset:
+    def __init__(self, rect):
+        self.rect = rect
 
 class GamePlay:
     def __init__(self, main):
@@ -34,43 +46,54 @@ class GamePlay:
             "background": Asset(os.path.join(main.root_path, "Material/BG/game.png"), (0, 0)),
             "deck": Asset(os.path.join(main.root_path, "Material/Card/deck.png"), (180, 150), mag=0.3),
             "button_uno": Asset(os.path.join(main.root_path, "Material/Button/button_uno.png"), (610, 300)),
-            "table": Asset(os.path.join(main.root_path, "Material/Card/deck.png"), (360, 150), mag=0.3)
+            "table": Asset(os.path.join(main.root_path, "Material/Card/deck.png"), (360, 150), mag=0.3),
+            "color": Asset(os.path.join(main.root_path, "Material/Extra/red.png"), (610, 200))
         }
 
         self.on_game_gui = True
 
         self.card_assets = []
+        self.animate_assets = []
 
         callback = {
         "select_color": self.select_color,
-        "turn_changed": self.turn_changed
+        "turn_changed": self.select_color 
         }
-        self.players = [Player("ME")]
+
+        self.player = Player("ME")        
+        self.players = [self.player] # TODO: AI Player 
         self.game = Game(self.players, callback)
 
         self.turn = self.game.turn()
-        self.turn_changed()
+
+        self.update_hand()
+        self.update_table()
 
     def select_color(self):
         print("SELECT COLOR")
+        return random.choice([CardColor.BLUE, CardColor.GREEN, CardColor.RED, CardColor.YELLOW])
         # TODO: Handle Select Color
 
-    def turn_changed(self):
+    def update_table(self):
         card = self.game.table.top()
         if card.color:
             filename = card.color + "_" + card.card_type.split("_")[1]
         else:
             filename = "wild_" + card.card_type.split("_")[1]
-        self.assets["table"].set_image(f"Material/Card/{filename}.png")
+        self.assets["table"].set_image(os.path.join(self.main.root_path, f"Material/Card/{filename}.png"))
 
+        color = self.game.table.get_color()
+        self.assets["color"].set_image(os.path.join(self.main.root_path, f"Material/Extra/{color}.png"))
+        self.assets["deck2"] = Asset(os.path.join(self.main.root_path, "Material/Card/deck.png"), (180, 150), mag=0.3)
+
+    def update_hand(self):
         self.card_assets = []
-        for i, card in enumerate(self.players[0].hand):
+        for i, card in enumerate(self.player.hand):
             if card.color:
                 filename = card.color + "_" + card.card_type.split("_")[1]
             else:
                 filename = "wild_" + card.card_type.split("_")[1]
             self.card_assets.append(Asset(os.path.join(self.main.root_path, f"Material/Card/{filename}.png"), (30+i*100, 560), mag=0.2))
-
 
     def display(self):
         for event in pygame.event.get():
@@ -91,6 +114,28 @@ class GamePlay:
 
         if self.on_game_gui:
             self.draw_game()
+
+    def animate_asset(self):
+        if self.animate_assets:
+            asset, dest, time, tick = self.animate_assets.pop()
+            print(asset.rect, dest.rect, time, tick)
+
+            if tick >= time:
+                new_rect = dest.rect
+                self.update_hand()
+                self.update_table()
+
+            else:
+                new_rect = asset.pos[0] - ((asset.pos[0] - dest.rect[0]) * tick / time),\
+                        asset.pos[1] - ((asset.pos[1] - dest.rect[1]) * tick / time),\
+                        abs(asset.rect[2] - (asset.rect[2] - dest.rect[2]) / (time-tick)*5),\
+                        abs(asset.rect[3] - (asset.rect[3] - dest.rect[3]) / (time-tick)*5),\
+                        
+                asset.img = pygame.transform.scale(asset.img, (new_rect[2], new_rect[3]))
+                asset.rect.update(new_rect)
+                
+                self.animate_assets.append((asset, dest, time, tick+1))
+
             
     def draw_game(self):
         for name, asset in self.assets.items():
@@ -99,6 +144,8 @@ class GamePlay:
         for card_asset in self.card_assets:
             self.main.screen.blit(card_asset.img, card_asset.rect)
 
+        self.animate_asset()
+
         self.main.screen.blit(self.assets["table"].img, self.assets["table"].rect)
 
     def collide_game(self, mouse_pos):
@@ -106,12 +153,18 @@ class GamePlay:
             print("!")
 
         if self.assets["deck"].rect.collidepoint(mouse_pos):
-            self.game.play(self.players[0])
+            self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
+            self.game.play(self.player)
 
         for i, card_asset in enumerate(self.card_assets):
             if card_asset.rect.collidepoint(mouse_pos):
                 print(f"{i} card clicked")
-                self.game.play(self.players[0], self.players[0].hand[i])
+                if self.game.table.playable(self.players[0].hand[i]):
+                    self.animate_assets.append((card_asset, self.assets["table"], 50, 0))
+                    self.game.play(self.player, self.player.hand[i])
+
+                    
+
             
     def keydown_game(self, key):
         pass
