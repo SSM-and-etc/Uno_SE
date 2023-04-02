@@ -55,6 +55,8 @@ class GamePlay:
         self.card_assets = []
         self.animate_assets = []
 
+        self.font = pygame.font.SysFont(None, 50)
+
         callback = {
         "select_color": self.select_color,
         "turn_changed": self.select_color 
@@ -86,14 +88,37 @@ class GamePlay:
         self.assets["color"].set_image(os.path.join(self.main.root_path, f"Material/Extra/{color}.png"))
         self.assets["deck2"] = Asset(os.path.join(self.main.root_path, "Material/Card/deck.png"), (180, 150), mag=0.3)
 
+        pygame.time.set_timer(pygame.USEREVENT, 1000)
+        self.counter = 15
+
+    def calculate_card_size(self):
+        n = len(self.player.hand)
+
+        card_orig = 388, 562
+        hand_y = 504
+        hand_x = 896
+
+        card_x = (hand_x - 20) / n
+        mag = card_x / card_orig[0]
+        card_y = card_orig[1] * mag
+
+        if card_y > 150:
+            card_y = 150
+            mag = card_y / card_orig[1]
+            card_x = card_orig[0] * mag
+
+        return card_x, hand_y + (216-card_y) / 2, mag * 0.95
+
     def update_hand(self):
+        card_size = self.calculate_card_size()
+
         self.card_assets = []
         for i, card in enumerate(self.player.hand):
             if card.color:
                 filename = card.color + "_" + card.card_type.split("_")[1]
             else:
                 filename = "wild_" + card.card_type.split("_")[1]
-            self.card_assets.append(Asset(os.path.join(self.main.root_path, f"Material/Card/{filename}.png"), (30+i*100, 560), mag=0.2))
+            self.card_assets.append(Asset(os.path.join(self.main.root_path, f"Material/Card/{filename}.png"), (10+i*card_size[0], card_size[1]), mag=card_size[2]))
 
     def display(self):
         for event in pygame.event.get():
@@ -109,6 +134,15 @@ class GamePlay:
                 
             if event.type == pygame.MOUSEMOTION:
                 pass
+
+            if event.type == pygame.USEREVENT:
+                self.counter -= 1
+
+                if self.counter == 0:
+                    pygame.time.set_timer(pygame.USEREVENT, 0)
+                    self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
+                    self.game.play(self.player) 
+
             
         self.main.screen.blit(self.assets["background"].img, self.assets["background"].rect)
 
@@ -118,7 +152,6 @@ class GamePlay:
     def animate_asset(self):
         if self.animate_assets:
             asset, dest, time, tick = self.animate_assets.pop()
-            print(asset.rect, dest.rect, time, tick)
 
             if tick >= time:
                 new_rect = dest.rect
@@ -148,6 +181,8 @@ class GamePlay:
 
         self.main.screen.blit(self.assets["table"].img, self.assets["table"].rect)
 
+        self.main.screen.blit(self.font.render(str(self.counter), True, (255, 255, 255)), (830, 450))
+
     def collide_game(self, mouse_pos):
         if self.assets["button_uno"].rect.collidepoint(mouse_pos):
             print("!")
@@ -163,9 +198,6 @@ class GamePlay:
                     self.animate_assets.append((card_asset, self.assets["table"], 50, 0))
                     self.game.play(self.player, self.player.hand[i])
 
-                    
-
-            
     def keydown_game(self, key):
         pass
     '''
