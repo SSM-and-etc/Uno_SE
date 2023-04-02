@@ -20,7 +20,7 @@ class Default_AI(Player):
             card = random.choice(possible_hand)
     
         return card
-    
+
     def choose_color(self, table_color):
         possible_colors = []
         for card_color in CardColor:
