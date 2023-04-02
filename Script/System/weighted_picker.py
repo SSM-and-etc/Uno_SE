@@ -10,6 +10,16 @@ class WeightedPicker():
         if len(deck) == 0:
             return None
         
+        weight_table, table_end = self.get_weight_table(deck)
+            
+        rand_number = random.randrange(table_end)
+        picked_index = bisect_left(weight_table, rand_number)
+        picked_card = deck[picked_index]
+        del deck[picked_index]
+        
+        return picked_card
+    
+    def get_weight_table(self, deck):
         acc_weight = 0
         acc_weights = []
         for card in deck:
@@ -20,10 +30,5 @@ class WeightedPicker():
                 
             acc_weights.append(acc_weight)
             
-        rand_number = random.randrange(acc_weight)
-        picked_index = bisect_left(acc_weights, rand_number)
-        picked_card = deck[picked_index]
-        del deck[picked_index]
-        
-        return picked_card
+        return acc_weights, acc_weight
         
