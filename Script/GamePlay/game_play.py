@@ -36,7 +36,7 @@ class FakeAsset:
         self.rect = rect
 
 class GamePlay:
-    def __init__(self, main):
+    def __init__(self, main, stage_index):
         self.main = main
 
         design_resolution = (1280, 720)

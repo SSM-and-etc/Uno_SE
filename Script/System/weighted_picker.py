@@ -5,6 +5,9 @@ class WeightedPicker():
     def __init__(self, weights={"number": 1, "special": 1}): #가중치는 정수로 전달
         self.weight = weights
         
+    def draw(self, deck, player, n=1): # game.py로 옮길까?
+        n = min(n, len(deck))
+        player.hand.extend([self.pick_card(deck) for _ in range(n)])
         
     def pick_card(self, deck):
         if len(deck) == 0:
