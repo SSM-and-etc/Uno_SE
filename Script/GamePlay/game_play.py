@@ -103,7 +103,7 @@ class GamePlay:
                 filename = "wild_" + card.card_type.split("_")[1]
             self.card_assets.append(Asset(os.path.join(self.main.root_path, f"Material/Card/{filename}.png"), (30+i*100, 560), mag=0.2))
 
-    def display(self):
+    def display(self, main):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.main.running = False
