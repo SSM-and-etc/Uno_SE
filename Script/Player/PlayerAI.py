@@ -11,9 +11,9 @@ class PlayerAI(Player):
         
     def choose_card(self, table):
         if self.index == 1:
-            return self.choose_card_default
+            return self.choose_card_default(table)
         else:
-            return self.choose_card_stage1
+            return self.choose_card_stage1(table)
         
     def choose_color(self, table_color):
         possible_colors = []

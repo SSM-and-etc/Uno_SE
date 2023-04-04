@@ -3,6 +3,7 @@ import pygame
 from uno.game import Game
 from uno.player import Player
 from uno.enums import CardColor, CardType
+from Player.PlayerAI import PlayerAI
 
 import random
 
@@ -36,8 +37,9 @@ class FakeAsset:
         self.rect = rect
 
 class GamePlay:
-    def __init__(self, main, stage_index):
+    def __init__(self, main, stage_index, playerAI_number = 1):
         self.main = main
+        self.stage_index = stage_index
 
         design_resolution = (1280, 720)
         screen_size = main.user_data.get_screen_size()
@@ -60,14 +62,20 @@ class GamePlay:
         "turn_changed": self.select_color 
         }
 
-        self.player = Player("ME")        
-        self.players = [self.player] # TODO: AI Player 
-        self.game = Game(self.players, callback)
+        self.player_setting(playerAI_number)
+        self.game = Game(self.players, callback, stage_index)
 
         self.turn = self.game.turn()
 
         self.update_hand()
         self.update_table()
+
+    def player_setting(self, playerAI_number):
+        self.player = Player("ME")        
+        self.players = [self.player]
+        for _ in range(playerAI_number):
+            self.players.append(PlayerAI(self.stage_index))
+
 
     def select_color(self):
         print("SELECT COLOR")

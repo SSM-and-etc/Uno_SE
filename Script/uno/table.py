@@ -1,4 +1,5 @@
 from uno.card import *
+import random
 
 class Table:
     def __init__(self):
@@ -13,6 +14,12 @@ class Table:
             return self.color
         else:
             return self.cards[-1].color
+        
+    def change_color(self, color):
+        self.color = color
+        
+    def change_random_color(self):
+        self.color = random.choice(list(CardColor))
     
     def put(self, card):
         self.cards.append(card)

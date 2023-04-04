@@ -3,6 +3,7 @@ import os
 import pygame
 
 from GameData.user_data import UserData
+from GameData.game_data import GameData
 from Title.title import Title
 
 
@@ -15,6 +16,7 @@ class GameMain():
         
         self.running = True
         
+        self.game_data = GameData()
         self.user_data = UserData()
         self.title = Title(root_path, self.user_data.get_screen_size())
         
