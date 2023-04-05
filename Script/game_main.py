@@ -24,7 +24,7 @@ class GameMain():
         
         
         self.set_scene_obj(self.scene_state)
-        self.set_screen(self.user_data.screen_width, self.user_data.screen_height)
+        self.set_screen()
         
         self.card_group       = pygame.sprite.Group()
         
@@ -65,8 +65,8 @@ class GameMain():
         self.scene_state = next_scene_state
         
         
-    def set_screen(self, width, height):
-        self.screen = pygame.display.set_mode((width, height))
+    def set_screen(self):
+        self.screen = pygame.display.set_mode(self.user_data.get_screen_size())
         
     def group_reset(self):
         self.card_group.empty()

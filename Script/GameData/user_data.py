@@ -32,10 +32,12 @@ class UserData():
         self.key_left            =  pygame.K_LEFT
         self.key_right            =  pygame.K_RIGHT
         self.key_enter            =  pygame.K_RETURN
+        self.color_blindness_mode = False
         
     def get_screen_size(self):
-        return (self.screen_width, self.screen_height)
+        return self.screen_sizes[self.screen_size_index]
     
-    def set_screen_size(self, screen_size_index):
+    def set_screen_size(self, main, screen_size_index):
         self.screen_size_index = screen_size_index
         self.screen_width, self.screen_height = self.screen_sizes[screen_size_index]
+        main.set_screen()

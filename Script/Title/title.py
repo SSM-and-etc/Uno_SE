@@ -55,7 +55,7 @@ class Title():
         screen.blit(self.single_game_img, self.single_game_rect)
         screen.blit(self.option_img, self.option_rect)
         screen.blit(self.exit_img, self.exit_rect)
-        screen.blit(self.button_select_img, self.button_Select_rect)
+        screen.blit(self.button_select_img, self.button_select_rect)
         
     def click_collide_title(self, main, mouse_pos):
         if self.single_game_rect.collidepoint(mouse_pos):
@@ -63,7 +63,6 @@ class Title():
             pass
         elif self.option_rect.collidepoint(mouse_pos):
             self.on_option = True
-            # TODO: 옵션창 호출
         elif self.exit_rect.collidepoint(mouse_pos):
             main.running = False
             
@@ -75,7 +74,7 @@ class Title():
         elif (self.exit_rect.collidepoint(mouse_pos)):
             self.select_state = 2
         
-        self.apply_state_change(main.user_data.get_screen_size())    
+        self.apply_state_change()    
             
     def keydown_title(self, main, key):
         if(key == main.user_data.key_left):
@@ -89,15 +88,18 @@ class Title():
         elif(key == main.user_data.key_enter):
             self.enter_state(main)
             return
+        elif key == pygame.K_ESCAPE:
+            self.on_option = True
         else:
             # 사용 가능한 키 보여주기
             return
         
-        self.apply_state_change(main.user_data.get_screen_size())
+        self.apply_state_change()
             
-    def apply_state_change(self, screen_size):
+    def apply_state_change(self):
+        screen_size = self.user_data.get_screen_size()
         self.button_select_pos = self.tup_mul(screen_size, self.button_select_default_poses[self.select_state])
-        self.button_Select_rect = self.button_select_img.get_rect(center = self.button_select_pos)
+        self.button_select_rect = self.button_select_img.get_rect(center = self.button_select_pos)
     
     def enter_state(self, main):
         if(self.select_state == STATE_SINGLE_GAME):
@@ -119,7 +121,7 @@ class Title():
         self.single_game_rect = self.single_game_img.get_rect(center = self.single_game_pos)
         self.option_rect = self.option_img.get_rect(center = self.option_pos)
         self.exit_rect = self.exit_img.get_rect(center = self.exit_pos)
-        self.button_Select_rect = self.button_select_img.get_rect(center = self.button_select_pos)
+        self.button_select_rect = self.button_select_img.get_rect(center = self.button_select_pos)
         
     def tup_mul(self, tup1, tup2):
         return (tup1[0] * tup2[0], tup1[1] * tup2[1])
