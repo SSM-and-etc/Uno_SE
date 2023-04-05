@@ -58,13 +58,13 @@ class Title():
         screen.blit(self.button_select_img, self.button_Select_rect)
         
     def click_collide_title(self, main, mouse_pos):
-        if(self.single_game_rect.collidepoint(mouse_pos)):
+        if self.single_game_rect.collidepoint(mouse_pos):
             # TODO: 싱글 게임 시작 호출
             pass
-        elif(self.option_rect.collidepoint(mouse_pos)):
+        elif self.option_rect.collidepoint(mouse_pos):
             self.on_option = True
             # TODO: 옵션창 호출
-        elif (self.exit_rect.collidepoint(mouse_pos)):
+        elif self.exit_rect.collidepoint(mouse_pos):
             main.running = False
             
     def move_collide_title(self, main, mouse_pos):

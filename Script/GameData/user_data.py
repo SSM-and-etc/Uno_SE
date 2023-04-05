@@ -17,6 +17,7 @@ class UserData():
         
         
         self.screen_sizes = [(640, 480), (1280, 720), (1920, 1080), (2560,1440)]
+        self.screen_size_index = 1
         
         
     def load_data(self):
@@ -36,4 +37,5 @@ class UserData():
         return (self.screen_width, self.screen_height)
     
     def set_screen_size(self, screen_size_index):
+        self.screen_size_index = screen_size_index
         self.screen_width, self.screen_height = self.screen_sizes[screen_size_index]

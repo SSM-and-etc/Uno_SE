@@ -12,8 +12,10 @@ class Option():
                 pygame.image.load(os.path.join(root, "Material/button/1920_1080.png")),
                 pygame.image.load(os.path.join(root, "Material/button/2560_1440.png"))
             ]
+        self.key_button_img = pygame.image.load(os.path.join(root, "Material/button/key_button.png"))
         
         self.pop_up_default_pos = (0.5, 0.5)
+        self.screen_size_changer_button_default_pos = (0.6, 0.31)
         self.screen_size_block_default_poses = \
             [
                 (0.6, 0.35), 
@@ -21,11 +23,14 @@ class Option():
                 (0.6, 0.43), 
                 (0.6, 0.47)
             ]
+        self.left_key_button_default_pos = (0.53, 0.45)
+        self.right_key_button_default_pos = (0.62, 0.45)
+        self.enter_key_button_default_pos = (0.71, 0.45)
         
-        self.on_screen_changer = False
-        self.on_key_setting = False
         self.user_data = user_data
-        self.set_option_gui(self.user_data.get_screen_size())
+        self.reset_on_option_state()
+        self.set_option_gui()
+        
     
     def display(self, main):
         on_option = True
@@ -34,13 +39,13 @@ class Option():
                 main.running = False
                 
             if event.type == pygame.KEYDOWN:
-                on_option = self.keydown_option(main, event.key)
+                on_option = self.keydown_option(event.key)
             
             if event.type == pygame.MOUSEBUTTONDOWN: 
-                self.click_collide_option(main, event.pos)
+                self.click_collide_option(event.pos)
                 
             if event.type == pygame.MOUSEMOTION:
-                self.move_collide_option(main, event.pos)
+                self.move_collide_option(event.pos)
             
         self.draw_option(main.screen)
         
@@ -48,16 +53,46 @@ class Option():
             
     def draw_option(self, screen):
         screen.blit(self.pop_up_img, self.pop_up_rect)
-        for i in range(len(self.screen_size_block_imges)):
-            screen.blit(self.screen_size_block_imges[i], self.screen_size_block_rects[i])
+        # 아래에서 위 순서로 그리기 (덮어쓰게)
+        self.draw_key_setting_option(screen)
+        self.draw_screen_size_option(screen)
         
-    def click_collide_option(self, main, mouse_pos):
-        pass
             
-    def move_collide_option(self, main, mouse_pos):
+    def draw_screen_size_option(self, screen):
+        screen.blit(self.screen_size_changer_button_img, self.screen_size_changer_button_rect)
+        if(self.on_screen_changer):
+            for i in range(len(self.screen_size_block_imges)):
+                screen.blit(self.screen_size_block_imges[i], self.screen_size_block_rects[i])
+        
+    def draw_key_setting_option(self, screen):
+        screen.blit(self.key_button_img, self.left_key_button_rect)
+        screen.blit(self.key_button_img, self.right_key_button_rect)
+        screen.blit(self.key_button_img, self.enter_key_button_rect)
+        
+    def click_collide_option(self, mouse_pos):
+        if self.click_collide_screen_size_option(mouse_pos) or self.click_collide_key_setting_option(mouse_pos):
+            self.reset_on_option_state()
+        elif self.screen_size_changer_button_rect.collidepoint(mouse_pos):
+            self.on_screen_changer = not self.on_screen_changer
+    
+    def click_collide_screen_size_option(self, mouse_pos):
+        if self.on_screen_changer:
+            for idx, rect in enumerate(self.screen_size_block_rects):
+                if rect.collidepoint(mouse_pos):
+                    self.change_screen_size(idx)
+            return True
+        return False
+            
+    def click_collide_key_setting_option(self, mouse_pos):
+        if self.on_key_setting:
+            
+            return True
+        return False
+            
+    def move_collide_option(self, mouse_pos):
         pass  
             
-    def keydown_option(self, main, key):
+    def keydown_option(self, key):
         if(key == pygame.K_ESCAPE):
             return False
         
@@ -66,6 +101,7 @@ class Option():
     
     def change_screen_size(self, screen_size_index):
         self.user_data.set_screen_size(screen_size_index)
+        self.screen_size_changer_button_img = self.screen_size_block_imges[self.user_data.screen_size_index]
         
     def change_key(self, key_idx, new_key):
         match key_idx:
@@ -76,12 +112,27 @@ class Option():
             case 2:
                 self.user_data.key_enter = new_key
                 
-    def set_option_gui(self, screen_size):
+    def set_option_gui(self):
+        screen_size = self.user_data.get_screen_size()
+        self.screen_size_changer_button_img = self.screen_size_block_imges[self.user_data.screen_size_index]
+        
         self.pop_up_pos = self.tup_mul(screen_size, self.pop_up_default_pos)
         self.screen_size_block_poses = [self.tup_mul(screen_size, pos) for pos in self.screen_size_block_default_poses]
+        self.screen_size_changer_button_pos = self.tup_mul(screen_size, self.screen_size_changer_button_default_pos)
+        self.left_key_button_pos = self.tup_mul(screen_size, self.left_key_button_default_pos)
+        self.right_key_button_pos = self.tup_mul(screen_size, self.right_key_button_default_pos)
+        self.enter_key_button_pos = self.tup_mul(screen_size, self.enter_key_button_default_pos)
         
         self.pop_up_rect = self.pop_up_img.get_rect(center = self.pop_up_pos)
         self.screen_size_block_rects = [self.screen_size_block_imges[i].get_rect(center = self.screen_size_block_poses[i]) for i in range(len(self.screen_size_block_imges))]
+        self.screen_size_changer_button_rect = self.screen_size_changer_button_img.get_rect(center = self.screen_size_changer_button_pos)
+        self.left_key_button_rect = self.key_button_img.get_rect(center = self.left_key_button_pos)
+        self.right_key_button_rect = self.key_button_img.get_rect(center = self.right_key_button_pos)
+        self.enter_key_button_rect = self.key_button_img.get_rect(center = self.enter_key_button_pos)
+        
+    def reset_on_option_state(self):
+        self.on_key_setting = False
+        self.on_screen_changer = False
         
     def tup_mul(self, tup1, tup2):
         return (tup1[0] * tup2[0], tup1[1] * tup2[1])
