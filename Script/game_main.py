@@ -5,7 +5,6 @@ import pygame
 from GameData.user_data import UserData
 from GameData.game_data import GameData
 from Title.title import Title
-from System.option import Option
 from GamePlay.game_play import GamePlay
 
 
@@ -22,7 +21,6 @@ class GameMain():
         self.user_data = UserData()
         self.title = None
         self.play_game = None
-        self.option = None
         
         
         self.set_scene_obj(self.scene_state)
@@ -35,8 +33,6 @@ class GameMain():
         
     def get_scene_obj(self, scene_state):
         match scene_state:
-            case -1:
-                return self.option
             case 0:
                 return self.title
             case 1:
@@ -46,19 +42,15 @@ class GameMain():
             
     def set_scene_obj(self, scene_state):
         match scene_state:
-            case -1:
-                self.option = Option()
             case 0:
-                self.title = Title(self.root_path, self.user_data.get_screen_size())
+                self.title = Title(self.root_path, self.user_data)
             case 1:
-                self.play_game = GamePlay()
+                self.play_game = GamePlay(self.user_data)
             case _:
                 pass
                 
     def reset_scene_obj(self, scene_state):
         match scene_state:
-            case -1:
-                self.option = None
             case 0:
                 self.title = None
             case 1:

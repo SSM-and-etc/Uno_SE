@@ -2,6 +2,8 @@ import pygame
 
 import os
 
+from System.option import Option
+
 # Constants
 STATE_NUMBER = 3
 STATE_SINGLE_GAME = 0
@@ -9,7 +11,7 @@ STATE_OPTION = 1
 STATE_EXIT = 2
 
 class Title():
-    def __init__(self, root, screen_size):
+    def __init__(self, root, user_data):
         self.title_BG = pygame.image.load(os.path.join(root, "Material/BG/title.png"))
         self.single_game_img = pygame.image.load(os.path.join(root, "Material/Button/single_game.png"))
         self.option_img = pygame.image.load(os.path.join(root, "Material/Button/option.png"))
@@ -21,26 +23,31 @@ class Title():
         self.exit_default_pos = (0.8, 0.7)
         self.button_select_default_poses = [ (0.2, 0.65), (0.6, 0.65), (0.8, 0.65) ]
         
-        self.on_title_gui = True
+        self.on_option = False
         self.select_state = 0 # 0: single game start, 1: option, 2: exit ...
         
-        self.set_title_gui(screen_size)
+        self.user_data = user_data
+        self.option = Option(root, user_data)
+        
+        self.set_title_gui(self.user_data.get_screen_size())
         
     def display(self, main):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                main.running = False
+        if(self.on_option):
+            self.on_option = self.option.display(main)
+        else:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    main.running = False
+                    
+                if event.type == pygame.KEYDOWN:
+                    self.keydown_title(main, event.key)
                 
-            if event.type == pygame.KEYDOWN:
-                self.keydown_title(main, event.key)
-            
-            if event.type == pygame.MOUSEBUTTONDOWN: 
-                self.click_collide_title(main, event.pos)
-                
-            if event.type == pygame.MOUSEMOTION:
-                self.move_collide_title(main, event.pos)
-            
-        if(self.on_title_gui):
+                if event.type == pygame.MOUSEBUTTONDOWN: 
+                    self.click_collide_title(main, event.pos)
+                    
+                if event.type == pygame.MOUSEMOTION:
+                    self.move_collide_title(main, event.pos)
+                    
             self.draw_title(main.screen)
             
     def draw_title(self, screen):
@@ -55,7 +62,7 @@ class Title():
             # TODO: 싱글 게임 시작 호출
             pass
         elif(self.option_rect.collidepoint(mouse_pos)):
-            self.on_title_gui = False
+            self.on_option = True
             # TODO: 옵션창 호출
         elif (self.exit_rect.collidepoint(mouse_pos)):
             main.running = False
@@ -97,12 +104,11 @@ class Title():
             # TODO: 싱글 게임 시작 호출 
             pass
         elif(self.select_state == STATE_OPTION):
-            self.on_title_gui = False
+            self.on_option = True
             # TODO: 옵션창 호출
             pass
         elif(self.select_state == STATE_EXIT):
             main.running = False
-        
     
     def set_title_gui(self, screen_size):
         self.single_game_pos = self.tup_mul(screen_size, self.single_game_default_pos)
