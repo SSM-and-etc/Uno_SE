@@ -26,7 +26,7 @@ class Title():
         
         self.set_title_gui(screen_size)
         
-    def display(self, main, screen):
+    def display(self, main):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 main.running = False
@@ -40,11 +40,11 @@ class Title():
             if event.type == pygame.MOUSEMOTION:
                 self.move_collide_title(main, event.pos)
             
-        screen.blit(self.title_BG, (0, 0))
         if(self.on_title_gui):
-            self.draw_title(screen)
+            self.draw_title(main.screen)
             
     def draw_title(self, screen):
+        screen.blit(self.title_BG, (0, 0))
         screen.blit(self.single_game_img, self.single_game_rect)
         screen.blit(self.option_img, self.option_rect)
         screen.blit(self.exit_img, self.exit_rect)

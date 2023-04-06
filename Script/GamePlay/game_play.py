@@ -3,6 +3,7 @@ import pygame
 from uno.game import Game
 from uno.player import Player
 from uno.enums import CardColor, CardType
+from Player.PlayerAI import PlayerAI
 
 import random
 
@@ -36,8 +37,9 @@ class FakeAsset:
         self.rect = pygame.Rect(rect)
 
 class GamePlay:
-    def __init__(self, main):
+    def __init__(self, main, stage_index, playerAI_number = 1):
         self.main = main
+        self.stage_index = stage_index
 
         design_resolution = (1280, 720)
         screen_size = main.user_data.get_screen_size()
@@ -63,16 +65,22 @@ class GamePlay:
         "turn_changed": self.turn_changed 
         }
 
-        self.player = Player("You")
-        players = [self.player, Player("AI"), Player("AI2")] # TODO: AI Player
-        self.game = Game(players, callback)
+        self.player_setting(playerAI_number)
+        self.game = Game(self.players, callback, stage_index)
 
         self.pane_assets = [FakeAsset((10, 514, 876, 196))]
-        for i in range(len(players)-1):
+        for i in range(len(self.players)-1):
             self.pane_assets.append(Asset(os.path.join(main.root_path, "Material/BG/player_panel.png"), (906, 10 + 150 * i)))
 
         self.update_hand()
         self.update_table()
+
+    def player_setting(self, playerAI_number):
+        self.player = Player("ME")        
+        self.players = [self.player]
+        for _ in range(playerAI_number):
+            self.players.append(PlayerAI(self.stage_index))
+
 
     def select_color(self):
         print("SELECT COLOR")
@@ -127,7 +135,7 @@ class GamePlay:
                 filename = "wild_" + card.card_type.split("_")[1]
             self.card_assets.append(Asset(os.path.join(self.main.root_path, f"Material/Card/{filename}.png"), (10+card_size[0]*i, 30+card_size[1]), mag=card_size[2]))
 
-    def display(self):
+    def display(self, main):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.main.running = False
