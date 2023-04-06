@@ -159,11 +159,15 @@ class GamePlay:
                 
                 if event.type == pygame.USEREVENT:
                     self.counter -= 1
-
-                    if self.counter == 0:
+                    
+                    if self.counter == 12 and self.player != self.game.turn():
                         pygame.time.set_timer(pygame.USEREVENT, 0)
                         self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
-                        self.game.play(self.player)             
+                        self.game.play(self.game.turn())             
+                    elif self.counter == 0:
+                        pygame.time.set_timer(pygame.USEREVENT, 0)
+                        self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
+                        self.game.play(self.game.turn())
                         
             self.main.screen.blit(self.assets["background"].img, self.assets["background"].rect)
 

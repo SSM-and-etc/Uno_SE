@@ -10,7 +10,7 @@ class Game:
     def __init__(self, players, callback, stage_index):
         self.players = players
         self.table = Table()
-        self.deck = Deck({"number": 1, "special": 1, "wild": 20})
+        self.deck = Deck({"number": 1, "special": 1, "wild": 0})
         self.players_turn = CycleIterator(players)
         self.callback = callback
         self.stage_index = stage_index
@@ -70,6 +70,10 @@ class Game:
         if current_player != player:
             return False
         
+        if player.is_ai:
+            print("진입!!!")
+            card = player.choose_card(self.table)
+            
         if card:
             if self.deal(player, card):
                 next(self.players_turn)
