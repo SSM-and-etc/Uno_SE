@@ -10,7 +10,7 @@ class Game:
     def __init__(self, players, callback, stage_index):
         self.players = players
         self.table = Table()
-        self.deck = Deck({"number": 1, "special": 1, "wild": 0})
+        self.deck = Deck({"number": 1, "special": 1, "wild": 10})
         self.players_turn = CycleIterator(players)
         self.callback = callback
         self.stage_index = stage_index
@@ -65,6 +65,9 @@ class Game:
 
                 elif card.card_type == CardType.CARD_CHANGECOLOR:
                     self.table.color = self.callback["select_color"]()
+                    
+                elif card.card_type == CardType.CARD_DRAW:
+                    self.draw(self.players_turn.look_next(), 4)
 
             player.hand.remove(card)
             return True
