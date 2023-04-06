@@ -157,7 +157,7 @@ class GamePlay:
                 if event.type == pygame.MOUSEMOTION:
                     pass
                 
-                if event.type == pygame.USEREVENT:
+                if event.type == pygame.USEREVENT and self.counter > 0:
                     self.counter -= 1
                     
                     if self.counter == 12 and self.player != self.game.turn():
@@ -228,6 +228,7 @@ class GamePlay:
             if self.game.turn() == self.player:
                 self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
                 self.game.play(self.player)
+                self.counter = 0
 
         for i, card_asset in enumerate(self.card_assets):
             if card_asset.rect.collidepoint(mouse_pos):
@@ -235,6 +236,7 @@ class GamePlay:
                     if self.game.table.playable(self.player.hand[i]):
                         self.animate_assets.append((card_asset, self.assets["table"], 50, 0))
                         self.game.play(self.player, self.player.hand[i])
+                        self.counter = 0
 
                     
 
