@@ -4,7 +4,7 @@ import os
 
 class Option():
     def __init__(self, root, user_data):
-        self.pop_up_img = pygame.image.load(os.path.join(root, "Material/GUI/pop_up.png"))
+        self.pop_up_img = pygame.image.load(os.path.join(root, "Material/GUI/option_pop_up.png"))
         self.screen_size_block_imges = \
             [
                 pygame.image.load(os.path.join(root, "Material/button/640_480.png")),
@@ -17,19 +17,19 @@ class Option():
         self.button_select_img = pygame.image.load(os.path.join(root, "Material/Button/button_select.png"))
         
         self.pop_up_default_pos = (0.5, 0.5)
-        self.screen_size_changer_button_default_pos = (0.6, 0.31)
+        self.screen_size_changer_button_default_pos = (0.6, 0.3)
         self.screen_size_block_default_poses = \
             [
                 (0.6, 0.35), 
-                (0.6, 0.39), 
-                (0.6, 0.43), 
-                (0.6, 0.47)
+                (0.6, 0.4), 
+                (0.6, 0.45), 
+                (0.6, 0.5)
             ]
         self.left_key_button_default_pos = (0.53, 0.45)
         self.right_key_button_default_pos = (0.62, 0.45)
         self.enter_key_button_default_pos = (0.71, 0.45)
         self.button_select_default_poses = [(0.53, 0.39), (0.62, 0.39), (0.71, 0.39)]
-        self.on_color_blindness_mode_default_pos = (0.53, 0.59)
+        self.on_color_blindness_mode_default_pos = (0.53, 0.61)
         
         self.key_select_state = 0
         self.user_data = user_data
@@ -127,9 +127,9 @@ class Option():
             return False
         elif self.on_key_setting:
             self.change_key(key)
+            self.on_key_setting = False
         
         return True
-        
     
     def change_screen_size(self, main, screen_size_index):
         self.user_data.set_screen_size(main, screen_size_index)
