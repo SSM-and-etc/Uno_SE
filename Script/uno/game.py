@@ -71,7 +71,6 @@ class Game:
             return False
         
         if player.is_ai:
-            print("진입!!!")
             card = player.choose_card(self.table)
             
         if card:
