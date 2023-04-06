@@ -15,8 +15,9 @@ class Game:
         self.callback = callback
         self.stage_index = stage_index
 
-        self.draw_setting()
         self.table.put(self.deck.draw()) # TODO: 첫 카드가 숫자 카드가 아닐 때
+        self.draw_setting()
+        
 
     def draw_setting(self, default_card_num = 7):
         if(self.stage_index == 0):
@@ -30,6 +31,9 @@ class Game:
             n = len(self.deck.stack) // len(self.players)
             for player in self.players:
                 self.draw(player, n)
+        elif(self.stage_index == 3):
+            for player in self.players:
+                self.draw(player, default_card_num)
         
 
     def draw(self, player, n=1):
