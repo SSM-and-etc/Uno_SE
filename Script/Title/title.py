@@ -32,7 +32,7 @@ class Title():
         self.set_title_gui(self.user_data.get_screen_size())
         
     def display(self, main):
-        if(self.on_option):
+        if self.on_option:
             self.on_option = self.option.display(main)
         else:
             for event in pygame.event.get():
@@ -59,8 +59,7 @@ class Title():
         
     def click_collide_title(self, main, mouse_pos):
         if self.single_game_rect.collidepoint(mouse_pos):
-            # TODO: 싱글 게임 시작 호출
-            pass
+            self.enter_state(main)
         elif self.option_rect.collidepoint(mouse_pos):
             self.on_option = True
         elif self.exit_rect.collidepoint(mouse_pos):
@@ -77,15 +76,15 @@ class Title():
         self.apply_state_change()    
             
     def keydown_title(self, main, key):
-        if(key == main.user_data.key_left):
+        if(key == self.user_data.key_left):
             self.select_state -= 1
             while(self.select_state < 0):
                 self.select_state += STATE_NUMBER
-        elif(key == main.user_data.key_right):
+        elif(key == self.user_data.key_right):
             self.select_state += 1
             while(self.select_state >= STATE_NUMBER):
                 self.select_state -= STATE_NUMBER
-        elif(key == main.user_data.key_enter):
+        elif(key == self.user_data.key_enter):
             self.enter_state(main)
             return
         elif key == pygame.K_ESCAPE:
@@ -103,12 +102,9 @@ class Title():
     
     def enter_state(self, main):
         if(self.select_state == STATE_SINGLE_GAME):
-            # TODO: 싱글 게임 시작 호출 
-            pass
+            main.scene_change(main.get_scene_index("single game"))
         elif(self.select_state == STATE_OPTION):
             self.on_option = True
-            # TODO: 옵션창 호출
-            pass
         elif(self.select_state == STATE_EXIT):
             main.running = False
     
