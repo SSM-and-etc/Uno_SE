@@ -45,7 +45,7 @@ class Game:
         n = min(n, len(self.deck.stack))
         player.hand.extend([picker.pick_card(self.deck.stack) for _ in range(n)])
 
-    def deal(self, player, card):
+    def deal(self, player, players_number, card):
         if self.table.playable(card):
             if card.is_number():
                self.table.put(card) 
@@ -55,7 +55,10 @@ class Game:
                     self.draw(self.players_turn.look_next(), 2)
 
                 elif card.card_type == CardType.CARD_REVERSE:
-                    self.players_turn.reverse()
+                    if players_number == 2:
+                        next(self.players_turn)
+                    else:    
+                        self.players_turn.reverse()
 
                 elif card.card_type == CardType.CARD_SKIP:
                     next(self.players_turn)
@@ -69,7 +72,7 @@ class Game:
         else:
             return False
 
-    def play(self, player, card=None):
+    def play(self, player, players_number, card=None):
         current_player = self.turn()
         if current_player != player:
             return False
@@ -78,7 +81,7 @@ class Game:
             card = player.choose_card(self.table)
             
         if card:
-            if self.deal(player, card):
+            if self.deal(player, players_number, card):
                 next(self.players_turn)
         else:
             self.draw(player)

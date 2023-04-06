@@ -38,7 +38,7 @@ class FakeAsset:
         self.rect = pygame.Rect(rect)
 
 class GamePlay:
-    def __init__(self, main, stage_index = 3, playerAI_number = 1):
+    def __init__(self, main, stage_index = 1, playerAI_number = 1):
         self.main = main
         self.stage_index = stage_index
         self.user_data = main.user_data
@@ -190,7 +190,7 @@ class GamePlay:
 
     def play_player(self, player, card = None):
         self.counter = 0
-        self.game.play(player, card)
+        self.game.play(player, len(self.players), card)
         self.acc_turn += 1
         if self.stage_index == 3:
             while self.acc_turn >= 5:
