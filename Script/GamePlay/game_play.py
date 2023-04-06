@@ -38,12 +38,13 @@ class FakeAsset:
         self.rect = pygame.Rect(rect)
 
 class GamePlay:
-    def __init__(self, main, stage_index = 0, playerAI_number = 1):
+    def __init__(self, main, stage_index = 3, playerAI_number = 1):
         self.main = main
         self.stage_index = stage_index
         self.user_data = main.user_data
         self.option = Option(main.root_path, self.user_data)
         self.on_option = False
+        self.acc_turn = 0
 
         design_resolution = (1280, 720)
         screen_size = main.user_data.get_screen_size()
@@ -82,10 +83,23 @@ class GamePlay:
     def player_setting(self, playerAI_number):
         self.player = Player("ME")        
         self.players = [self.player]
+        if self.stage_index != 0:
+            playerAI_number = self.player_ai_setting()
         for _ in range(playerAI_number):
             self.players.append(PlayerAI(self.stage_index))
 
-
+    def player_ai_setting(self): # 스테이지별 ai 수 조정
+        match self.stage_index:
+            case 1:
+                return 1
+            case 2:
+                return 3
+            case 3:
+                return 2
+            case _:
+                return None
+            
+    
     def select_color(self):
         print("SELECT COLOR")
         return random.choice([CardColor.BLUE, CardColor.GREEN, CardColor.RED, CardColor.YELLOW])
@@ -163,16 +177,27 @@ class GamePlay:
                     if self.counter == 12 and self.player != self.game.turn():
                         pygame.time.set_timer(pygame.USEREVENT, 0)
                         self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
-                        self.game.play(self.game.turn())             
+                        self.play_player(self.game.turn())             
                     elif self.counter == 0:
                         pygame.time.set_timer(pygame.USEREVENT, 0)
                         self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
-                        self.game.play(self.game.turn())
+                        self.play_player(self.game.turn())
                         
             self.main.screen.blit(self.assets["background"].img, self.assets["background"].rect)
 
             if self.on_game_gui:
                 self.draw_game()
+
+    def play_player(self, player, card = None):
+        self.counter = 0
+        self.game.play(player, card)
+        self.acc_turn += 1
+        if self.stage_index == 3:
+            while self.acc_turn >= 5:
+                self.acc_turn -= 5
+                print("stage 3 기믹")
+                self.select_color()
+            
 
     def animate_asset(self):
         if self.animate_assets:
@@ -227,16 +252,14 @@ class GamePlay:
         if self.assets["deck"].rect.collidepoint(mouse_pos):
             if self.game.turn() == self.player:
                 self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
-                self.game.play(self.player)
-                self.counter = 0
+                self.play_player(self.player)
 
         for i, card_asset in enumerate(self.card_assets):
             if card_asset.rect.collidepoint(mouse_pos):
                 if self.game.turn() == self.player:
                     if self.game.table.playable(self.player.hand[i]):
                         self.animate_assets.append((card_asset, self.assets["table"], 50, 0))
-                        self.game.play(self.player, self.player.hand[i])
-                        self.counter = 0
+                        self.play_player(self.player, self.player.hand[i])
 
                     
 

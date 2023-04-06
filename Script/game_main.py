@@ -67,7 +67,6 @@ class GameMain():
                 pass
         
     def scene_change(self, next_scene_state):
-        print("hello")
         self.reset_scene_obj(self.scene_state)
         self.set_scene_obj(next_scene_state)
         
