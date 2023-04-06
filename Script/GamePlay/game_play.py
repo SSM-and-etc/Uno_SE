@@ -4,6 +4,7 @@ from uno.game import Game
 from uno.player import Player
 from uno.enums import CardColor, CardType
 from Player.PlayerAI import PlayerAI
+from System.option import Option
 
 import random
 
@@ -37,9 +38,12 @@ class FakeAsset:
         self.rect = pygame.Rect(rect)
 
 class GamePlay:
-    def __init__(self, main, stage_index, playerAI_number = 1):
+    def __init__(self, main, stage_index = 0, playerAI_number = 1):
         self.main = main
         self.stage_index = stage_index
+        self.user_data = main.user_data
+        self.option = Option(main.root_path, self.user_data)
+        self.on_option = False
 
         design_resolution = (1280, 720)
         screen_size = main.user_data.get_screen_size()
@@ -136,33 +140,35 @@ class GamePlay:
             self.card_assets.append(Asset(os.path.join(self.main.root_path, f"Material/Card/{filename}.png"), (10+card_size[0]*i, 30+card_size[1]), mag=card_size[2]))
 
     def display(self, main):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.main.running = False
+        if self.on_option:
+            self.on_option = self.option.display(main)
+        else:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.main.running = False
+                    
+                if event.type == pygame.KEYDOWN:
+                    self.keydown_game(main, event.key)
                 
-            if event.type == pygame.KEYDOWN:
-                pass
-            
-            if event.type == pygame.MOUSEBUTTONDOWN: 
-                self.collide_game(event.pos)
-                pass
+                if event.type == pygame.MOUSEBUTTONDOWN: 
+                    self.collide_game(event.pos)
+                    pass
+                    
+                if event.type == pygame.MOUSEMOTION:
+                    pass
                 
-            if event.type == pygame.MOUSEMOTION:
-                pass
+                if event.type == pygame.USEREVENT:
+                    self.counter -= 1
 
-            if event.type == pygame.USEREVENT:
-                self.counter -= 1
+                    if self.counter == 0:
+                        pygame.time.set_timer(pygame.USEREVENT, 0)
+                        self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
+                        self.game.play(self.player)             
+                        
+            self.main.screen.blit(self.assets["background"].img, self.assets["background"].rect)
 
-                if self.counter == 0:
-                    pygame.time.set_timer(pygame.USEREVENT, 0)
-                    self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
-                    self.game.play(self.player) 
-
-            
-        self.main.screen.blit(self.assets["background"].img, self.assets["background"].rect)
-
-        if self.on_game_gui:
-            self.draw_game()
+            if self.on_game_gui:
+                self.draw_game()
 
     def animate_asset(self):
         if self.animate_assets:
@@ -226,18 +232,22 @@ class GamePlay:
                         self.animate_assets.append((card_asset, self.assets["table"], 50, 0))
                         self.game.play(self.player, self.player.hand[i])
 
-    def keydown_game(self, key):
-        pass
-    '''
-        if(key == main.user_data.key_left):
-            self.select_state -= 1
-            return
+                    
+
+            
+    def keydown_game(self, main, key):
+        if(key == self.user_data.key_left):
+            pass
+        elif(key == self.user_data.key_right):
+            pass
+        elif(key == self.user_data.key_enter):
+            pass
+        elif key == pygame.K_ESCAPE:
+            self.on_option = True
         else:
             # 사용 가능한 키 보여주기
-            return
+            pass
         
-        self.apply_state_change()
-    '''
             
     def apply_state_change(self):
         # TODO: 현재 state에 따라 select 이미지 적절하게 이동시키기

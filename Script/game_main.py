@@ -5,7 +5,6 @@ import pygame
 from GameData.user_data import UserData
 from GameData.game_data import GameData
 from Title.title import Title
-from System.option import Option
 from GamePlay.game_play import GamePlay
 
 
@@ -14,29 +13,32 @@ class GameMain():
         current_path = os.path.dirname(__file__) 
         self.root_path = os.path.join(current_path, os.pardir)
         
-        
         self.running = True
         
-        self.scene_state = 0 # 0: Title, 1: play(single)
+        self.scene_state = self.get_scene_index("title") # title: 0, single play: 1, ...
         self.game_data = GameData()
         self.user_data = UserData()
         self.title = None
         self.play_game = None
-        self.option = None
         
         
         self.set_scene_obj(self.scene_state)
-        self.set_screen(self.user_data.screen_width, self.user_data.screen_height)
+        self.set_screen()
         
         self.card_group       = pygame.sprite.Group()
         
         self.clock = pygame.time.Clock()
         
+    def get_scene_index(self, scene_name):
+        match scene_name:
+            case "title":
+                return 0
+            case "single game":
+                return 1
+        return -1
         
     def get_scene_obj(self, scene_state):
         match scene_state:
-            case -1:
-                return self.option
             case 0:
                 return self.title
             case 1:
@@ -46,19 +48,17 @@ class GameMain():
             
     def set_scene_obj(self, scene_state):
         match scene_state:
-            case -1:
-                self.option = Option()
             case 0:
-                self.title = Title(self.root_path, self.user_data.get_screen_size())
+                self.title = Title(self.root_path, self.user_data)
             case 1:
-                self.play_game = GamePlay()
+                # 인자) 일반 모드: 0, 대전 상대 수 n / 스토리: 스테이지 n 을 인자로 추가
+                self.play_game = GamePlay(self)
             case _:
                 pass
                 
     def reset_scene_obj(self, scene_state):
+        print("hello")
         match scene_state:
-            case -1:
-                self.option = None
             case 0:
                 self.title = None
             case 1:
@@ -67,14 +67,15 @@ class GameMain():
                 pass
         
     def scene_change(self, next_scene_state):
+        print("hello")
         self.reset_scene_obj(self.scene_state)
         self.set_scene_obj(next_scene_state)
         
         self.scene_state = next_scene_state
         
         
-    def set_screen(self, width, height):
-        self.screen = pygame.display.set_mode((width, height))
+    def set_screen(self):
+        self.screen = pygame.display.set_mode(self.user_data.get_screen_size())
         
     def group_reset(self):
         self.card_group.empty()
