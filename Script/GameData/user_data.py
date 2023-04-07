@@ -27,12 +27,17 @@ class UserData():
         pass
     
     def reset_data(self):
-        self.screen_width        =   1280
-        self.screen_height       =   720
-        self.key_left            =  pygame.K_LEFT
-        self.key_right            =  pygame.K_RIGHT
-        self.key_enter            =  pygame.K_RETURN
-        self.color_blindness_mode = False
+        self.screen_width           = 1280
+        self.screen_height          = 720
+        self.key_left               = pygame.K_LEFT
+        self.key_right              = pygame.K_RIGHT
+        self.key_enter              = pygame.K_RETURN
+        self.key_up                 = pygame.K_UP
+        self.key_down               = pygame.K_DOWN
+        self.color_blindness_mode   = False
+        self.master_volume          = 1
+        self.bgm_volume             = 1
+        self.eft_volume             = 1
         
     def get_screen_size(self):
         return self.screen_sizes[self.screen_size_index]
