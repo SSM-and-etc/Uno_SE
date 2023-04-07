@@ -16,7 +16,12 @@ class Table:
             return self.cards[-1].color
         
     def change_color(self, color):
-        self.color = color
+        if self.top().card_type.is_color():
+            
+            new_card = Card(self.top().card_type, color)
+            self.put(new_card)
+        else:    
+            self.color = color
         
     def change_random_color(self):
         self.color = random.choice(list(CardColor))
