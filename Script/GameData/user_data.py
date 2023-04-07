@@ -35,12 +35,8 @@ class UserData():
         self.key_up                 = pygame.K_UP
         self.key_down               = pygame.K_DOWN
         self.color_blindness_mode   = False
-        self.master_volume          = 1
-        self.master_volume_off      = False
-        self.bgm_volume             = 1
-        self.bgm_volume_off         = False
-        self.eft_volume             = 1
-        self.eft_volume_off         = False
+        self.volumes                = [1, 1, 1] # master, bgm, eft 순서
+        self.volumes_off            = [False, False, False] # 위와 동일
         
     def get_screen_size(self):
         return self.screen_sizes[self.screen_size_index]
@@ -49,3 +45,29 @@ class UserData():
         self.screen_size_index = screen_size_index
         self.screen_width, self.screen_height = self.screen_sizes[screen_size_index]
         main.set_screen()
+        
+    def set_key(self, key_index, new_key):
+        match key_index:
+            case 0:
+                self.key_left = new_key
+            case 1:
+                self.key_right = new_key
+            case 2:
+                self.key_enter = new_key
+            case 3:
+                self.key_up = new_key
+            case 4:
+                self.key_down = new_key
+                
+    def copy_data(self, other_data):
+        # TODO: 노가다 말고 뭔가 좋은 방법이 없을까..?
+        self.screen_width           = other_data.screen_width        
+        self.screen_height          = other_data.screen_height       
+        self.key_left               = other_data.key_left            
+        self.key_right              = other_data.key_right           
+        self.key_enter              = other_data.key_enter           
+        self.key_up                 = other_data.key_up              
+        self.key_down               = other_data.key_down            
+        self.color_blindness_mode   = other_data.color_blindness_mode
+        self.volumes                = other_data.volumes             
+        self.volumes_off            = other_data.volumes_off         

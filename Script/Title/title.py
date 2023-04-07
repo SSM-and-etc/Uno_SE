@@ -27,7 +27,7 @@ class Title():
         self.select_state = 0 # 0: single game start, 1: option, 2: exit ...
         
         self.user_data = user_data
-        self.option = Option(root, user_data)
+        self.option = Option(root, self.user_data)
         
         self.set_title_gui(self.user_data.get_screen_size())
         
@@ -88,6 +88,8 @@ class Title():
             self.enter_state(main)
             return
         elif key == pygame.K_ESCAPE:
+            print(self.user_data.key_left)
+            print(self.option.user_data.key_left)
             self.on_option = True
         else:
             # 사용 가능한 키 보여주기

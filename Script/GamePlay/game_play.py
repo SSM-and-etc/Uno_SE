@@ -273,16 +273,13 @@ class GamePlay:
                     if self.game.table.playable(self.player.hand[i]):
                         self.animate_assets.append((card_asset, self.assets["table"], 50, 0))
                         self.play_player(self.player, self.player.hand[i])
-
-                    
-
             
     def keydown_game(self, main, key):
-        if(key == self.user_data.key_left):
+        if key == self.user_data.key_left:
             pass
-        elif(key == self.user_data.key_right):
+        elif key == self.user_data.key_right:
             pass
-        elif(key == self.user_data.key_enter):
+        elif key == self.user_data.key_enter:
             pass
         elif key == pygame.K_ESCAPE:
             self.on_option = True
