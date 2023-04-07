@@ -6,6 +6,8 @@ from uno.player import Player
 from uno.utils import *
 from System.weighted_picker import WeightedPicker
 
+import random
+
 class Game:
     def __init__(self, players, callback, stage_index):
         self.players = players
@@ -62,18 +64,35 @@ class Game:
 
                 elif card.card_type == CardType.CARD_SKIP:
                     next(self.players_turn)
+                    
+                elif card.card_type == CardType.CARD_RNUMBER:
+                    rnumber_card = Card(random.choice(CardType.NUMBER()), card.color)
+                    self.table.put(rnumber_card)
 
                 elif card.card_type == CardType.CARD_CHANGECOLOR:
                     self.table.color = self.callback["select_color"]()
                     
                 elif card.card_type == CardType.CARD_DRAW:
                     self.draw(self.players_turn.look_next(), 4)
+                    
+                elif card.card_type == CardType.CARD_SWAP:
+                    player.hand.remove(card)
+                    
+                    players_list = self.players.copy()
+                    players_list.remove(player)
+                    rand_player = random.choice(players_list)
+                    self.hand_swap(player, rand_player)
+                    return True
+                    
 
             player.hand.remove(card)
             return True
 
         else:
             return False
+
+    def hand_swap(self, player1, player2):
+        player1.hand, player2.hand = player2.hand, player1.hand
 
     def play(self, player, players_number, card=None):
         current_player = self.turn()
