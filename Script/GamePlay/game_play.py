@@ -38,13 +38,14 @@ class FakeAsset:
         self.rect = pygame.Rect(rect)
 
 class GamePlay:
-    def __init__(self, main, stage_index = 1, playerAI_number = 1):
+    def __init__(self, main, stage_index = 4, playerAI_number = 1):
         self.main = main
         self.stage_index = stage_index
         self.user_data = main.user_data
         self.option = Option(main.root_path, self.user_data)
         self.on_option = False
-        self.acc_turn = 0
+        self.turn_count_gimmick = 1
+        self.user_turn_count_gimmick = 1
 
         design_resolution = (1280, 720)
         screen_size = main.user_data.get_screen_size()
@@ -95,6 +96,8 @@ class GamePlay:
             case 2:
                 return 3
             case 3:
+                return 2
+            case 4:
                 return 2
             case _:
                 return None
@@ -172,33 +175,43 @@ class GamePlay:
                     pass
                 
                 if event.type == pygame.USEREVENT and self.counter > 0:
-                    self.counter -= 1
-                    
-                    if self.counter == 12 and self.player != self.game.turn():
-                        pygame.time.set_timer(pygame.USEREVENT, 0)
-                        self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
-                        self.play_player(self.game.turn())             
-                    elif self.counter == 0:
-                        pygame.time.set_timer(pygame.USEREVENT, 0)
-                        self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
-                        self.play_player(self.game.turn())
+                    self.counter_event()
                         
             self.main.screen.blit(self.assets["background"].img, self.assets["background"].rect)
 
             if self.on_game_gui:
                 self.draw_game()
+    
+    def counter_event(self):
+        self.counter -= 1
+        if (self.counter == 0) or (self.counter == 12 and self.player != self.game.turn()):
+            pygame.time.set_timer(pygame.USEREVENT, 0)
+            self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
+            self.play_player(self.game.turn())  
 
     def play_player(self, player, card = None):
+        # self.game.play() 이후의 self.game.turn()은 순서를 넘겨 받은 플레이어가 됨에 주의
         self.counter = 0
         self.game.play(player, len(self.players), card)
-        self.acc_turn += 1
-        if self.stage_index == 3:
-            while self.acc_turn >= 5:
-                self.acc_turn -= 5
-                print("stage 3 기믹")
-                self.select_color()
-            
-
+        self.turn_count_gimmick += 1
+        if self.game.turn() == self.player:
+            self.user_turn_count_gimmick += 1
+        
+        match self.stage_index:
+            case 3:
+                while self.turn_count_gimmick >= 5:
+                    self.turn_count_gimmick -= 5
+                    print("stage 3 기믹")
+                    self.select_color()
+            case 4:
+                if self.game.turn() == self.player and not (self.user_turn_count_gimmick & 1):
+                    print("stage 4 드로우 기믹")
+                    self.game.draw(self.game.turn(), 2)
+                if self.turn_count_gimmick == 5:
+                    print("stage 4 패 교환 기믹")
+                    self.game.hand_swap(player, self.game.turn())
+                    self.turn_count_gimmick = 0
+                    
     def animate_asset(self):
         if self.animate_assets:
             asset, dest, time, tick = self.animate_assets.pop()
