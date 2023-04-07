@@ -45,7 +45,7 @@ class GameMain():
                 return self.play_game
             case _:
                 return None
-            
+
     def set_scene_obj(self, scene_state):
         match scene_state:
             case 0:
@@ -55,7 +55,7 @@ class GameMain():
                 self.play_game = GamePlay(self)
             case _:
                 pass
-                
+
     def reset_scene_obj(self, scene_state):
         print("hello")
         match scene_state:

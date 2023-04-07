@@ -17,19 +17,19 @@ class Option():
         self.button_select_img = pygame.image.load(os.path.join(root, "Material/Button/button_select.png"))
         
         self.pop_up_default_pos = (0.5, 0.5)
-        self.screen_size_changer_button_default_pos = (0.6, 0.3)
+        self.screen_size_changer_button_default_pos = (0.6, 0.23)
         self.screen_size_block_default_poses = \
             [
-                (0.6, 0.35), 
-                (0.6, 0.4), 
-                (0.6, 0.45), 
-                (0.6, 0.5)
+                (0.6, 0.28), 
+                (0.6, 0.33), 
+                (0.6, 0.38), 
+                (0.6, 0.43)
             ]
-        self.left_key_button_default_pos = (0.53, 0.45)
-        self.right_key_button_default_pos = (0.62, 0.45)
-        self.enter_key_button_default_pos = (0.71, 0.45)
-        self.button_select_default_poses = [(0.53, 0.39), (0.62, 0.39), (0.71, 0.39)]
-        self.on_color_blindness_mode_default_pos = (0.53, 0.61)
+        self.left_key_button_default_pos = (0.53, 0.31)
+        self.right_key_button_default_pos = (0.62, 0.31)
+        self.enter_key_button_default_pos = (0.71, 0.31)
+        self.button_select_default_poses = [(0.53, 0.25), (0.62, 0.25), (0.71, 0.25)]
+        self.on_color_blindness_mode_default_pos = (0.53, 0.4)
         
         self.key_select_state = 0
         self.user_data = user_data
@@ -38,13 +38,13 @@ class Option():
         
     
     def display(self, main):
-        on_option = True
+        self.on_option = True
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 main.running = False
                 
             if event.type == pygame.KEYDOWN:
-                on_option = self.keydown_option(event.key)
+                self.keydown_option(event.key)
             
             if event.type == pygame.MOUSEBUTTONDOWN: 
                 self.click_collide_option(main, event.pos)
@@ -54,15 +54,19 @@ class Option():
             
         self.draw_option(main.screen)
         
-        return on_option
+        return self.on_option
             
     def draw_option(self, screen):
         screen.blit(self.pop_up_img, self.pop_up_rect)
-        # 아래에서 위 순서로 그리기 (덮어쓰게)
+        # 아래에서 위 순서로 그리기, 현재 선택지 표시는 제일 아래로
         self.draw_color_blindness_option(screen)
         self.draw_key_setting_option(screen)
         self.draw_screen_size_option(screen)
+        self.draw_now_select_option(screen)
         
+    def draw_now_select_option(self,screen):
+        if(self.on_key_setting):
+            screen.blit(self.button_select_img, self.button_select_rect)
             
     def draw_screen_size_option(self, screen):
         screen.blit(self.screen_size_changer_button_img, self.screen_size_changer_button_rect)
@@ -74,9 +78,6 @@ class Option():
         screen.blit(self.key_button_img, self.left_key_button_rect)
         screen.blit(self.key_button_img, self.right_key_button_rect)
         screen.blit(self.key_button_img, self.enter_key_button_rect)
-        
-        if(self.on_key_setting):
-            screen.blit(self.button_select_img, self.button_select_rect)
             
     def draw_color_blindness_option(self, screen):
         if self.on_color_blindness_mode:
@@ -92,6 +93,8 @@ class Option():
             self.reset_on_option_state()
         elif self.screen_size_changer_button_rect.collidepoint(mouse_pos):
             self.on_screen_changer = not self.on_screen_changer
+        elif not self.pop_up_rect.collidepoint(mouse_pos):
+            self.on_option = False
         else:
             self.click_collide_color_blindness_option(mouse_pos)
     
@@ -124,12 +127,9 @@ class Option():
             
     def keydown_option(self, key):
         if(key == pygame.K_ESCAPE):
-            return False
+            self.on_option = False
         elif self.on_key_setting:
             self.change_key(key)
-            self.on_key_setting = False
-        
-        return True
     
     def change_screen_size(self, main, screen_size_index):
         self.user_data.set_screen_size(main, screen_size_index)
