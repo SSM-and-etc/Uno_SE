@@ -36,8 +36,11 @@ class UserData():
         self.key_down               = pygame.K_DOWN
         self.color_blindness_mode   = False
         self.master_volume          = 1
+        self.master_volume_off      = False
         self.bgm_volume             = 1
+        self.bgm_volume_off         = False
         self.eft_volume             = 1
+        self.eft_volume_off         = False
         
     def get_screen_size(self):
         return self.screen_sizes[self.screen_size_index]
