@@ -12,7 +12,7 @@ class Game:
     def __init__(self, players, callback, stage_index):
         self.players = players
         self.table = Table()
-        self.deck = Deck({"number": 1, "special": 1, "wild": 10})
+        self.deck = Deck({"number": 1, "special": 0, "wild": 0})
         self.players_turn = CycleIterator(players)
         self.callback = callback
         self.stage_index = stage_index
@@ -22,20 +22,18 @@ class Game:
         
 
     def draw_setting(self, default_card_num = 7):
-        if(self.stage_index == 0):
-            for player in self.players:
-                self.draw(player, default_card_num)
-        elif(self.stage_index == 1):
-            self.draw(self.players[0], default_card_num)
-            self.weighted_draw(self.players[1],{"number": 2, "special": 3}, default_card_num)
-            # 가중치 하드코딩? 어딘가에 저장해 놓는 것이 좋을지
-        elif(self.stage_index == 2):
-            n = len(self.deck.stack) // len(self.players)
-            for player in self.players:
-                self.draw(player, n)
-        elif(self.stage_index == 3):
-            for player in self.players:
-                self.draw(player, default_card_num)
+        match self.stage_index:
+            case 1:
+                self.draw(self.players[0], default_card_num)
+                self.weighted_draw(self.players[1],{"number": 2, "special": 3}, default_card_num)
+                # 가중치 하드코딩? 어딘가에 저장해 놓는 것이 좋을지
+            case 2:
+                n = len(self.deck.stack) // len(self.players)
+                for player in self.players:
+                    self.draw(player, n)
+            case _: # 0, 3, 4
+                for player in self.players:
+                    self.draw(player, default_card_num)
         
 
     def draw(self, player, n=1):
