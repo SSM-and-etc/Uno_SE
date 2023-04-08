@@ -1,6 +1,7 @@
 import pytest
 from System.weighted_picker import WeightedPicker
 from uno.deck import Deck
+import copy
 
 def pick_card():
     deck = Deck({"number": 3, "special": 10, "wild": 0}).stack
