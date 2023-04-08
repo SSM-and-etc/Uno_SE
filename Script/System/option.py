@@ -3,32 +3,48 @@ import pygame
 import os
 import copy
 
+from GameData.user_data import UserData
+
+ORANGE = (255, 153, 51)
+
 class Option():
-    def __init__(self, root, user_data):
-        self.user_data = user_data
-        self.temp_data = copy.copy(self.user_data)
+    def __init__(self, main):
+        self.main = main
+        self.user_data = main.user_data
+        self.temp_data = UserData()
+        self.temp_data.copy_data(self.user_data)
         
-        self.load_asset(root)
+        self.load_asset(main.root_path)
         self.set_default_pos()
         
-        self.reset_on_option_state()
         self.set_option_gui()
+        self.reset_on_option_state()
+        self.set_key_hold_down()
         
     
     def display(self, main):
         self.on_option = True
+        
+        self.move_collide_option(self.last_mouse_pos)
+        if self.on_key_hold and self.on_select:
+            self.keyhold_option()
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 main.running = False
-                
             if event.type == pygame.KEYDOWN:
+                self.key_down_hold_check(event.key)
                 self.keydown_option(main, event.key)
+            
+            if event.type == pygame.KEYUP:
+                self.key_up_hold_check(event.key)
             
             if event.type == pygame.MOUSEBUTTONDOWN: 
                 self.click_collide_option(main, event.pos)
+                #pygame.MOUSEBUTTONUP
                 
             if event.type == pygame.MOUSEMOTION:
-                self.move_collide_option(event.pos)
+                self.last_mouse_pos = event.pos
             
         self.draw_option(main.screen)
         
@@ -36,8 +52,8 @@ class Option():
     
     def exit_option(self):
         self.on_option = False
+        self.temp_data.copy_data(self.user_data)
         self.reset_on_option_state()
-        self.temp_data = copy.copy(self.user_data)
             
     def draw_option(self, screen):
         screen.blit(self.pop_up_img, self.pop_up_rect)
@@ -72,13 +88,12 @@ class Option():
         
     def draw_volume_option(self, screen):
         for i in range(len(self.volume_rects)):
-            screen.blit(self.volume_img, self.volume_rects[i])
-            screen.blit(self.sound_bar_img, self.sound_bar_rects[i])
             if self.temp_data.volumes_off[i]:
                 screen.blit(self.volume_x_img, self.volume_x_poses[i])
-            else:
-                pass
-        # TODO: pass 자리에 현재 바 상태만큼 색칠
+            else: # 색칠 한 후에 sound_bar가 그려져야 사각형 외각이 가려지므로 주의
+                pygame.draw.rect(screen, ORANGE, self.fill_sound_bar_rects[i])
+            screen.blit(self.volume_img, self.volume_rects[i])
+            screen.blit(self.sound_bar_img, self.sound_bar_rects[i])
         
     def draw_setting_buttons(self, screen):
         screen.blit(self.save_img, self.save_rect)
@@ -112,6 +127,8 @@ class Option():
             return
         elif self.click_collide_setting_buttons(mouse_pos):
             return
+        else:
+            self.on_select = False
     
     def click_collide_screen_size_option(self, main, mouse_pos):
         if self.screen_size_changer_button_rect.collidepoint(mouse_pos):
@@ -156,11 +173,12 @@ class Option():
                     self.temp_data.volumes_off[i] = not self.temp_data.volumes_off[i]
                 return True
             if self.sound_bar_rects[i].collidepoint(mouse_pos):
-                if self.on_select and self.select_state[0] == i + 4:
-                    pass # 볼륨조절
+                if self.on_select and not self.select_state[0] == i + 4:
+                    self.on_select = False
                 else:
                     self.select_state = self.cursor_state.copy()
-                    self.on_select = not self.on_select
+                    self.on_select = True
+                    self.change_fill_bar_pos(i, mouse_pos[0])
                 return True
         return False
     
@@ -168,6 +186,8 @@ class Option():
         if self.on_select:
             if self.save_rect.collidepoint(mouse_pos) or self.reset_rect.collidepoint(mouse_pos) or self.exit_rect.collidepoint(mouse_pos):
                 self.on_select = False
+            else:
+                return False
         else:
             if self.save_rect.collidepoint(mouse_pos):
                 self.save_data()
@@ -231,6 +251,16 @@ class Option():
         elif self.exit_rect.collidepoint(mouse_pos):
             self.cursor_state = [7, 2]
             
+    def keyhold_option(self):
+        if self.cursor_state[0] >= 4 and self.cursor_state[0] <= 6:
+            if self.left_hold:
+                self.sound_bars_w[self.cursor_state[0] - 4] -= 1
+            elif self.right_hold:
+                self.sound_bars_w[self.cursor_state[0] - 4] += 1
+            else:
+                return
+            self.change_fill_bar_width(self.cursor_state[0] - 4, self.sound_bars_w[self.cursor_state[0] - 4])
+            
     def keydown_option(self, main, key):
         # 해상도 입력 상태, 키 입력 상태, 사운드 입력 상태 총 세가지 경우 예외 처리 후 방향키 이동
         if key == pygame.K_ESCAPE:
@@ -258,7 +288,15 @@ class Option():
             self.change_key(key)
             self.on_select = False
         elif self.cursor_state[0] >= 4 and self.cursor_state[0] <= 6: # 사운드 바
-            pass
+            if key == self.user_data.key_left:
+                self.sound_bars_w[self.cursor_state[0] - 4] -= 1
+            elif key == self.user_data.key_right:
+                self.sound_bars_w[self.cursor_state[0] - 4] += 1
+            elif key == self.user_data.key_enter:
+                self.on_select = False
+            else:
+                return
+            self.change_fill_bar_width(self.cursor_state[0] - 4, self.sound_bars_w[self.cursor_state[0] - 4])
             
     def key_down_on_cursur_state(self, main, key):
         if key == self.user_data.key_left:
@@ -321,9 +359,6 @@ class Option():
         else:
             self.select_state = self.cursor_state.copy()
             self.on_select = True
-            
-    
-
     
     def change_screen_size(self, main, screen_size_index):
         self.temp_data.set_screen_size(main, screen_size_index)
@@ -341,30 +376,72 @@ class Option():
         self.button_select_pos = self.tup_mul(screen_size, self.button_select_default_poses[self.select_state])
         self.button_select_rect = self.button_select_img.get_rect(center = self.button_select_pos)
         
+    def key_down_hold_check(self, key):
+        if key == self.user_data.key_left:
+            self.left_hold = True
+        elif key == self.user_data.key_right:
+            self.right_hold = True
+        if self.is_key_holding():
+            self.on_key_hold = True    
+        
+    def key_up_hold_check(self, key):
+        if key == self.user_data.key_left:
+            self.left_hold = False
+        elif key == self.user_data.key_right:
+            self.right_hold = False
+        if not self.is_key_holding():
+            self.on_key_hold = False
+            
+    def is_key_holding(self):
+        if self.left_hold or self.right_hold:
+            return True
+        else:
+            return False
+        
+    def change_fill_bar_pos(self, bar_idx, xpos_right):
+        xpos_right = min(self.fill_sound_bar_xposes_max[bar_idx], xpos_right)
+        xpos_right = max(self.fill_sound_bar_xposes_min[bar_idx], xpos_right)
+        w = xpos_right - self.fill_sound_bar_xposes_min[bar_idx]
+        self.fill_sound_bar_rects[bar_idx][2] = w
+        self.temp_data.volumes[bar_idx] = w / self.sound_bar_rects[bar_idx].width
+        self.temp_data.volumes_off[bar_idx] = False
+        
+    def change_fill_bar_width(self, bar_idx, width):
+        self.sound_bars_w[bar_idx] = max(0, self.sound_bars_w[bar_idx])
+        self.sound_bars_w[bar_idx] = min(self.sound_bar_rects[0].width, self.sound_bars_w[bar_idx])
+        self.fill_sound_bar_rects[bar_idx][2] = self.sound_bars_w[bar_idx]
+        self.temp_data.volumes[bar_idx] = self.sound_bars_w[bar_idx] / self.sound_bar_rects[bar_idx].width
+        self.temp_data.volumes_off[bar_idx] = False   
+        if self.sound_bars_w[bar_idx] == 0:
+            self.temp_data.volumes_off[bar_idx] = True
+        
     def reset_on_option_state(self):
         self.select_state = [0, 0]
         self.cursor_state = [0, 0]
         self.on_select = False
+        self.last_mouse_pos = (0, 0)
+        self.set_drawing_options()
         
     def reset_option(self):
-        self.reset_on_option_state()
         self.temp_data.reset_data()
+        self.reset_on_option_state()
         
     def tup_mul(self, tup1, tup2):
         return (tup1[0] * tup2[0], tup1[1] * tup2[1])
     
     def save_data(self):
         self.user_data.copy_data(self.temp_data)
+        self.user_data.save_data(self.main)
         
     def load_asset(self, root):
         self.pop_up_img = pygame.image.load(os.path.join(root, "Material/GUI/option_pop_up.png"))
         self.screen_size_block_imges = \
-            [
-                pygame.image.load(os.path.join(root, "Material/button/640_480.png")),
-                pygame.image.load(os.path.join(root, "Material/button/1280_720.png")),
-                pygame.image.load(os.path.join(root, "Material/button/1920_1080.png")),
-                pygame.image.load(os.path.join(root, "Material/button/2560_1440.png"))
-            ]
+        [
+            pygame.image.load(os.path.join(root, "Material/button/640_480.png")),
+            pygame.image.load(os.path.join(root, "Material/button/1280_720.png")),
+            pygame.image.load(os.path.join(root, "Material/button/1920_1080.png")),
+            pygame.image.load(os.path.join(root, "Material/button/2560_1440.png"))
+        ]
         self.key_button_img = pygame.image.load(os.path.join(root, "Material/button/key_button.png"))
         self.checked_button_img = pygame.image.load(os.path.join(root, "Material/button/checked_button.png"))
         self.volume_img  = pygame.image.load(os.path.join(root, "Material/Option/volume.png"))
@@ -381,12 +458,12 @@ class Option():
         self.pop_up_default_pos = (0.5, 0.5)
         self.screen_size_changer_button_default_pos = (0.6, 0.15)
         self.screen_size_block_default_poses = \
-            [
-                (0.6, 0.2), 
-                (0.6, 0.25), 
-                (0.6, 0.3), 
-                (0.6, 0.35)
-            ]
+        [
+            (0.6, 0.2), 
+            (0.6, 0.25), 
+            (0.6, 0.3), 
+            (0.6, 0.35)
+        ]
         self.left_key_button_default_pos = (0.535, 0.225)
         self.right_key_button_default_pos = (0.625, 0.225)
         self.enter_key_button_default_pos = (0.715, 0.225)
@@ -394,38 +471,38 @@ class Option():
         self.down_key_button_default_pos = (0.625, 0.315)
         self.on_color_blindness_mode_default_pos = (0.535, 0.395)
         self.volume_default_poses = \
-            [
-                (0.49, 0.485),
-                (0.49, 0.575),
-                (0.49, 0.665)
-            ]
+        [
+            (0.49, 0.485),
+            (0.49, 0.575),
+            (0.49, 0.665)
+        ]
         self.volume_x_default_poses = \
-            [
-                (0.505, 0.475),
-                (0.505, 0.565),
-                (0.505, 0.655)
-            ]
+        [
+            (0.505, 0.475),
+            (0.505, 0.565),
+            (0.505, 0.655)
+        ]
         self.sound_bar_default_poses = \
-            [
-                (0.62, 0.485),
-                (0.62, 0.575),
-                (0.62, 0.665)
-            ]
+        [
+            (0.62, 0.485),
+            (0.62, 0.575),
+            (0.62, 0.665)
+        ]
         self.save_default_pos = (0.35, 0.85)
         self.reset_default_pos = (0.5, 0.85)
         self.exit_default_pos = (0.65, 0.85)
         
         self.button_select_default_poses = \
-            [
-                [(0.6, 0.1), (0.6, 0.15), (0.6, 0.2), (0.6, 0.25), (0.6, 0.3)],
-                [(0.535, 0.175), (0.625, 0.175), (0.715, 0.175)],
-                [(0.535, 0.265), (0.625, 0.265)],
-                [(0.535, 0.345)],
-                [(0.49, 0.44), (0.62, 0.44)],
-                [(0.49, 0.53), (0.62, 0.53)],
-                [(0.49, 0.62), (0.62, 0.62)],
-                [(0.35, 0.78), (0.5, 0.78), (0.65, 0.78)]
-            ]
+        [
+            [(0.6, 0.1), (0.6, 0.15), (0.6, 0.2), (0.6, 0.25), (0.6, 0.3)],
+            [(0.535, 0.175), (0.625, 0.175), (0.715, 0.175)],
+            [(0.535, 0.265), (0.625, 0.265)],
+            [(0.535, 0.345)],
+            [(0.49, 0.44), (0.62, 0.44)],
+            [(0.49, 0.53), (0.62, 0.53)],
+            [(0.49, 0.62), (0.62, 0.62)],
+            [(0.35, 0.78), (0.5, 0.78), (0.65, 0.78)]
+        ]
             
     def set_option_gui(self):
         screen_size = self.temp_data.get_screen_size()
@@ -468,3 +545,19 @@ class Option():
         
         self.button_select_rects = [[self.button_select_img.get_rect(center = pos) for pos in poses] for poses in self.button_select_poses]
         self.button_cursor_rects = [[self.button_cursor_img.get_rect(center = pos) for pos in poses] for poses in self.button_cursor_poses]
+        
+    def set_drawing_options(self):
+        self.screen_size_changer_button_img = self.screen_size_block_imges[self.temp_data.screen_size_index]
+        self.fill_sound_bar_xposes_max = [rect.right for rect in self.sound_bar_rects]
+        self.fill_sound_bar_xposes_min = [rect.left for rect in self.sound_bar_rects]
+        w = self.sound_bar_rects[0].width
+        self.fill_sound_bar_rects = [[self.sound_bar_rects[i].left, self.sound_bar_rects[i].top, w * self.temp_data.volumes[i], self.sound_bar_rects[i].height] for i in range(len(self.sound_bar_rects))] # x, y, w, h
+        self.sound_bars_w = [w * volume for volume in self.temp_data.volumes]
+    
+    def set_key_hold_down(self):
+        self.on_key_hold = False
+        self.left_hold = False
+        self.right_hold = False
+        #self.up_hold = False
+        #self.down_hold = False
+        #self.enter_hold = False        

@@ -15,7 +15,6 @@ class UserData():
         self.reset_data()
             # self.save_data()
         
-        
         self.screen_sizes = [(640, 480), (1280, 720), (1920, 1080), (2560,1440)]
         self.screen_size_index = 1
         
@@ -23,8 +22,9 @@ class UserData():
     def load_data(self):
         pass
     
-    def save_data(self):
-        pass
+    def save_data(self, main):
+        self.set_screen_size(main, self.screen_size_index)
+        main.set_screen()
     
     def reset_data(self):
         self.screen_width           = 1280
@@ -35,8 +35,9 @@ class UserData():
         self.key_up                 = pygame.K_UP
         self.key_down               = pygame.K_DOWN
         self.color_blindness_mode   = False
-        self.volumes                = [1, 1, 1] # master, bgm, eft 순서
+        self.volumes                = [1, 1, 1] # master, bgm, eft 순서 0 ~ 1?
         self.volumes_off            = [False, False, False] # 위와 동일
+        self.screen_size_index = 1
         
     def get_screen_size(self):
         return self.screen_sizes[self.screen_size_index]
@@ -44,7 +45,6 @@ class UserData():
     def set_screen_size(self, main, screen_size_index):
         self.screen_size_index = screen_size_index
         self.screen_width, self.screen_height = self.screen_sizes[screen_size_index]
-        main.set_screen()
         
     def set_key(self, key_index, new_key):
         match key_index:
@@ -61,6 +61,7 @@ class UserData():
                 
     def copy_data(self, other_data):
         # TODO: 노가다 말고 뭔가 좋은 방법이 없을까..?
+        # 단일 변수 아닌 애들은 깊은 복사 안 되게 조정
         self.screen_width           = other_data.screen_width        
         self.screen_height          = other_data.screen_height       
         self.key_left               = other_data.key_left            
@@ -69,5 +70,6 @@ class UserData():
         self.key_up                 = other_data.key_up              
         self.key_down               = other_data.key_down            
         self.color_blindness_mode   = other_data.color_blindness_mode
-        self.volumes                = other_data.volumes             
-        self.volumes_off            = other_data.volumes_off         
+        self.volumes                = [i for i in other_data.volumes]
+        self.volumes_off            = [i for i in other_data.volumes_off]   
+        self.screen_size_index = other_data.screen_size_index

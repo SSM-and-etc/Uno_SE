@@ -49,7 +49,7 @@ class GameMain():
     def set_scene_obj(self, scene_state):
         match scene_state:
             case 0:
-                self.title = Title(self.root_path, self.user_data)
+                self.title = Title(self)
             case 1:
                 # 인자) 일반 모드: 0, 대전 상대 수 n / 스토리: 스테이지 n 을 인자로 추가
                 self.play_game = GamePlay(self)

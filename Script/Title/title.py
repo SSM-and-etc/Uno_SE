@@ -11,12 +11,13 @@ STATE_OPTION = 1
 STATE_EXIT = 2
 
 class Title():
-    def __init__(self, root, user_data):
-        self.title_BG = pygame.image.load(os.path.join(root, "Material/BG/title.png"))
-        self.single_game_img = pygame.image.load(os.path.join(root, "Material/Button/single_game.png"))
-        self.option_img = pygame.image.load(os.path.join(root, "Material/Button/option.png"))
-        self.exit_img = pygame.image.load(os.path.join(root, "Material/Button/exit.png"))
-        self.button_select_img = pygame.image.load(os.path.join(root, "Material/Button/button_select.png"))
+    def __init__(self, main):
+        self.main = main
+        self.title_BG = pygame.image.load(os.path.join(main.root_path, "Material/BG/title.png"))
+        self.single_game_img = pygame.image.load(os.path.join(main.root_path, "Material/Button/single_game.png"))
+        self.option_img = pygame.image.load(os.path.join(main.root_path, "Material/Button/option.png"))
+        self.exit_img = pygame.image.load(os.path.join(main.root_path, "Material/Button/exit.png"))
+        self.button_select_img = pygame.image.load(os.path.join(main.root_path, "Material/Button/button_select.png"))
 
         self.single_game_default_pos = (0.2, 0.7)
         self.option_default_pos = (0.6, 0.7)
@@ -26,8 +27,8 @@ class Title():
         self.on_option = False
         self.select_state = 0 # 0: single game start, 1: option, 2: exit ...
         
-        self.user_data = user_data
-        self.option = Option(root, self.user_data)
+        self.user_data = main.user_data
+        self.option = Option(main)
         
         self.set_title_gui(self.user_data.get_screen_size())
         
