@@ -42,7 +42,7 @@ class GamePlay:
         self.main = main
         self.stage_index = stage_index
         self.user_data = main.user_data
-        self.option = Option(main.root_path, self.user_data)
+        self.option = Option(main)
         self.on_option = False
         self.turn_count_gimmick = 1
         self.user_turn_count_gimmick = 1
