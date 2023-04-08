@@ -22,7 +22,7 @@ class Option():
                 main.running = False
                 
             if event.type == pygame.KEYDOWN:
-                self.keydown_option(event.key)
+                self.keydown_option(main, event.key)
             
             if event.type == pygame.MOUSEBUTTONDOWN: 
                 self.click_collide_option(main, event.pos)
@@ -227,15 +227,77 @@ class Option():
         elif self.exit_rect.collidepoint(mouse_pos):
             self.cursor_state = [7, 2]
             
-    def keydown_option(self, key):
+    def keydown_option(self, main, key):
+        # 해상도 입력 상태, 키 입력 상태, 사운드 입력 상태 총 세가지 경우 예외 처리 후 방향키 이동
         if key == pygame.K_ESCAPE:
             if self.on_select:
                 self.on_select = False
             else:
                 self.exit_option()
-        elif self.on_select and (self.cursor_state[0] == 1 or self.cursor_state[0] == 2):
+        elif self.on_select:
+            self.key_down_on_select_state(main, key)
+        else:
+            self.key_down_on_cursur_state(main, key)
+
+    def key_down_on_select_state(self, main, key):
+        if self.cursor_state[0] == 0: # 해상도 부분
+            if key == self.user_data.key_up:
+                self.select_state[1] -= 1
+                self.screen_size_option_index_handling()
+            elif key == self.user_data.key_down:
+                self.select_state[1] += 1
+                self.screen_size_option_index_handling()
+            elif self.select_state[1] != 0 and key == self.user_data.key_enter:
+                self.change_screen_size(main, self.select_state[1] - 1)
+                self.on_select = False
+        elif self.cursor_state[0] == 1 or self.cursor_state[0] == 2: # 키 입력 부분
             self.change_key(key)
             self.on_select = False
+        elif self.cursor_state[0] >= 4 and self.cursor_state[0] <= 6: # 사운드 바
+            pass
+            
+    def key_down_on_cursur_state(self, main, key):
+        if key == self.user_data.key_left:
+            self.cursor_state[1] -= 1
+        elif key == self.user_data.key_right:
+            self.cursor_state[1] += 1
+        elif key == self.user_data.key_up:
+            self.cursor_state[0] -= 1
+            if self.cursor_state[1] >= len(self.button_cursor_poses[self.cursor_state[0]]):
+                self.cursor_state[1] = len(self.button_cursor_poses[self.cursor_state[0]]) - 1
+        elif key == self.user_data.key_down:
+            self.cursor_state[0] += 1
+            if self.cursor_state[0] >= len(self.button_cursor_poses):
+                self.cursor_state[0] -= len(self.button_cursor_poses)
+            if self.cursor_state[1] >= len(self.button_cursor_poses[self.cursor_state[0]]):
+                self.cursor_state[1] = len(self.button_cursor_poses[self.cursor_state[0]]) - 1
+        elif key == self.user_data.key_enter:
+            self.enter_state(key)
+            return
+        else:
+            return
+        self.option_cursor_index_handling()
+            
+    def screen_size_option_index_handling(self):
+        if self.select_state[1] < 1:
+            self.select_state[1] += 4
+        elif self.select_state[1] > 4:
+            self.select_state[1] -= 4
+    
+    def option_cursor_index_handling(self):
+        if self.cursor_state[0] == 0:
+            self.cursor_state[1] = 0 # 해상도 커서는 0에만(첫 상자에) 고정되게
+        elif self.cursor_state[0] < 0:
+            self.cursor_state[0] += len(self.button_cursor_poses)
+        elif self.cursor_state[0] >= len(self.button_cursor_poses):
+            self.cursor_state[0] -= len(self.button_cursor_poses)
+        elif self.cursor_state[1] < 0:
+            self.cursor_state[1] += len(self.button_cursor_poses[self.cursor_state[0]])
+        elif self.cursor_state[1] >= len(self.button_cursor_poses[self.cursor_state[0]]):
+            self.cursor_state[1] -= len(self.button_cursor_poses[self.cursor_state[0]])
+        
+    def enter_state(self, key):
+        pass
     
     def change_screen_size(self, main, screen_size_index):
         self.temp_data.set_screen_size(main, screen_size_index)

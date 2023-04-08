@@ -76,15 +76,15 @@ class Title():
         self.apply_state_change()    
             
     def keydown_title(self, main, key):
-        if(key == self.user_data.key_left):
+        if key == self.user_data.key_left:
             self.select_state -= 1
             while(self.select_state < 0):
                 self.select_state += STATE_NUMBER
-        elif(key == self.user_data.key_right):
+        elif key == self.user_data.key_right:
             self.select_state += 1
             while(self.select_state >= STATE_NUMBER):
                 self.select_state -= STATE_NUMBER
-        elif(key == self.user_data.key_enter):
+        elif key == self.user_data.key_enter:
             self.enter_state(main)
             return
         elif key == pygame.K_ESCAPE:
