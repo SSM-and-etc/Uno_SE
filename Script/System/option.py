@@ -96,8 +96,12 @@ class Option():
     
         
     def click_collide_option(self, main, mouse_pos):
+        # TODO: on_select 상태에 따라 클릭을 이분 하는 방식으로 리펙토링
         if not self.pop_up_rect.collidepoint(mouse_pos):
-            self.exit_option()
+            if self.on_select:
+                self.on_select = False
+            else:
+                self.exit_option()
         elif self.click_collide_screen_size_option(main, mouse_pos):
             return
         elif self.click_collide_key_setting_option(mouse_pos):
@@ -112,7 +116,7 @@ class Option():
     def click_collide_screen_size_option(self, main, mouse_pos):
         if self.screen_size_changer_button_rect.collidepoint(mouse_pos):
             if not self.on_select:
-                self.select_state = self.cursor_state
+                self.select_state = self.cursor_state.copy()
         elif self.on_select and self.select_state[0] == 0:
             for idx, rect in enumerate(self.screen_size_block_rects):
                 if rect.collidepoint(mouse_pos):
@@ -126,7 +130,7 @@ class Option():
         if self.left_key_button_rect.collidepoint(mouse_pos) or self.right_key_button_rect.collidepoint(mouse_pos) \
             or self.enter_key_button_rect.collidepoint(mouse_pos) or self.up_key_button_rect.collidepoint(mouse_pos) \
                 or self.down_key_button_rect.collidepoint(mouse_pos):
-            self.select_state = self.cursor_state
+            self.select_state = self.cursor_state.copy()
         elif self.on_select and (self.cursor_state[0] == 1 or self.cursor_state[0] == 2):
             pass
         else:
@@ -155,7 +159,7 @@ class Option():
                 if self.on_select and self.select_state[0] == i + 4:
                     pass # 볼륨조절
                 else:
-                    self.select_state = self.cursor_state
+                    self.select_state = self.cursor_state.copy()
                     self.on_select = not self.on_select
                 return True
         return False
@@ -272,7 +276,7 @@ class Option():
             if self.cursor_state[1] >= len(self.button_cursor_poses[self.cursor_state[0]]):
                 self.cursor_state[1] = len(self.button_cursor_poses[self.cursor_state[0]]) - 1
         elif key == self.user_data.key_enter:
-            self.enter_state(key)
+            self.enter_state()
             return
         else:
             return
@@ -296,8 +300,30 @@ class Option():
         elif self.cursor_state[1] >= len(self.button_cursor_poses[self.cursor_state[0]]):
             self.cursor_state[1] -= len(self.button_cursor_poses[self.cursor_state[0]])
         
-    def enter_state(self, key):
-        pass
+    def enter_state(self):
+        if self.cursor_state[0] == 3:
+            self.temp_data.color_blindness_mode = not self.temp_data.color_blindness_mode
+        elif self.cursor_state[0] >= 4 and self.cursor_state[0] <= 6:
+            if self.cursor_state[1] == 0:
+                self.temp_data.volumes_off[self.cursor_state[0] - 4] = not self.temp_data.volumes_off[self.cursor_state[0] - 4]
+            elif self.cursor_state[1] == 1:
+                self.select_state = self.cursor_state.copy()
+                self.on_select = True
+        elif self.cursor_state[0] == 7:
+            match self.cursor_state[1]:
+                case 0:
+                    self.save_data()
+                    self.exit_option()
+                case 1:
+                    self.reset_option()
+                case 2:
+                    self.exit_option()
+        else:
+            self.select_state = self.cursor_state.copy()
+            self.on_select = True
+            
+    
+
     
     def change_screen_size(self, main, screen_size_index):
         self.temp_data.set_screen_size(main, screen_size_index)
