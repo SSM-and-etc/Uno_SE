@@ -88,8 +88,6 @@ class Title():
             self.enter_state(main)
             return
         elif key == pygame.K_ESCAPE:
-            print(self.user_data.key_left)
-            print(self.option.user_data.key_left)
             self.on_option = True
         else:
             # 사용 가능한 키 보여주기

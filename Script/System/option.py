@@ -37,6 +37,7 @@ class Option():
     def exit_option(self):
         self.on_option = False
         self.reset_on_option_state()
+        self.temp_data = copy.copy(self.user_data)
             
     def draw_option(self, screen):
         screen.blit(self.pop_up_img, self.pop_up_rect)
@@ -166,6 +167,7 @@ class Option():
         else:
             if self.save_rect.collidepoint(mouse_pos):
                 self.save_data()
+                self.exit_option()
             elif self.reset_rect.collidepoint(mouse_pos):
                 self.reset_option()
             elif self.exit_rect.collidepoint(mouse_pos):
