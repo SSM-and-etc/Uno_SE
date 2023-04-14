@@ -187,11 +187,16 @@ class GamePlay:
                 self.draw_game()
     
     def counter_event(self):
-        self.counter -= 1
-        if (self.counter == 0) or (self.counter == 12 and self.player != self.game.turn()):
-            pygame.time.set_timer(pygame.USEREVENT, 0)
-            self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
+        if self.counter > 0:
+            self.counter -= 1
+
+        if self.counter == 0:
+            self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0, True))
             self.play_player(self.game.turn())  
+        
+        elif self.counter == 12 and self.player != self.game.turn():
+            self.animate_assets.append((self.assets["deck2"], self.pane_assets[self.game.players.index(self.game.turn())], 50, 0, False))
+            self.play_player(self.game.turn())
 
     def play_player(self, player, card = None):
         # self.game.play() 이후의 self.game.turn()은 순서를 넘겨 받은 플레이어가 됨에 주의
@@ -218,7 +223,7 @@ class GamePlay:
                     
     def animate_asset(self):
         if self.animate_assets:
-            asset, dest, time, tick = self.animate_assets.pop()
+            asset, dest, time, tick, resize = self.animate_assets.pop()
 
             if tick >= time:
                 new_rect = dest.rect
@@ -231,10 +236,11 @@ class GamePlay:
                         abs(asset.rect[2] - (asset.rect[2] - dest.rect[2]) / (time-tick)*5),\
                         abs(asset.rect[3] - (asset.rect[3] - dest.rect[3]) / (time-tick)*5),\
                         
-                asset.img = pygame.transform.scale(asset.img, (new_rect[2], new_rect[3]))
+                if resize:
+                    asset.img = pygame.transform.scale(asset.img, (new_rect[2], new_rect[3]))
                 asset.rect.update(new_rect)
                 
-                self.animate_assets.append((asset, dest, time, tick+1))
+                self.animate_assets.append((asset, dest, time, tick+1, resize))
 
             
     def draw_game(self):
@@ -272,7 +278,7 @@ class GamePlay:
 
         if self.assets["deck"].rect.collidepoint(mouse_pos):
             if self.game.turn() == self.player:
-                self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
+                self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0, True))
                 self.play_player(self.player)
 
         for i, card_asset in enumerate(self.card_assets):
@@ -285,7 +291,7 @@ class GamePlay:
                             self.color_selection["idx"] = i
 
                         else:
-                            self.animate_assets.append((card_asset, self.assets["table"], 50, 0))
+                            self.animate_assets.append((card_asset, self.assets["table"], 50, 0, True))
                             self.play_player(self.player, self.player.hand[i])
 
         if self.color_selection["selecting"]:
@@ -297,7 +303,7 @@ class GamePlay:
             if self.color_selection["selection"]:
                 self.player.hand[self.color_selection["idx"]].color = self.color_selection["selection"]
 
-                self.animate_assets.append((self.card_assets[self.color_selection["idx"]], self.assets["table"], 50, 0))
+                self.animate_assets.append((self.card_assets[self.color_selection["idx"]], self.assets["table"], 50, 0, True))
                 self.play_player(self.player, self.player.hand[self.color_selection["idx"]])
 
                 self.color_selection["selecting"] = False
