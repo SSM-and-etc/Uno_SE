@@ -38,7 +38,7 @@ class FakeAsset:
         self.rect = pygame.Rect(rect)
 
 class GamePlay:
-    def __init__(self, main, stage_index = 4, playerAI_number = 1):
+    def __init__(self, main, stage_index = 1, playerAI_number = 1):
         self.main = main
         self.stage_index = stage_index
         self.user_data = main.user_data
@@ -46,6 +46,16 @@ class GamePlay:
         self.on_option = False
         self.turn_count_gimmick = 1
         self.user_turn_count_gimmick = 1
+        self.color_selection = {
+            "selecting": False,
+            "idx": None,
+            "assets": {CardColor.RED: Asset(os.path.join(main.root_path, "Material/Extra/red.png"), (300, 100)),
+                        CardColor.GREEN: Asset(os.path.join(main.root_path, "Material/Extra/green.png"), (400, 100)),
+                        CardColor.BLUE: Asset(os.path.join(main.root_path, "Material/Extra/blue.png"), (500, 100)),
+                        CardColor.YELLOW: Asset(os.path.join(main.root_path, "Material/Extra/yellow.png"), (600, 100))
+            },
+            "selection": None
+        }
 
         design_resolution = (1280, 720)
         screen_size = main.user_data.get_screen_size()
@@ -66,13 +76,8 @@ class GamePlay:
         self.counter_font = pygame.font.SysFont(None, 50)
         self.name_font = pygame.font.SysFont(None, 50)
 
-        callback = {
-        "select_color": self.select_color,
-        "turn_changed": self.turn_changed 
-        }
-
         self.player_setting(playerAI_number)
-        self.game = Game(self.players, callback, stage_index)
+        self.game = Game(self.players, stage_index)
 
         self.pane_assets = [FakeAsset((10, 514, 876, 196))]
         for i in range(len(self.players)-1):
@@ -104,7 +109,6 @@ class GamePlay:
             
     
     def select_color(self):
-        print("SELECT COLOR")
         return random.choice([CardColor.BLUE, CardColor.GREEN, CardColor.RED, CardColor.YELLOW])
         # TODO: Handle Select Color
 
@@ -143,7 +147,7 @@ class GamePlay:
             mag = card_h / card_orig[1]
             card_x = card_orig[0] * mag
 
-        return card_x, pane_y + (pane_h-card_h) / 2, mag * 0.95
+        return card_x, pane_y + (pane_h-card_h) / 2, mag * 0.9
 
     def update_hand(self):
         card_size = self.calculate_card_size(0)
@@ -255,6 +259,10 @@ class GamePlay:
             if self.game.players[i] == self.game.turn():
                 pygame.draw.rect(self.main.screen, (255, 0, 0), pane_asset, 2)
 
+        if self.color_selection["selecting"]:
+            for color, asset in self.color_selection["assets"].items():
+                self.main.screen.blit(asset.img, asset.rect)
+
         self.main.screen.blit(self.assets["table"].img, self.assets["table"].rect)
         self.main.screen.blit(self.counter_font.render(str(self.counter), True, (255, 255, 255)), (830, 450))
 
@@ -271,8 +279,30 @@ class GamePlay:
             if card_asset.rect.collidepoint(mouse_pos):
                 if self.game.turn() == self.player:
                     if self.game.table.playable(self.player.hand[i]):
-                        self.animate_assets.append((card_asset, self.assets["table"], 50, 0))
-                        self.play_player(self.player, self.player.hand[i])
+
+                        if self.player.hand[i].card_type == CardType.CARD_CHANGECOLOR:
+                            self.color_selection["selecting"] = True
+                            self.color_selection["idx"] = i
+
+                        else:
+                            self.animate_assets.append((card_asset, self.assets["table"], 50, 0))
+                            self.play_player(self.player, self.player.hand[i])
+
+        if self.color_selection["selecting"]:
+            for color, asset in self.color_selection["assets"].items():
+                if asset.rect.collidepoint(mouse_pos):
+                    self.color_selection["selection"] = color
+                    print(color)
+        
+            if self.color_selection["selection"]:
+                self.player.hand[self.color_selection["idx"]].color = self.color_selection["selection"]
+
+                self.animate_assets.append((self.card_assets[self.color_selection["idx"]], self.assets["table"], 50, 0))
+                self.play_player(self.player, self.player.hand[self.color_selection["idx"]])
+
+                self.color_selection["selecting"] = False
+                self.color_selection["selection"] = None
+        
             
     def keydown_game(self, main, key):
         if key == self.user_data.key_left:
