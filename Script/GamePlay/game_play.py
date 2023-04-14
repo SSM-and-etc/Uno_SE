@@ -207,6 +207,9 @@ class GamePlay:
                 pos_x, pos_y, _, _ = self.pane_assets[self.game.players.index(self.game.turn())].rect
                 asset = Asset(os.path.join(self.main.root_path, f"Material/Card/{filename}.png"), (pos_x, pos_y), mag=0.3)
                 self.animate_assets.append((asset, self.assets["table"], 50, 0, True))
+
+                if card.card_type == CardType.CARD_CHANGECOLOR:
+                    card.color = self.game.turn().choose_color(self.game.table.get_color())
             else: # draw
                 self.animate_assets.append((self.assets["deck2"], self.pane_assets[self.game.players.index(self.game.turn())], 50, 0, False))
             
