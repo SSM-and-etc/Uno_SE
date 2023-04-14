@@ -49,10 +49,10 @@ class GamePlay:
         self.color_selection = {
             "selecting": False,
             "idx": None,
-            "assets": {CardColor.RED: Asset(os.path.join(main.root_path, "Material/Extra/red.png"), (300, 100)),
-                        CardColor.GREEN: Asset(os.path.join(main.root_path, "Material/Extra/green.png"), (400, 100)),
-                        CardColor.BLUE: Asset(os.path.join(main.root_path, "Material/Extra/blue.png"), (500, 100)),
-                        CardColor.YELLOW: Asset(os.path.join(main.root_path, "Material/Extra/yellow.png"), (600, 100))
+            "assets": {CardColor.RED: Asset(os.path.join(main.root_path, "Material/Extra/red.png"), (200, 400)),
+                        CardColor.GREEN: Asset(os.path.join(main.root_path, "Material/Extra/green.png"), (300, 400)),
+                        CardColor.BLUE: Asset(os.path.join(main.root_path, "Material/Extra/blue.png"), (400, 400)),
+                        CardColor.YELLOW: Asset(os.path.join(main.root_path, "Material/Extra/yellow.png"), (500, 400))
             },
             "selection": None
         }
@@ -84,7 +84,7 @@ class GamePlay:
             self.pane_assets.append(Asset(os.path.join(main.root_path, "Material/BG/player_panel.png"), (906, 10 + 150 * i)))
 
         self.update_hand()
-        self.update_table()
+        self.update_table()    
 
     def player_setting(self, playerAI_number):
         self.player = Player("ME")        
@@ -172,7 +172,8 @@ class GamePlay:
                     self.keydown_game(main, event.key)
                 
                 if event.type == pygame.MOUSEBUTTONDOWN: 
-                    self.collide_game(event.pos)
+                    if not self.game.table.top().is_special():
+                        self.collide_game(event.pos)
                     pass
                     
                 if event.type == pygame.MOUSEMOTION:
@@ -189,6 +190,16 @@ class GamePlay:
     def counter_event(self):
         if self.counter > 0:
             self.counter -= 1
+
+        if self.game.table.top().is_special():
+            card = self.game.table.top()
+
+            if card.card_type == CardType.CARD_CHANGECOLOR:
+                card.color = random.choice(list(CardColor))
+            self.game.turn().hand.append(card)
+            self.game.play(self.game.turn(), len(self.players), card)
+            self.animate_assets.append((self.assets["deck2"], self.assets["table"], 50, 0, False))
+            self.game.table.put(self.game.deck.draw())
 
         if self.counter == 0:
             #pygame.time.set_timer(pygame.USEREVENT, 0)
