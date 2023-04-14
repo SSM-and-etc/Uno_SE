@@ -36,8 +36,8 @@ class GameMain():
                 return 0
             case "single game":
                 return 1
-            case "lobby":
-                return 2
+            # case "lobby":
+            #     return 2
         return -1
         
     def get_scene_obj(self, scene_state):
@@ -45,9 +45,10 @@ class GameMain():
             case 0:
                 return self.title
             case 1:
+                return self.lobby
                 return self.play_game
-            case 2:
-                 return self.lobby
+            # case 2:
+            #      return self.lobby
             case _:
                 return None
 
@@ -60,8 +61,8 @@ class GameMain():
                 self.lobby = Lobby(self)
                 # self.play_game = GamePlay(self)
  
-            case 2:
-                self.lobby = Lobby(self)
+            # case 2:
+            #     self.lobby = Lobby(self)
             case _:
                 pass
 
@@ -72,8 +73,8 @@ class GameMain():
                 self.title = None
             case 1:
                 self.play_game = None
-            case 2:
-                self.lobby = None
+            # case 2:
+            #     self.lobby = None
             case _:
                 pass
         

@@ -1,7 +1,6 @@
 import pygame
 
 import os
-
 from Lobby.input_box import InputBox
 
 class Lobby:
@@ -22,9 +21,9 @@ class Lobby:
         self.computer4= InputBox(50, 200, 200, 32, 4)
         self.computer5= InputBox(50, 250, 200, 32, 5)
         # self.screen= pygame.display.set_mode((640, 480))
-        self.draw_lobby
+        # self.draw_lobby
         
-    def display(self,main,screen):
+    def display(self,main):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 # main.running = False
@@ -50,12 +49,12 @@ class Lobby:
                         # self.text_dic[self.key] +=event.unicode
                         self.text += event.unicode
                             
-        screen.blit(self.lobby_img, (0, 0))
+        main.screen.blit(self.lobby_img, (0, 0))
         if(self.on_title_gui):
-            self.draw_lobby(screen)
+            self.computer1.draw(main.screen)
             
-    def draw_lobby(self,screen):
-        self.computer1.draw(self,screen)
+    # def draw_lobby(self,screen):
+       
         # pygame.draw.rect(screen, self.color, self.input_box, 2)
         # text_surface = self.font.render(self.text, True, (0, 0, 0))
         # screen.blit(text_surface, (self.input_box.x + 5, self.input_box.y + 5))

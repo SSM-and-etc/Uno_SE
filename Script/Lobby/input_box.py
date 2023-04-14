@@ -44,7 +44,7 @@ class InputBox:
 
     def draw(self,screen):
         # Input Box와 텍스트를 화면에 그립니다.
-        pygame.draw.rect(self.screen, self.color, self.rect, 2)
+        pygame.draw.rect(screen, self.color, self.rect, 2)
         font = pygame.font.Font(None, 24)
         text_surface = font.render(self.text, True, self.color)
         screen.blit(text_surface, (self.rect.x + 5, self.rect.y + 5))
