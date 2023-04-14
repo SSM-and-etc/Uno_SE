@@ -2,6 +2,7 @@ import os
 
 import pygame
 
+from Lobby.lobby import Lobby
 from GameData.user_data import UserData
 from GameData.game_data import GameData
 from Title.title import Title
@@ -20,7 +21,7 @@ class GameMain():
         self.user_data = UserData()
         self.title = None
         self.play_game = None
-        
+        self.lobby = None
         
         self.set_scene_obj(self.scene_state)
         self.set_screen()
@@ -35,6 +36,8 @@ class GameMain():
                 return 0
             case "single game":
                 return 1
+            case "lobby":
+                return 2
         return -1
         
     def get_scene_obj(self, scene_state):
@@ -43,6 +46,8 @@ class GameMain():
                 return self.title
             case 1:
                 return self.play_game
+            case 2:
+                 return self.lobby
             case _:
                 return None
 
@@ -53,6 +58,9 @@ class GameMain():
             case 1:
                 # 인자) 일반 모드: 0, 대전 상대 수 n / 스토리: 스테이지 n 을 인자로 추가
                 self.play_game = GamePlay(self)
+ 
+            case 2:
+                self.lobby = Lobby(self)
             case _:
                 pass
 
@@ -63,6 +71,8 @@ class GameMain():
                 self.title = None
             case 1:
                 self.play_game = None
+            case 2:
+                self.lobby = None
             case _:
                 pass
         
