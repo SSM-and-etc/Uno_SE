@@ -117,7 +117,7 @@ class GamePlay:
 
     def update_table(self):
         card = self.game.table.top()
-        if card.color:
+        if card.is_color():
             filename = card.color + "_" + card.card_type.split("_")[1]
         else:
             filename = "wild_" + card.card_type.split("_")[1]
@@ -154,7 +154,7 @@ class GamePlay:
 
         self.card_assets = []
         for i, card in enumerate(self.player.hand):
-            if card.color:
+            if card.is_color():
                 filename = card.color + "_" + card.card_type.split("_")[1]
             else:
                 filename = "wild_" + card.card_type.split("_")[1]
