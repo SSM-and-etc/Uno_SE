@@ -3,6 +3,8 @@ import pygame
 from uno.game import Game
 from uno.player import Player
 from uno.enums import CardColor, CardType
+from Player.PlayerAI import PlayerAI
+from System.option import Option
 
 import random
 
@@ -36,8 +38,14 @@ class FakeAsset:
         self.rect = pygame.Rect(rect)
 
 class GamePlay:
-    def __init__(self, main):
+    def __init__(self, main, stage_index = 4, playerAI_number = 1):
         self.main = main
+        self.stage_index = stage_index
+        self.user_data = main.user_data
+        self.option = Option(main)
+        self.on_option = False
+        self.turn_count_gimmick = 1
+        self.user_turn_count_gimmick = 1
 
         design_resolution = (1280, 720)
         screen_size = main.user_data.get_screen_size()
@@ -63,17 +71,38 @@ class GamePlay:
         "turn_changed": self.turn_changed 
         }
 
-        self.player = Player("You")
-        players = [self.player, Player("AI"), Player("AI2")] # TODO: AI Player
-        self.game = Game(players, callback)
+        self.player_setting(playerAI_number)
+        self.game = Game(self.players, callback, stage_index)
 
         self.pane_assets = [FakeAsset((10, 514, 876, 196))]
-        for i in range(len(players)-1):
+        for i in range(len(self.players)-1):
             self.pane_assets.append(Asset(os.path.join(main.root_path, "Material/BG/player_panel.png"), (906, 10 + 150 * i)))
 
         self.update_hand()
         self.update_table()
 
+    def player_setting(self, playerAI_number):
+        self.player = Player("ME")        
+        self.players = [self.player]
+        if self.stage_index != 0:
+            playerAI_number = self.player_ai_setting()
+        for _ in range(playerAI_number):
+            self.players.append(PlayerAI(self.stage_index))
+
+    def player_ai_setting(self): # 스테이지별 ai 수 조정
+        match self.stage_index:
+            case 1:
+                return 1
+            case 2:
+                return 3
+            case 3:
+                return 2
+            case 4:
+                return 2
+            case _:
+                return None
+            
+    
     def select_color(self):
         print("SELECT COLOR")
         return random.choice([CardColor.BLUE, CardColor.GREEN, CardColor.RED, CardColor.YELLOW])
@@ -127,35 +156,62 @@ class GamePlay:
                 filename = "wild_" + card.card_type.split("_")[1]
             self.card_assets.append(Asset(os.path.join(self.main.root_path, f"Material/Card/{filename}.png"), (10+card_size[0]*i, 30+card_size[1]), mag=card_size[2]))
 
-    def display(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.main.running = False
+    def display(self, main):
+        if self.on_option:
+            self.on_option = self.option.display(main)
+        else:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.main.running = False
+                    
+                if event.type == pygame.KEYDOWN:
+                    self.keydown_game(main, event.key)
                 
-            if event.type == pygame.KEYDOWN:
-                pass
-            
-            if event.type == pygame.MOUSEBUTTONDOWN: 
-                self.collide_game(event.pos)
-                pass
+                if event.type == pygame.MOUSEBUTTONDOWN: 
+                    self.collide_game(event.pos)
+                    pass
+                    
+                if event.type == pygame.MOUSEMOTION:
+                    pass
                 
-            if event.type == pygame.MOUSEMOTION:
-                pass
+                if event.type == pygame.USEREVENT and self.counter > 0:
+                    self.counter_event()
+                        
+            self.main.screen.blit(self.assets["background"].img, self.assets["background"].rect)
 
-            if event.type == pygame.USEREVENT:
-                self.counter -= 1
+            if self.on_game_gui:
+                self.draw_game()
+    
+    def counter_event(self):
+        self.counter -= 1
+        if (self.counter == 0) or (self.counter == 12 and self.player != self.game.turn()):
+            pygame.time.set_timer(pygame.USEREVENT, 0)
+            self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
+            self.play_player(self.game.turn())  
 
-                if self.counter == 0:
-                    pygame.time.set_timer(pygame.USEREVENT, 0)
-                    self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
-                    self.game.play(self.player) 
-
-            
-        self.main.screen.blit(self.assets["background"].img, self.assets["background"].rect)
-
-        if self.on_game_gui:
-            self.draw_game()
-
+    def play_player(self, player, card = None):
+        # self.game.play() 이후의 self.game.turn()은 순서를 넘겨 받은 플레이어가 됨에 주의
+        self.counter = 0
+        self.game.play(player, len(self.players), card)
+        self.turn_count_gimmick += 1
+        if self.game.turn() == self.player:
+            self.user_turn_count_gimmick += 1
+        
+        match self.stage_index:
+            case 3:
+                while self.turn_count_gimmick >= 5:
+                    self.turn_count_gimmick -= 5
+                    print("stage 3 기믹")
+                    self.select_color()
+            case 4:
+                if self.game.turn() == self.player and not (self.user_turn_count_gimmick & 1):
+                    print("stage 4 드로우 기믹")
+                    self.game.draw(self.game.turn(), 2)
+                if self.turn_count_gimmick == 5:
+                    print("stage 4 패 교환 기믹")
+                    self.game.hand_swap(player, self.game.turn())
+                    self.turn_count_gimmick = 0
+                    
     def animate_asset(self):
         if self.animate_assets:
             asset, dest, time, tick = self.animate_assets.pop()
@@ -209,27 +265,28 @@ class GamePlay:
         if self.assets["deck"].rect.collidepoint(mouse_pos):
             if self.game.turn() == self.player:
                 self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0))
-                self.game.play(self.player)
+                self.play_player(self.player)
 
         for i, card_asset in enumerate(self.card_assets):
             if card_asset.rect.collidepoint(mouse_pos):
                 if self.game.turn() == self.player:
                     if self.game.table.playable(self.player.hand[i]):
                         self.animate_assets.append((card_asset, self.assets["table"], 50, 0))
-                        self.game.play(self.player, self.player.hand[i])
-
-    def keydown_game(self, key):
-        pass
-    '''
-        if(key == main.user_data.key_left):
-            self.select_state -= 1
-            return
+                        self.play_player(self.player, self.player.hand[i])
+            
+    def keydown_game(self, main, key):
+        if key == self.user_data.key_left:
+            pass
+        elif key == self.user_data.key_right:
+            pass
+        elif key == self.user_data.key_enter:
+            pass
+        elif key == pygame.K_ESCAPE:
+            self.on_option = True
         else:
             # 사용 가능한 키 보여주기
-            return
+            pass
         
-        self.apply_state_change()
-    '''
             
     def apply_state_change(self):
         # TODO: 현재 state에 따라 select 이미지 적절하게 이동시키기
