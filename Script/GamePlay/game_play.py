@@ -191,12 +191,26 @@ class GamePlay:
             self.counter -= 1
 
         if self.counter == 0:
+            #pygame.time.set_timer(pygame.USEREVENT, 0)
             self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0, True))
             self.play_player(self.game.turn())  
         
-        elif self.counter == 12 and self.player != self.game.turn():
-            self.animate_assets.append((self.assets["deck2"], self.pane_assets[self.game.players.index(self.game.turn())], 50, 0, False))
-            self.play_player(self.game.turn())
+        elif self.counter == 12 and self.player != self.game.turn(): # AI Player
+            #pygame.time.set_timer(pygame.USEREVENT, 0)
+            card = self.game.turn().choose_card(self.game.table) # self.game.turn() is ai player
+
+            if card: # deal
+                if card.is_color():
+                    filename = card.color + "_" + card.card_type.split("_")[1]
+                else:
+                    filename = "wild_" + card.card_type.split("_")[1]
+                pos_x, pos_y, _, _ = self.pane_assets[self.game.players.index(self.game.turn())].rect
+                asset = Asset(os.path.join(self.main.root_path, f"Material/Card/{filename}.png"), (pos_x, pos_y), mag=0.3)
+                self.animate_assets.append((asset, self.assets["table"], 50, 0, True))
+            else: # draw
+                self.animate_assets.append((self.assets["deck2"], self.pane_assets[self.game.players.index(self.game.turn())], 50, 0, False))
+            
+            self.play_player(self.game.turn(), card)
 
     def play_player(self, player, card = None):
         # self.game.play() 이후의 self.game.turn()은 순서를 넘겨 받은 플레이어가 됨에 주의
@@ -265,6 +279,9 @@ class GamePlay:
             if self.game.players[i] == self.game.turn():
                 pygame.draw.rect(self.main.screen, (255, 0, 0), pane_asset, 2)
 
+        for asset in self.animate_assets:
+            self.main.screen.blit(asset[0].img, asset[0].rect)
+
         if self.color_selection["selecting"]:
             for color, asset in self.color_selection["assets"].items():
                 self.main.screen.blit(asset.img, asset.rect)
@@ -298,7 +315,6 @@ class GamePlay:
             for color, asset in self.color_selection["assets"].items():
                 if asset.rect.collidepoint(mouse_pos):
                     self.color_selection["selection"] = color
-                    print(color)
         
             if self.color_selection["selection"]:
                 self.player.hand[self.color_selection["idx"]].color = self.color_selection["selection"]

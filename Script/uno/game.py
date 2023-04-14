@@ -97,12 +97,10 @@ class Game:
         if current_player != player:
             return False
         
-        if player.is_ai:
-            card = player.choose_card(self.table)
-            
         if card:
             if self.deal(player, players_number, card):
                 next(self.players_turn)
+
         else:
             self.draw(player)
             next(self.players_turn)
