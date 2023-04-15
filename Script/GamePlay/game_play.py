@@ -37,6 +37,66 @@ class FakeAsset:
     def __init__(self, rect):
         self.rect = pygame.Rect(rect)
 
+class Selection:
+    def __init__(self, player, color_selection):
+        self.map = [
+            ["deck", "button_uno"],
+            list(CardColor),
+            ["card"]
+        ]
+        self.pos = [2, 0] # card[0]
+        self.player = player
+        self.color_selection = color_selection
+
+    def reset(self):
+        self.pos = [2, 0]
+
+    def current(self):
+        if self.pos[0] == 2:
+            return "card", self.pos[1]
+
+        else:
+            return self.map[self.pos[0]][self.pos[1]], 0
+
+    def set(self, obj, idx=0):
+        if obj == "card":
+            self.pos = [2, idx]
+
+        else:
+            for i, row in enumerate(self.map):
+                for j, col in enumerate(row):
+                    if col == obj:
+                        self.pos = [i, j]
+                        return
+
+    def left(self):
+        if self.pos[1] > 0:
+            self.pos[1] -= 1
+
+    def right(self):
+        if self.pos[0] == 2:
+            if self.pos[1] < len(self.player.hand)-1:
+                self.pos[1] += 1
+        else:
+            if self.pos[1] < len(self.map[self.pos[0]])-1:
+                self.pos[1] += 1
+
+    def down(self):
+        if self.pos[0] < 2:
+            self.pos[0] += 1
+            self.pos[1] = 0
+
+        if self.pos[0] == 1 and not self.color_selection["selecting"]:
+            self.pos[0] = 2
+
+    def up(self):
+        if self.pos[0] > 0:
+            self.pos[0] -= 1
+            self.pos[1] = 0
+
+        if self.pos[0] == 1 and not self.color_selection["selecting"]:
+            self.pos[0] = 0
+
 class GamePlay:
     def __init__(self, main, stage_index = 1, playerAI_number = 1):
         self.main = main
@@ -53,8 +113,7 @@ class GamePlay:
                         CardColor.GREEN: Asset(os.path.join(main.root_path, "Material/Extra/green.png"), (300, 400)),
                         CardColor.BLUE: Asset(os.path.join(main.root_path, "Material/Extra/blue.png"), (400, 400)),
                         CardColor.YELLOW: Asset(os.path.join(main.root_path, "Material/Extra/yellow.png"), (500, 400))
-            },
-            "selection": None
+            }
         }
 
         design_resolution = (1280, 720)
@@ -65,7 +124,8 @@ class GamePlay:
             "deck": Asset(os.path.join(main.root_path, "Material/Card/deck.png"), (180, 150), mag=0.3),
             "button_uno": Asset(os.path.join(main.root_path, "Material/Button/button_uno.png"), (600, 250)),
             "table": Asset(os.path.join(main.root_path, "Material/Card/deck.png"), (380, 150), mag=0.3),
-            "color": Asset(os.path.join(main.root_path, "Material/Extra/red.png"), (620, 150))
+            "color": Asset(os.path.join(main.root_path, "Material/Extra/red.png"), (625, 150)),
+            "cursor": Asset(os.path.join(main.root_path, "Material/Button/button_cursor.png"), (-100, -100))
         }
 
         self.on_game_gui = True
@@ -82,6 +142,8 @@ class GamePlay:
         self.pane_assets = [FakeAsset((10, 514, 876, 196))]
         for i in range(len(self.players)-1):
             self.pane_assets.append(Asset(os.path.join(main.root_path, "Material/BG/player_panel.png"), (906, 10 + 150 * i)))
+
+        self.selection = Selection(self.player, self.color_selection)
 
         self.update_hand()
         self.update_table()    
@@ -107,14 +169,6 @@ class GamePlay:
             case _:
                 return None
             
-    
-    def select_color(self):
-        return random.choice([CardColor.BLUE, CardColor.GREEN, CardColor.RED, CardColor.YELLOW])
-        # TODO: Handle Select Color
-
-    def turn_changed(self):
-        pass
-
     def update_table(self):
         card = self.game.table.top()
         if card.is_color():
@@ -162,7 +216,8 @@ class GamePlay:
             
         if self.color_selection["selecting"]:
             self.color_selection["selecting"] = False
-            self.color_selection["selection"] = None 
+
+        self.selection.reset()
 
 
     def display(self, main):
@@ -179,10 +234,11 @@ class GamePlay:
                 if event.type == pygame.MOUSEBUTTONDOWN: 
                     if not self.game.table.top().is_special():
                         self.collide_game(event.pos)
-                    pass
+                        self.handle()
                     
                 if event.type == pygame.MOUSEMOTION:
-                    pass
+                    if not self.game.table.top().is_special():
+                        self.collide_game(event.pos)
                 
                 if event.type == pygame.USEREVENT and self.counter > 0:
                     self.counter_event()
@@ -275,9 +331,23 @@ class GamePlay:
                 
                 self.animate_assets.append((asset, dest, time, tick+1, resize))
 
+    def move_cursor(self):
+        sel, idx = self.selection.current()
+        asset = None
+        if sel == "card":
+            asset = self.card_assets[idx]
+        elif isinstance(sel, CardColor):
+            asset = self.color_selection["assets"][sel]
+        else:
+            asset = self.assets[sel]
+
+        pos_x = asset.rect.centerx - 10
+        pos_y = asset.rect.top - 40
+        self.assets["cursor"].rect.update(pos_x, pos_y, 0, 0)
             
     def draw_game(self):
         self.animate_asset()
+        self.move_cursor()
 
         for name, asset in self.assets.items():
             self.main.screen.blit(asset.img, asset.rect)
@@ -313,56 +383,65 @@ class GamePlay:
 
     def collide_game(self, mouse_pos):
         if self.assets["button_uno"].rect.collidepoint(mouse_pos):
-            self.assets["button_uno"].set_image(os.path.join(self.main.root_path, "Material/Button/button_uno_enabled.png"))
-            self.game.uno_player = self.player
-            print("uno!")
+            self.selection.set("button_uno")
 
         if self.assets["deck"].rect.collidepoint(mouse_pos):
-            if self.game.turn() == self.player:
-                self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0, True))
-                self.play_player(self.player)
+            self.selection.set("deck")
 
         for i, card_asset in enumerate(self.card_assets):
             if card_asset.rect.collidepoint(mouse_pos):
-                if self.game.turn() == self.player:
-                    if self.game.table.playable(self.player.hand[i]):
-
-                        if self.player.hand[i].card_type == CardType.CARD_CHANGECOLOR:
-                            self.color_selection["selecting"] = True
-                            self.color_selection["idx"] = i
-
-                        else:
-                            self.animate_assets.append((card_asset, self.assets["table"], 50, 0, True))
-                            self.play_player(self.player, self.player.hand[i])
+                self.selection.set("card", i)
 
         if self.color_selection["selecting"]:
             for color, asset in self.color_selection["assets"].items():
                 if asset.rect.collidepoint(mouse_pos):
-                    self.color_selection["selection"] = color
+                    self.selection.set(color)
         
-            if self.color_selection["selection"]:
-                self.player.hand[self.color_selection["idx"]].color = self.color_selection["selection"]
+    def handle(self):
+        sel, idx = self.selection.current()
 
-                self.animate_assets.append((self.card_assets[self.color_selection["idx"]], self.assets["table"], 50, 0, True))
-                self.play_player(self.player, self.player.hand[self.color_selection["idx"]])
+        if sel == "card":
+            if self.game.turn() == self.player:
+                if idx < len(self.player.hand) and self.game.table.playable(self.player.hand[idx]):
+                    if self.player.hand[idx].card_type == CardType.CARD_CHANGECOLOR:
+                        self.color_selection["selecting"] = True
+                        self.color_selection["idx"] = idx
 
-                self.color_selection["selecting"] = False
-                self.color_selection["selection"] = None
-        
-            
+                    else:
+                        self.animate_assets.append((self.card_assets[idx], self.assets["table"], 50, 0, True))
+                        self.play_player(self.player, self.player.hand[idx])    
+
+        elif sel == "deck":
+            if self.game.turn() == self.player:
+                self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0, True))
+                self.play_player(self.player)
+
+        elif sel == "button_uno":
+            self.assets["button_uno"].set_image(os.path.join(self.main.root_path, "Material/Button/button_uno_enabled.png"))
+            self.game.uno_player = self.player
+            print("uno!")
+
+        elif isinstance(sel, CardColor):
+            self.player.hand[self.color_selection["idx"]].color = sel
+
+            self.animate_assets.append((self.card_assets[self.color_selection["idx"]], self.assets["table"], 50, 0, True))
+            self.play_player(self.player, self.player.hand[self.color_selection["idx"]])
+
+            self.color_selection["selecting"] = False
+    
     def keydown_game(self, main, key):
         if key == self.user_data.key_left:
-            pass
+            self.selection.left()
         elif key == self.user_data.key_right:
-            pass
+            self.selection.right()
+        elif key == self.user_data.key_up:
+            self.selection.up()
+        elif key == self.user_data.key_down:
+            self.selection.down()
         elif key == self.user_data.key_enter:
-            pass
+            self.handle()
         elif key == pygame.K_ESCAPE:
             self.on_option = True
-        else:
-            # 사용 가능한 키 보여주기
-            pass
-        
             
     def apply_state_change(self):
         # TODO: 현재 state에 따라 select 이미지 적절하게 이동시키기
