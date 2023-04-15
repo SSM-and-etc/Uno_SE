@@ -16,6 +16,8 @@ class Game:
         self.players_turn = CycleIterator(players)
         self.stage_index = stage_index
 
+        self.uno_player = None
+
         self.draw_setting()
         self.table.put(self.deck.draw()) # TODO: 첫 카드가 숫자 카드가 아닐 때
         

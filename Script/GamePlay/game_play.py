@@ -300,11 +300,16 @@ class GamePlay:
             for color, asset in self.color_selection["assets"].items():
                 self.main.screen.blit(asset.img, asset.rect)
 
+        if self.game.uno_player:
+            self.main.screen.blit(self.name_font.render(self.game.uno_player.tag, True, (255, 255, 255)), self.assets["button_uno"].rect.move(0, 75))
+
         self.main.screen.blit(self.assets["table"].img, self.assets["table"].rect)
         self.main.screen.blit(self.counter_font.render(str(self.counter), True, (255, 255, 255)), (830, 450))
 
     def collide_game(self, mouse_pos):
         if self.assets["button_uno"].rect.collidepoint(mouse_pos):
+            self.assets["button_uno"].set_image(os.path.join(self.main.root_path, "Material/Button/button_uno_enabled.png"))
+            self.game.uno_player = self.player
             print("uno!")
 
         if self.assets["deck"].rect.collidepoint(mouse_pos):
