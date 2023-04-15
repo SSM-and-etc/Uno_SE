@@ -63,9 +63,9 @@ class GamePlay:
         self.assets = {
             "background": Asset(os.path.join(main.root_path, "Material/BG/game.png"), (0, 0)),
             "deck": Asset(os.path.join(main.root_path, "Material/Card/deck.png"), (180, 150), mag=0.3),
-            "button_uno": Asset(os.path.join(main.root_path, "Material/Button/button_uno.png"), (610, 300)),
-            "table": Asset(os.path.join(main.root_path, "Material/Card/deck.png"), (360, 150), mag=0.3),
-            "color": Asset(os.path.join(main.root_path, "Material/Extra/red.png"), (610, 200))
+            "button_uno": Asset(os.path.join(main.root_path, "Material/Button/button_uno.png"), (600, 250)),
+            "table": Asset(os.path.join(main.root_path, "Material/Card/deck.png"), (380, 150), mag=0.3),
+            "color": Asset(os.path.join(main.root_path, "Material/Extra/red.png"), (620, 150))
         }
 
         self.on_game_gui = True
