@@ -159,6 +159,11 @@ class GamePlay:
             else:
                 filename = "wild_" + card.card_type.split("_")[1]
             self.card_assets.append(Asset(os.path.join(self.main.root_path, f"Material/Card/{filename}.png"), (10+card_size[0]*i, 30+card_size[1]), mag=card_size[2]))
+            
+        if self.color_selection["selecting"]:
+            self.color_selection["selecting"] = False
+            self.color_selection["selection"] = None 
+
 
     def display(self, main):
         if self.on_option:
