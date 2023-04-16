@@ -12,20 +12,30 @@ import os
 
 
 class Asset:
-    def __init__(self, img_path, pos, mag=1.0):
-        self.mag = (mag, mag)
+    design_resolution = (1280, 720)
+
+    def __init__(self, img, pos, mag=1.0):
+        self.mag = mag
         self.pos = pos
 
-        self.orig_img = pygame.image.load(img_path)
-        self.img = pygame.transform.scale_by(self.orig_img, self.mag)
+        if isinstance(img, str):
+            self.orig_img = pygame.image.load(img)
+        else:
+            self.orig_img = img.copy()
+        self.img = pygame.transform.scale_by(self.orig_img, (self.mag, self.mag))
 
         self.rect = self.img.get_rect().move(pos)
 
     def set_image(self, img_path):
         self.orig_img = pygame.image.load(img_path)
-        self.img = pygame.transform.scale_by(self.orig_img, self.mag)
+        self.img = pygame.transform.scale_by(self.orig_img, (self.mag, self.mag))
 
         self.rect = self.img.get_rect().move(self.pos)
+
+    def clone(self):
+        asset = Asset(self.orig_img, self.pos, self.mag)
+        asset.rect = self.rect.copy()
+        return asset
 
     def copy(self, asset):
         self.mag = asset.mag
@@ -33,7 +43,7 @@ class Asset:
         self.img = asset.img.copy()
         self.rect = asset.rect
 
-class FakeAsset:
+class FakeAsset(Asset):
     def __init__(self, rect):
         self.rect = pygame.Rect(rect)
 
@@ -116,7 +126,6 @@ class GamePlay:
             }
         }
 
-        design_resolution = (1280, 720)
         screen_size = main.user_data.get_screen_size()
 
         self.assets = {
@@ -179,7 +188,6 @@ class GamePlay:
 
         color = self.game.table.get_color()
         self.assets["color"].set_image(os.path.join(self.main.root_path, f"Material/Extra/{color}.png"))
-        self.assets["deck2"] = Asset(os.path.join(self.main.root_path, "Material/Card/deck.png"), (180, 150), mag=0.3)
 
         pygame.time.set_timer(pygame.USEREVENT, 1000)
         self.counter = 15
@@ -259,12 +267,12 @@ class GamePlay:
                 card.color = random.choice(list(CardColor))
             self.game.turn().hand.append(card)
             self.game.play(self.game.turn(), len(self.players), card)
-            self.animate_assets.append((self.assets["deck2"], self.assets["table"], 50, 0, False))
+            self.animate_assets.append((self.assets["deck"].clone(), self.assets["table"], 50, 0, False))
             self.game.table.put(self.game.deck.draw())
 
         if self.counter == 0:
             #pygame.time.set_timer(pygame.USEREVENT, 0)
-            self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0, True))
+            self.animate_assets.append((self.assets["deck"].clone(), self.card_assets[-1], 50, 0, True))
             self.play_player(self.game.turn())  
         
         elif self.counter == 12 and self.player != self.game.turn(): # AI Player
@@ -283,7 +291,7 @@ class GamePlay:
                 if card.card_type == CardType.CARD_CHANGECOLOR:
                     card.color = self.game.turn().choose_color(self.game.table.get_color())
             else: # draw
-                self.animate_assets.append((self.assets["deck2"], self.pane_assets[self.game.players.index(self.game.turn())], 50, 0, False))
+                self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.game.turn())], 50, 0, False))
             
             self.play_player(self.game.turn(), card)
 
@@ -413,7 +421,7 @@ class GamePlay:
 
         elif sel == "deck":
             if self.game.turn() == self.player:
-                self.animate_assets.append((self.assets["deck2"], self.card_assets[-1], 50, 0, True))
+                self.animate_assets.append((self.assets["deck"].clone(), self.card_assets[-1], 50, 0, True))
                 self.play_player(self.player)
 
         elif sel == "button_uno":
