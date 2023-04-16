@@ -20,7 +20,10 @@ class CardType(StrEnum):
     CARD_SKIP = auto()
     CARD_REVERSE = auto()
     CARD_PLUS2 = auto()
+    CARD_RNUMBER = auto()
     CARD_CHANGECOLOR = auto()
+    CARD_DRAW = auto()
+    CARD_SWAP = auto()
 
     @classmethod
     def NUMBER(cls):
@@ -28,11 +31,15 @@ class CardType(StrEnum):
 
     @classmethod
     def SPECIAL(cls):
-        return [cls.CARD_SKIP, cls.CARD_REVERSE, cls.CARD_PLUS2, cls.CARD_CHANGECOLOR]
+        return [cls.CARD_SKIP, cls.CARD_REVERSE, cls.CARD_PLUS2, cls.CARD_RNUMBER, cls.CARD_CHANGECOLOR, cls.CARD_DRAW, cls.CARD_SWAP]
 
     @classmethod
     def WILD(cls):
-        return [cls.CARD_CHANGECOLOR]
+        return [cls.CARD_CHANGECOLOR, cls.CARD_DRAW, cls.CARD_SWAP]
+    
+    @classmethod
+    def COLOR(cls):
+        return [cls.CARD_0, cls.CARD_1, cls.CARD_2, cls.CARD_3, cls.CARD_4, cls.CARD_5, cls.CARD_6, cls.CARD_7, cls.CARD_8, cls.CARD_9, cls.CARD_SKIP, cls.CARD_REVERSE, cls.CARD_PLUS2, cls.CARD_RNUMBER]
 
     def is_number(self):
         return self in self.NUMBER()
@@ -43,3 +50,5 @@ class CardType(StrEnum):
     def is_wild(self):
         return self in self.WILD()
             
+    def is_color(self):
+        return self in self.COLOR()

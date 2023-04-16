@@ -16,3 +16,6 @@ class Card:
     
     def is_wild(self):
         return self.card_type.is_wild()
+
+    def is_color(self):
+        return self.card_type.is_color()
