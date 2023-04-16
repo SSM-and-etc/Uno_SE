@@ -275,8 +275,8 @@ class GamePlay:
                 
                 if event.type == pygame.MOUSEBUTTONDOWN: 
                     if not self.game.table.top().is_special():
-                        self.collide_game(event.pos)
-                        self.handle()
+                        if self.collide_game(event.pos):
+                            self.handle()
                     
                 if event.type == pygame.MOUSEMOTION:
                     if not self.game.table.top().is_special():
@@ -419,21 +419,28 @@ class GamePlay:
 
         self.main.screen.blit(*self.assets["table"].scaled())
         self.main.screen.blit(self.counter_font.render(str(self.counter), True, (255, 255, 255)), self.fake_assets["counter"].scaled_rect())
+
     def collide_game(self, mouse_pos):
         if self.assets["button_uno"].scaled_rect().collidepoint(mouse_pos):
             self.selection.set("button_uno")
+            return True
 
         if self.assets["deck"].scaled_rect().collidepoint(mouse_pos):
             self.selection.set("deck")
+            return True
 
         for i, card_asset in enumerate(self.card_assets):
             if card_asset.scaled_rect().collidepoint(mouse_pos):
                 self.selection.set("card", i)
+                return True
 
         if self.color_selection["selecting"]:
             for color, asset in self.color_selection["assets"].items():
                 if asset.scaled_rect().collidepoint(mouse_pos):
                     self.selection.set(color)
+                    return True
+
+        return False
         
     def handle(self):
         sel, idx = self.selection.current()
