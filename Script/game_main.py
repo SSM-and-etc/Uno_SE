@@ -47,6 +47,8 @@ class GameMain():
             case 1:
                 return self.lobby
                 return self.play_game
+            case 2:
+                 return self.lobby
             # case 2:
             #      return self.lobby
             case _:
@@ -60,7 +62,8 @@ class GameMain():
                 # 인자) 일반 모드: 0, 대전 상대 수 n / 스토리: 스테이지 n 을 인자로 추가
                 self.lobby = Lobby(self)
                 # self.play_game = GamePlay(self)
- 
+            case 2:
+                self.play_game = GamePlay(self)
             # case 2:
             #     self.lobby = Lobby(self)
             case _:

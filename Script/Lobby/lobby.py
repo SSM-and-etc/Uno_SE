@@ -2,25 +2,34 @@ import pygame
 
 import os
 from Lobby.input_box import InputBox
-
+from Lobby.button import StartButton
 class Lobby:
-    def __init__(self,screen_size):
-        self.lobby_img = pygame.image.load( "Material/BG/Title.png")
-        # self.single_game_default_pos = (0.2, 0.7)
-        # self.story_mode_default_pos = (0.4, 0.7)
-        # self.option_default_pos = (0.6, 0.7)
-        # self.exit_default_pos = (0.8, 0.7)
-        
-        self.on_title_gui = True
-        self.mouse_pos=pygame.mouse.get_pos()    
-        # self.apply_state_change()
-        self.player= InputBox(0, 50, 200, 32, 0, 'player')
-        self.computer1= InputBox(50, 50, 200, 32, 1, 'computer1')
-        self.computer2= InputBox(50, 100, 200, 32, 2, 'computer2')
-        self.computer3= InputBox(50, 150, 200, 32, 3, 'computer3')
-        self.computer4= InputBox(50, 200, 200, 32, 4, 'computer4') 
-        self.computer5= InputBox(50, 250, 200, 32, 5, 'computer5')
-        self.player=[self.computer1,self.computer2,self.computer3,self.computer4,self.computer5]
+    def __init__(self,main):
+        self.WHITE = (255, 255, 255)
+        self.ORANGE= (255, 163, 0)
+        self.font= pygame.font.Font(None, 36)
+        self.lobby_img = pygame.image.load("Material/BG/Title.png")
+        self.ratio_list=[(0.8,0.05),(0.8,0.2),(0.8,0.35),(0.8,0.5),(0.8,0.65),(0.8,0.8)]
+        self.player_box_info=[]
+        self.player_list=[]
+        self.screen= main.screen
+        self.screen_width=main.screen.get_width()
+        self.screen_heigth=main.screen.get_height()
+        self.make_screen(self.screen_width,self.screen_heigth, self.ratio_list)
+        self.mouse_pos=pygame.mouse.get_pos()
+        self.start_button=StartButton("Start", self.screen_width*0.4, self.screen_heigth*0.6, self.screen_width/6, self.screen_heigth/10,self.ORANGE,self.font, self.screen)
+        self.play_game
+        for i,info in enumerate(self.player_box_info):
+            self.player_list.append(InputBox(info[0],info[1],info[2],info[3],i,'player'+str(i)))
+        # self.player= InputBox(self.player_pos[0][0],self.player_pos[0][1], 200, 64, 0, 'player')
+        # self.computer1= InputBox(self.player_pos[1][0],self.player_pos[1][1], 200, 64, 1, 'computer1')
+        # self.computer2= InputBox(self.player_pos[2][0],self.player_pos[2][1], 200, 64, 2, 'computer2')
+        # self.computer3= InputBox(self.player_pos[3][0],self.player_pos[3][1], 200, 64, 3, 'computer3')
+        # self.computer4= InputBox(self.player_pos[4][0],self.player_pos[4][1], 200, 64, 4, 'computer4') 
+        # self.computer5= InputBox(self.player_pos[5][0],self.player_pos[5][1], 200, 64, 5, 'computer5')
+    #     self.player=[self.player,self.computer1,self.computer2,self.computer3,self.computer4,self.computer5]
+    # self.apply_state_change()
+       
         # self.screen= pygame.display.set_mode((640, 480))
         # self.draw_lobby
         
@@ -31,7 +40,7 @@ class Lobby:
                  pygame.quit()
                  exit()
             # if event.type == pygame.MOUSEBUTTONDOWN:
-            for computer in self.player:
+            for computer in self.player_list:
                 computer.handle_event(event)
        
             #     if self.rect.collidepoint(event.pos):
@@ -54,8 +63,9 @@ class Lobby:
             #             self.text += event.unicode
                             
         main.screen.blit(self.lobby_img, (0, 0))
-        for computer in self.player:
+        for computer in self.player_list:
             computer.draw(main.screen)
+        self.start_button.draw(self.mouse_pos)
         # if(self.on_title_gui):
         #     
             
@@ -116,17 +126,24 @@ class Lobby:
     #     elif(self.select_state == STATE_EXIT):
     #         main.running = False
         
-    
+    def make_screen(self,width,height,ratios):
+        for ratio in ratios:
+            self.player_box_info.append((width*ratio[0], height*ratio[1],self.screen_width/6,self.screen_heigth/12))
+    def play_game(self):
+         self.scene_state=2
+         self.get_scene_obj(self.scene_state).display(self)
+         pygame.display.update()
+      
     # def set_lobby_gui(self, screen_size):
-        # self.single_game_pos = self.tup_mul(screen_size, self.single_game_default_pos)
-        # self.story_mode_pos = self.tup_mul(screen_size, self.story_mode_default_pos)
-        # self.option_pos = self.tup_mul(screen_size, self.option_default_pos)
-        # self.exit_pos = self.tup_mul(screen_size, self.exit_default_pos)
+    #     self.single_game_pos = self.tup_mul(screen_size, self.single_game_default_pos)
+    #     self.story_mode_pos = self.tup_mul(screen_size, self.story_mode_default_pos)
+    #     self.option_pos = self.tup_mul(screen_size, self.option_default_pos)
+    #     self.exit_pos = self.tup_mul(screen_size, self.exit_default_pos)
         
-        # self.single_game_rect = self.single_game_img.get_rect(center = self.single_game_pos)
-        # self.story_mode_rect = self.story_mode_img.get_rect(center = self.story_mode_pos)
-        # self.option_rect = self.option_img.get_rect(center = self.option_pos)
-        # self.exit_rect = self.exit_img.get_rect(center = self.exit_pos)
+    #     self.single_game_rect = self.single_game_img.get_rect(center = self.single_game_pos)
+    #     self.story_mode_rect = self.story_mode_img.get_rect(center = self.story_mode_pos)
+    #     self.option_rect = self.option_img.get_rect(center = self.option_pos)
+    #     self.exit_rect = self.exit_img.get_rect(center = self.exit_pos)
         
     # def tup_mul(self, tup1, tup2):
     #     return (tup1[0] * tup2[0], tup1[1] * tup2[1])   
