@@ -134,6 +134,8 @@ class StoryMode:
             "현재 지역은 아프리카입니다. 도전하시겠습니까?"
         ]
 
+        self.user_data.story_level = 5
+
         for i in range(4):
             if self.user_data.story_level < i:
                 self.level_assets[i].set_image(os.path.join(main.root_path, f"Material/Avatar/{self.level_name[i]}_disabled.png"))
@@ -217,8 +219,7 @@ class StoryMode:
         sel = self.selection.pos
         if self.popup["visible"]:
             if sel == 0:
-                print("1")
-                self.main.stage_level = self.popup["level"]+1
+                self.main.stage_index = self.popup["level"]+1
                 self.main.scene_change(self.main.get_scene_index("story mode game start"))
             elif sel == 1:
                 self.popup["visible"] = False
