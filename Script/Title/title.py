@@ -5,10 +5,11 @@ import os
 from System.option import Option
 
 # Constants
-STATE_NUMBER = 3
+STATE_NUMBER = 4
 STATE_SINGLE_GAME = 0
-STATE_OPTION = 1
-STATE_EXIT = 2
+STATE_OPTION = 2
+STATE_EXIT = 3
+STATE_STORY_MODE = 1
 
 class Title():
     def __init__(self, main):
@@ -49,6 +50,7 @@ class Title():
         screen.blit(self.title_BG, (0, 0))
         screen.blit(self.single_game_img, self.single_game_rect)
         screen.blit(self.option_img, self.option_rect)
+        screen.blit(self.story_mode_img, self.story_mode_rect)
         screen.blit(self.exit_img, self.exit_rect)
         screen.blit(self.button_select_img, self.button_select_rect)
         
@@ -57,16 +59,20 @@ class Title():
             self.enter_state(main)
         elif self.option_rect.collidepoint(mouse_pos):
             self.on_option = True
+        elif(self.story_mode_rect.collidepoint(mouse_pos)):
+            self.enter_state(main)
         elif self.exit_rect.collidepoint(mouse_pos):
             main.running = False
             
     def move_collide_title(self, main, mouse_pos):
         if(self.single_game_rect.collidepoint(mouse_pos)):
             self.select_state = 0
-        elif(self.option_rect.collidepoint(mouse_pos)):
+        elif(self.story_mode_rect.collidepoint(mouse_pos)):
             self.select_state = 1
-        elif (self.exit_rect.collidepoint(mouse_pos)):
+        elif(self.option_rect.collidepoint(mouse_pos)):
             self.select_state = 2
+        elif (self.exit_rect.collidepoint(mouse_pos)):
+            self.select_state = 3
         
         self.apply_state_change()    
             
@@ -102,6 +108,8 @@ class Title():
             self.on_option = True
         elif(self.select_state == STATE_EXIT):
             main.running = False
+        elif(self.select_state == STATE_STORY_MODE):
+            main.scene_change(main.get_scene_index("story mode"))
     
     def set_title_gui(self, screen_size):
         self.set_gui_poses(screen_size)
@@ -117,12 +125,14 @@ class Title():
     def set_gui_default_poses(self):
         self.single_game_default_pos = (0.2, 0.7)
         self.option_default_pos = (0.6, 0.7)
+        self.story_mode_default_pos = (0.4, 0.7)
         self.exit_default_pos = (0.8, 0.7)
-        self.button_select_default_poses = [ (0.2, 0.65), (0.6, 0.65), (0.8, 0.65) ]
+        self.button_select_default_poses = [ (0.2, 0.65), (0.4, 0.65), (0.6, 0.65), (0.8, 0.65) ]
         
     def set_gui_poses(self, screen_size):
         self.single_game_pos = self.tup_mul(screen_size, self.single_game_default_pos)
         self.option_pos = self.tup_mul(screen_size, self.option_default_pos)
+        self.story_mode_pos = self.tup_mul(screen_size, self.story_mode_default_pos)
         self.exit_pos = self.tup_mul(screen_size, self.exit_default_pos)
         self.button_select_pos = self.tup_mul(screen_size, self.button_select_default_poses[self.select_state])
         
@@ -131,12 +141,14 @@ class Title():
         self.title_BG           = pygame.transform.scale(self.default_title_BG, self.tup_mul(self.get_img_size(self.default_title_BG), scale_ratio))
         self.single_game_img    = pygame.transform.scale(self.default_single_game_img, self.tup_mul(self.get_img_size(self.default_single_game_img), scale_ratio))
         self.option_img         = pygame.transform.scale(self.default_option_img, self.tup_mul(self.get_img_size(self.default_option_img), scale_ratio))
+        self.story_mode_img     = pygame.transform.scale(self.default_story_mode_img, self.tup_mul(self.get_img_size(self.default_story_mode_img), scale_ratio))
         self.exit_img           = pygame.transform.scale(self.default_exit_img, self.tup_mul(self.get_img_size(self.default_exit_img), scale_ratio))
         self.button_select_img  = pygame.transform.scale(self.default_button_select_img, self.tup_mul(self.get_img_size(self.default_button_select_img), scale_ratio))
         
     def set_gui_rct(self):
         self.single_game_rect = self.single_game_img.get_rect(center = self.single_game_pos)
         self.option_rect = self.option_img.get_rect(center = self.option_pos)
+        self.story_mode_rect = self.story_mode_img.get_rect(center = self.story_mode_pos)
         self.exit_rect = self.exit_img.get_rect(center = self.exit_pos)
         self.button_select_rect = self.button_select_img.get_rect(center = self.button_select_pos)
         
@@ -144,6 +156,7 @@ class Title():
         self.default_title_BG = pygame.image.load(os.path.join(root, "Material/BG/title.png"))
         self.default_single_game_img = pygame.image.load(os.path.join(root, "Material/Button/single_game.png"))
         self.default_option_img = pygame.image.load(os.path.join(root, "Material/Button/option.png"))
+        self.default_story_mode_img = pygame.image.load(os.path.join(root, "Material/Button/story_mode.png"))
         self.default_exit_img = pygame.image.load(os.path.join(root, "Material/Button/exit.png"))
         self.default_button_select_img = pygame.image.load(os.path.join(root, "Material/Button/button_select.png"))
         

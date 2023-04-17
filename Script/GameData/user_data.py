@@ -38,6 +38,7 @@ class UserData():
         self.volumes                = [1, 1, 1] # master, bgm, eft 순서 0 ~ 1?
         self.volumes_off            = [False, False, False] # 위와 동일
         self.screen_size_index = 1
+        self.story_level = 0
         
     def get_screen_size(self):
         return self.screen_sizes[self.screen_size_index]
@@ -73,3 +74,4 @@ class UserData():
         self.volumes                = [i for i in other_data.volumes]
         self.volumes_off            = [i for i in other_data.volumes_off]   
         self.screen_size_index = other_data.screen_size_index
+        self.story_level = other_data.story_level
