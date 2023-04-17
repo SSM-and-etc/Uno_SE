@@ -96,7 +96,7 @@ class StoryMode:
     def __init__(self, main):
         self.main = main
         self.user_data = main.user_data
-        self.option = Option(main)
+        self.option = Option(main, self)
         self.on_option = False
         
         Asset.user_data = main.user_data
@@ -217,7 +217,8 @@ class StoryMode:
         sel = self.selection.pos
         if self.popup["visible"]:
             if sel == 0:
-                print("ok")
+                self.main.stage_level = self.popup["level"]+1
+                self.main.scene_change(self.main.get_scene_index("story mode"))
             elif sel == 1:
                 self.popup["visible"] = False
                 self.selection.reset()
