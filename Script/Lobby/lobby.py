@@ -17,7 +17,8 @@ class Lobby():
         self.make_screen(self.screen_width,self.screen_heigth, self.ratio_list)
         self.mouse_pos=pygame.mouse.get_pos()
         self.start_button=StartButton("Start", self.screen_width*0.4, self.screen_heigth*0.6, self.screen_width/6, self.screen_heigth/10,self.ORANGE,self.font, self.screen,self.play_game)
-        self.play_game(main)
+        self.play_game
+        self.main=main
         for i,info in enumerate(self.player_box_info):
             self.player_list.append(InputBox(info[0],info[1],info[2],info[3],i,'player'+str(i)))
         
@@ -39,5 +40,5 @@ class Lobby():
     def make_screen(self,width,height,ratios):
         for ratio in ratios:
             self.player_box_info.append((width*ratio[0], height*ratio[1],self.screen_width/6,self.screen_heigth/12))
-    def play_game(self,main):
-       main.scene_change(main.get_scene_index("game start"))
+    def play_game(self):
+       self.main.scene_change(self.main.get_scene_index("game start"))

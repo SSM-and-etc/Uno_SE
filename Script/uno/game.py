@@ -9,16 +9,17 @@ from System.weighted_picker import WeightedPicker
 import random
 
 class Game:
-    def __init__(self, players, callback, stage_index):
+    def __init__(self, players, stage_index):
         self.players = players
         self.table = Table()
         self.deck = Deck({"number": 1, "special": 1, "wild": 10})
         self.players_turn = CycleIterator(players)
-        self.callback = callback
         self.stage_index = stage_index
 
-        self.table.put(self.deck.draw()) # TODO: 첫 카드가 숫자 카드가 아닐 때
+        self.uno_player = None
+
         self.draw_setting()
+        self.table.put(self.deck.draw()) # TODO: 첫 카드가 숫자 카드가 아닐 때
         
 
     def draw_setting(self, default_card_num = 7):
@@ -68,7 +69,8 @@ class Game:
                     self.table.put(rnumber_card)
 
                 elif card.card_type == CardType.CARD_CHANGECOLOR:
-                    self.table.change_color(self.callback["select_color"]())
+                    print(card.color)
+                    self.table.change_color(card.color)
                     
                 elif card.card_type == CardType.CARD_DRAW:
                     self.draw(self.players_turn.look_next(), 4)
@@ -97,12 +99,10 @@ class Game:
         if current_player != player:
             return False
         
-        if player.is_ai:
-            card = player.choose_card(self.table)
-            
         if card:
             if self.deal(player, players_number, card):
                 next(self.players_turn)
+
         else:
             self.draw(player)
             next(self.players_turn)
