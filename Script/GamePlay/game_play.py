@@ -250,12 +250,11 @@ class GamePlay:
             if player == self.player:
                 self.hand_assets.append(None)
             else:
-                if i > 0:
-                    w, y, mag = self.calculate_card_size(i)
-                    assets = []
-                    for j in range(len(player.hand)):
-                        assets.append(Asset(self.assets["deck"].orig_img, (10 + self.pane_assets[i].rect[0] + w*j, 30 + y), mag))
-                    self.hand_assets.append(assets)
+                w, y, mag = self.calculate_card_size(i)
+                assets = []
+                for j in range(len(player.hand)):
+                    assets.append(Asset(self.assets["deck"].orig_img, (10 + self.pane_assets[i].rect[0] + w*j, 30 + y), mag))
+                self.hand_assets.append(assets)
 
         # uno버튼에 의한 드로우 처리
         if len(self.game.turn().hand) == 1 and self.game.turn().uno != self.game.turn():
@@ -274,7 +273,7 @@ class GamePlay:
                 self.winner = player
 
     def calculate_card_size(self, player_num):
-        n = len(self.game.players[player_num].hand)
+        n = max(1, len(self.game.players[player_num].hand))
 
         pane_asset = self.pane_assets[player_num]
         pane_x, pane_y, pane_w, pane_h = pane_asset.rect
@@ -493,7 +492,10 @@ class GamePlay:
             
     def draw_game(self):
         self.animate_asset()
-        self.move_cursor()
+        try:
+            self.move_cursor()
+        except:
+            pass
 
         if self.game.turn().uno:
             self.assets["button_uno"].set_image("Button/button_uno_enabled.png")
