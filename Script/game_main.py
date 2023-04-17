@@ -49,11 +49,8 @@ class GameMain():
                 return self.title
             case 1:
                 return self.lobby
-                return self.play_game
             case 2:
-                    return self.play_game
-            # case 2:
-            #      return self.lobby
+                return self.play_game
             case _:
                 return None
 
@@ -64,23 +61,20 @@ class GameMain():
             case 1:
                 # 인자) 일반 모드: 0, 대전 상대 수 n / 스토리: 스테이지 n 을 인자로 추가
                 self.lobby = Lobby(self)
-                # self.play_game = GamePlay(self)
             case 2:
                 self.play_game = GamePlay(self,playerlist=self.player_info,stage_index=0,playerAI_number=self.playerAI_number)
-            # case 2:
-            #     self.lobby = Lobby(self)
             case _:
                 pass
     def reset_scene_obj(self, scene_state):
-            match scene_state:
-                case 0:
-                    self.title = None
-                case 1:
-                    self.lobby = None
-                case 2:
-                    self.play_game = None
-                case _:
-                    pass
+        match scene_state:
+            case 0:
+                self.title = None
+            case 1:
+                self.lobby = None
+            case 2:
+                self.play_game = None
+            case _:
+                pass
             
         
     def scene_change(self, next_scene_state):
