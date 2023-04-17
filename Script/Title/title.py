@@ -117,12 +117,14 @@ class Title():
         self.set_gui_poses(screen_size)
         self.set_gui_imges(screen_size)
         self.set_gui_rct()
+        self.set_text(screen_size)
         
     def change_screen_size(self):
         screen_size = self.user_data.get_screen_size()
         self.set_gui_poses(screen_size)
         self.set_gui_imges(screen_size)
         self.set_gui_rct()
+        self.set_text(screen_size)
         
     def set_gui_default_poses(self):
         self.single_game_default_pos = (0.2, 0.7)
@@ -154,11 +156,12 @@ class Title():
         self.exit_rect = self.exit_img.get_rect(center = self.exit_pos)
         self.button_select_rect = self.button_select_img.get_rect(center = self.button_select_pos)
         
-    def set_text(self):
-        font = pygame.font.SysFont("arial", self.default_font_size, True, True)
-        text = "Left: " + pygame.key.name(self.user_data.key_left) + " , Right: " + pygame.key.name(self.user_data.key_right) + ", Enter: " + pygame.key.name(self.user_data.key_enter)
-        self.ex_key_text = font.render(text, True, BLUE_MAGENTA)
+    def set_text(self, screen_size):
+        font_ratio = (screen_size[0]/self.design_size[0] + screen_size[1]/self.design_size[1]) / 2
+        font = pygame.font.SysFont("arial", int(self.default_font_size * font_ratio), True, True)
         
+        ex_key_text = "Left: " + pygame.key.name(self.user_data.key_left) + " , Right: " + pygame.key.name(self.user_data.key_right) + ", Enter: " + pygame.key.name(self.user_data.key_enter)
+        self.ex_key_text = font.render(ex_key_text, True, BLUE_MAGENTA)
         
     def load_asset(self, root):
         self.default_title_BG = pygame.image.load(os.path.join(root, "Material/BG/title.png"))
