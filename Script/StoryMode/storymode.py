@@ -142,7 +142,7 @@ class StoryMode:
 
         self.description_font = pygame.font.SysFont("AppleGothic", 24)
 
-        self.selection = Selection(self.popup, self.user_data.story_level)
+        self.selection = Selection(self.popup, min(self.user_data.story_level, 3))
 
     def display(self, main):
         if self.on_option:
