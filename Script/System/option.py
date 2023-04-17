@@ -461,6 +461,7 @@ class Option():
         self.default_exit_img                   = pygame.image.load(os.path.join(root, "Material/Option/exit.png"))
         self.default_button_select_img          = pygame.image.load(os.path.join(root, "Material/Button/button_select.png"))
         self.default_button_cursor_img          = pygame.image.load(os.path.join(root, "Material/Button/button_cursor.png"))
+        self.default_button_select_CM_img       = pygame.image.load(os.path.join(root, "Material/Button/button_cursor.png"))
     
     def set_gui_default_poses(self):
         self.pop_up_default_pos = (0.5, 0.5)
