@@ -13,15 +13,7 @@ class InputBox:
         else:
             self.namebox.append(name)    
         self.key=key
-        # self.text_dict = {
-        #     0:"player",
-        #     1:"computer1",
-        #     2:"computer2",
-        #     3:"computer3",
-        #     4:"computer4",
-        #     5:"computer5",
-        # }
-
+        
     def handle_event(self, event):
         # for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -56,25 +48,5 @@ class InputBox:
         center_y = self.rect.y + self.rect.height / 2
         screen.blit(text_surface, (center_x - text_width / 2, center_y - text_height / 2))
 
-# Input Box를 생성합니다.
-# input_boxes = [InputBox(0, 50, 200, 32,  0),
-#                InputBox(50, 50, 200, 32,  1),
-#                InputBox(50, 100, 200, 32, 2),
-#                InputBox(50, 150, 200, 32, 3),
-#                InputBox(50, 200, 200, 32, 4),
-#                InputBox(50, 250, 200, 32, 5)]
-
-
-# while True:
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             pygame.quit()
-#             exit()
-#         for input_box in input_boxes:
-#             input_box.handle_event(event)
-
-#     for input_box in input_boxes:
-#         input_box.draw(screen)
-#     pygame.display.update()
 
     
