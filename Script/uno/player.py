@@ -3,6 +3,7 @@ class Player:
         self.hand = []
         self.tag = tag
         self.is_ai = is_ai
+        self.uno = None
 
     def __repr__(self):
         return f"<Player {self.tag}: {self.hand}>"
