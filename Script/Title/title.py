@@ -160,7 +160,7 @@ class Title():
         self.story_mode_img     = pygame.transform.scale(self.default_story_mode_img, self.tup_mul(self.get_img_size(self.default_story_mode_img), scale_ratio))
         self.exit_img           = pygame.transform.scale(self.default_exit_img, self.tup_mul(self.get_img_size(self.default_exit_img), scale_ratio))
         self.button_select_img  = pygame.transform.scale(self.default_button_select_img, self.tup_mul(self.get_img_size(self.default_button_select_img), scale_ratio))
-        
+            
     def set_gui_rct(self):
         self.single_game_rect = self.single_game_img.get_rect(center = self.single_game_pos)
         self.option_rect = self.option_img.get_rect(center = self.option_pos)
