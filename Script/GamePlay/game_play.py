@@ -182,15 +182,21 @@ class GamePlay:
         self.update_table()    
 
     def player_setting(self, playerAI_number):
-        print(self.playerlist[0].namebox[1])
-        self.player = Player(self.playerlist[0].namebox[1])        
-        self.players = [self.player]
-        if self.stage_index != 0:
+        if self.stage_index == 0:
+            self.player = Player(self.playerlist[0].namebox[1])        
+            self.players = [self.player]
+            for player in self.playerlist:
+                player = PlayerAI(self.stage_index,player.namebox[1])
+                self.players.append(player)
+
+        else:
+            self.player = Player("ME")
+            self.players = [self.player]
             playerAI_number = self.player_ai_setting()
-        print(self.playerlist)
-        for i,player in enumerate(self.playerlist):
-            player = PlayerAI(self.stage_index,player.namebox[1])
-            self.players.append(player)
+            for i in range(playerAI_number):
+                player = PlayerAI(self.stage_index, f"Computer {i}")
+                self.players.append(player)
+
     def player_ai_setting(self): # 스테이지별 ai 수 조정
         match self.stage_index:
             case 1:
