@@ -14,12 +14,13 @@ class Lobby:
         self.on_title_gui = True
         self.mouse_pos=pygame.mouse.get_pos()    
         # self.apply_state_change()
-        self.player= InputBox(0, 50, 200, 32, 0)
-        self.computer1= InputBox(50, 50, 200, 32, 1)
-        self.computer2= InputBox(50, 100, 200, 32, 2)
-        self.computer3= InputBox(50, 150, 200, 32, 3)
-        self.computer4= InputBox(50, 200, 200, 32, 4)
-        self.computer5= InputBox(50, 250, 200, 32, 5)
+        self.player= InputBox(0, 50, 200, 32, 0, 'player')
+        self.computer1= InputBox(50, 50, 200, 32, 1, 'computer1')
+        self.computer2= InputBox(50, 100, 200, 32, 2, 'computer2')
+        self.computer3= InputBox(50, 150, 200, 32, 3, 'computer3')
+        self.computer4= InputBox(50, 200, 200, 32, 4, 'computer4') 
+        self.computer5= InputBox(50, 250, 200, 32, 5, 'computer5')
+        self.player=[self.computer1,self.computer2,self.computer3,self.computer4,self.computer5]
         # self.screen= pygame.display.set_mode((640, 480))
         # self.draw_lobby
         
@@ -29,29 +30,34 @@ class Lobby:
                 # main.running = False
                  pygame.quit()
                  exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.rect.collidepoint(event.pos):
-                    self.active = not self.active
-                else:
-                    self.active = False
-            if event.type == pygame.KEYDOWN:
-                if self.active:
-                    if event.key == pygame.K_RETURN:
-                        # Enter 키를 누르면 Input Box의 텍스트를 출력합니다.
-                        self.active=False
-                        # self.text_dic[self.key] = self.text
-                    elif event.key == pygame.K_BACKSPACE:
-                        # 백스페이스 키를 누르면 Input Box의 텍스트에서 마지막 문자를 삭제합니다.
-                        # self.text_dic[self.key] = self.text[:-1]
-                        self.text = self.text[:-1]
-                    else:
-                        # 키 입력이 있으면 Input Box의 텍스트에 추가합니다.
-                        # self.text_dic[self.key] +=event.unicode
-                        self.text += event.unicode
+            # if event.type == pygame.MOUSEBUTTONDOWN:
+            for computer in self.player:
+                computer.handle_event(event)
+       
+            #     if self.rect.collidepoint(event.pos):
+            #         self.active = not self.active
+            #     else:
+            #         self.active = False
+            # if event.type == pygame.KEYDOWN:
+            #     if self.active:
+            #         if event.key == pygame.K_RETURN:
+            #             # Enter 키를 누르면 Input Box의 텍스트를 출력합니다.
+            #             self.active=False
+            #             # self.text_dic[self.key] = self.text
+            #         elif event.key == pygame.K_BACKSPACE:
+            #             # 백스페이스 키를 누르면 Input Box의 텍스트에서 마지막 문자를 삭제합니다.
+            #             # self.text_dic[self.key] = self.text[:-1]
+            #             self.text = self.text[:-1]
+            #         else:
+            #             # 키 입력이 있으면 Input Box의 텍스트에 추가합니다.
+            #             # self.text_dic[self.key] +=event.unicode
+            #             self.text += event.unicode
                             
         main.screen.blit(self.lobby_img, (0, 0))
-        if(self.on_title_gui):
-            self.computer1.draw(main.screen)
+        for computer in self.player:
+            computer.draw(main.screen)
+        # if(self.on_title_gui):
+        #     
             
     # def draw_lobby(self,screen):
        

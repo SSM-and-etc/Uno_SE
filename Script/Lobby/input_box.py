@@ -1,10 +1,10 @@
 import pygame
 
 class InputBox:
-    def __init__(self, x, y, w, h, key):
+    def __init__(self, x, y, w, h, key,name):
         self.rect = pygame.Rect(x, y, w, h)
         self.color = pygame.Color('black')
-        self.text = ''
+        self.text = name
         self.active = False
         self.key=key
         # self.text_dict = {
@@ -17,30 +17,24 @@ class InputBox:
         # }
 
     def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            # 마우스 클릭 위치가 Input Box 안에 있는지 확인합니다.
-            if self.rect.collidepoint(event.pos):
-                self.active = not self.active
-            else:
-                self.active = False
-            #  #다른 Input Box는 비활성화합니다.
-            # for input_box in input_boxes:
-            #     if input_box != self:
-            #         input_box.active = False
-        if event.type == pygame.KEYDOWN:
-            if self.active:
-                if event.key == pygame.K_RETURN:
-                    # Enter 키를 누르면 Input Box의 텍스트를 출력합니다.
-                    self.active=False
-                    # self.text_dic[self.key] = self.text
-                elif event.key == pygame.K_BACKSPACE:
-                    # 백스페이스 키를 누르면 Input Box의 텍스트에서 마지막 문자를 삭제합니다.
-                    # self.text_dic[self.key] = self.text[:-1]
-                    self.text = self.text[:-1]
+        # for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+            #     # 마우스 클릭 위치가 Input Box 안에 있는지 확인합니다.
+                if self.rect.collidepoint(event.pos):
+                    self.active = not self.active
                 else:
-                    # 키 입력이 있으면 Input Box의 텍스트에 추가합니다.
-                    # self.text_dic[self.key] +=event.unicode
-                    self.text += event.unicode
+                    self.active = False
+            if self.active == True:
+                if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_RETURN:
+                            # Enter 키를 누르면 Input Box의 텍스트를 출력합니다.
+                            self.text= self.text
+                        elif event.key == pygame.K_BACKSPACE:
+                            # 백스페이스 키를 누르면 Input Box의 텍스트에서 마지막 문자를 삭제합니다.
+                            self.text = self.text[:-1]
+                        else:
+                            # 키 입력이 있으면 Input Box의 텍스트에 추가합니다.
+                            self.text += event.unicode
 
     def draw(self,screen):
         # Input Box와 텍스트를 화면에 그립니다.
