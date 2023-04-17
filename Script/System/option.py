@@ -8,7 +8,8 @@ from GameData.user_data import UserData
 ORANGE = (255, 153, 51)
 
 class Option():
-    def __init__(self, main):
+    def __init__(self, main, parent):
+        self.parent = parent
         self.main = main
         self.user_data = main.user_data
         self.temp_data = UserData()
@@ -432,6 +433,7 @@ class Option():
     def save_data(self):
         self.user_data.copy_data(self.temp_data)
         self.user_data.save_data(self.main)
+        self.parent.change_screen_size()
         
     def load_asset(self, root):
         self.pop_up_img = pygame.image.load(os.path.join(root, "Material/GUI/option_pop_up.png"))

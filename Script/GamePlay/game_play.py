@@ -507,3 +507,6 @@ class GamePlay:
         elif(self.select_state == STATE_EXIT):
             main.running = False
     '''
+    
+    def change_screen_size(self):
+        pass # title의 size 변경 방식과의 호환을 위해 임시로 만듦
