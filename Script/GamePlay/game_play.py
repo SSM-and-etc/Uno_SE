@@ -133,7 +133,7 @@ class GamePlay:
         self.stage_index = stage_index
         self.user_data = main.user_data
         Asset.user_data = main.user_data
-        self.option = Option(main)
+        self.option = Option(main, self)
         self.on_option = False
         self.turn_count_gimmick = 1
         self.user_turn_count_gimmick = 1
