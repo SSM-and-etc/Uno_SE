@@ -109,6 +109,11 @@ class Option():
         screen.blit(self.reset_img, self.reset_rect)
         screen.blit(self.exit_img, self.exit_rect)
         
+        if self.user_data.color_blindness_mode:
+            screen.blit(self.reset_CM_img, self.reset_rect)
+        else:
+            screen.blit(self.reset_img, self.reset_rect)
+        
     def draw_cursor(self, screen):
         if self.on_select:
             return
@@ -116,7 +121,10 @@ class Option():
     
     def draw_select(self, screen):
         if self.on_select:
-            screen.blit(self.button_select_img, self.button_select_rects[self.select_state[0]][self.select_state[1]])
+            if self.user_data.color_blindness_mode:
+                screen.blit(self.button_select_CM_img, self.button_select_rects[self.select_state[0]][self.select_state[1]])
+            else:
+                screen.blit(self.button_select_img, self.button_select_rects[self.select_state[0]][self.select_state[1]])
     
         
     def click_collide_option(self, main, mouse_pos):
@@ -458,9 +466,11 @@ class Option():
         self.default_sound_bar_img              = pygame.image.load(os.path.join(root, "Material/Option/sound_bar.png"))
         self.default_save_img                   = pygame.image.load(os.path.join(root, "Material/Option/save.png"))
         self.default_reset_img                  = pygame.image.load(os.path.join(root, "Material/Option/reset.png"))
+        self.default_reset_CM_img               = pygame.image.load(os.path.join(root, "Material/ColorMode/colormode_reset.png"))
         self.default_exit_img                   = pygame.image.load(os.path.join(root, "Material/Option/exit.png"))
         self.default_button_select_img          = pygame.image.load(os.path.join(root, "Material/Button/button_select.png"))
         self.default_button_cursor_img          = pygame.image.load(os.path.join(root, "Material/Button/button_cursor.png"))
+        self.default_button_select_CM_img       = pygame.image.load(os.path.join(root, "Material/ColorMode/colormode_button_select.png"))
     
     def set_gui_default_poses(self):
         self.pop_up_default_pos = (0.5, 0.5)
@@ -555,10 +565,13 @@ class Option():
         self.sound_bar_img              = pygame.transform.scale(self.default_sound_bar_img           , self.tup_mul(self.get_img_size(self.default_sound_bar_img),scale_ratio))
         self.save_img                   = pygame.transform.scale(self.default_save_img                , self.tup_mul(self.get_img_size(self.default_save_img),scale_ratio))
         self.reset_img                  = pygame.transform.scale(self.default_reset_img               , self.tup_mul(self.get_img_size(self.default_reset_img),scale_ratio))
+        self.reset_CM_img               = pygame.transform.scale(self.default_reset_CM_img            , self.tup_mul(self.get_img_size(self.default_reset_img),scale_ratio))
         self.exit_img                   = pygame.transform.scale(self.default_exit_img                , self.tup_mul(self.get_img_size(self.default_exit_img),scale_ratio))
         self.button_select_img          = pygame.transform.scale(self.default_button_select_img       , self.tup_mul(self.get_img_size(self.default_button_select_img ),scale_ratio))
         self.button_cursor_img          = pygame.transform.scale(self.default_button_cursor_img       , self.tup_mul(self.get_img_size(self.default_button_cursor_img),scale_ratio))
+        self.button_select_CM_img       = pygame.transform.scale(self.default_button_select_CM_img    , self.tup_mul(self.get_img_size(self.default_button_select_img ),scale_ratio))
         self.screen_size_changer_button_img = self.screen_size_block_imges[self.user_data.screen_size_index].copy()   
+            
             
     def set_gui_rct(self):
         self.pop_up_rect = self.pop_up_img.get_rect(center = self.pop_up_pos)
