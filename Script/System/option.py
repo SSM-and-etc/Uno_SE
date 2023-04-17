@@ -8,14 +8,17 @@ from GameData.user_data import UserData
 ORANGE = (255, 153, 51)
 
 class Option():
-    def __init__(self, main):
+    def __init__(self, main, parent):
+        self.parent = parent
         self.main = main
+        self.design_size = (1280, 720)
         self.user_data = main.user_data
         self.temp_data = UserData()
         self.temp_data.copy_data(self.user_data)
         
         self.load_asset(main.root_path)
-        self.set_default_pos()
+        self.set_gui_default_poses()
+        self.default_font_size = 17
         
         self.set_option_gui()
         self.reset_on_option_state()
@@ -54,6 +57,7 @@ class Option():
         self.on_option = False
         self.temp_data.copy_data(self.user_data)
         self.reset_on_option_state()
+        self.set_option_gui()
             
     def draw_option(self, screen):
         screen.blit(self.pop_up_img, self.pop_up_rect)
@@ -66,7 +70,6 @@ class Option():
         self.draw_cursor(screen)
         self.draw_select(screen)
         
-            
     def draw_screen_size_option(self, screen):
         screen.blit(self.screen_size_changer_button_img, self.screen_size_changer_button_rect)
         if(self.on_select and self.select_state[0] == 0):
@@ -79,6 +82,12 @@ class Option():
         screen.blit(self.key_button_img, self.enter_key_button_rect)
         screen.blit(self.key_button_img, self.up_key_button_rect)
         screen.blit(self.key_button_img, self.down_key_button_rect)
+        
+        screen.blit(self.left_key_text, self.left_key_text_pos)
+        screen.blit(self.right_key_text, self.right_key_text_pos)
+        screen.blit(self.enter_key_text, self.enter_key_text_pos)
+        screen.blit(self.up_key_text, self.up_key_text_pos)
+        screen.blit(self.down_key_text, self.down_key_text_pos)
         
     def draw_color_blindness_option(self, screen):
         if self.temp_data.color_blindness_mode:
@@ -100,6 +109,11 @@ class Option():
         screen.blit(self.reset_img, self.reset_rect)
         screen.blit(self.exit_img, self.exit_rect)
         
+        if self.user_data.color_blindness_mode:
+            screen.blit(self.reset_CM_img, self.reset_rect)
+        else:
+            screen.blit(self.reset_img, self.reset_rect)
+        
     def draw_cursor(self, screen):
         if self.on_select:
             return
@@ -107,7 +121,10 @@ class Option():
     
     def draw_select(self, screen):
         if self.on_select:
-            screen.blit(self.button_select_img, self.button_select_rects[self.select_state[0]][self.select_state[1]])
+            if self.user_data.color_blindness_mode:
+                screen.blit(self.button_select_CM_img, self.button_select_rects[self.select_state[0]][self.select_state[1]])
+            else:
+                screen.blit(self.button_select_img, self.button_select_rects[self.select_state[0]][self.select_state[1]])
     
         
     def click_collide_option(self, main, mouse_pos):
@@ -370,6 +387,7 @@ class Option():
                 self.temp_data.set_key(self.select_state[1], new_key)
             case 2:    
                 self.temp_data.set_key(self.select_state[1] + 3, new_key)
+        self.set_text(self.user_data.get_screen_size())
                 
     def apply_key_state_change(self):
         screen_size = self.temp_data.get_screen_size()
@@ -426,35 +444,35 @@ class Option():
         self.temp_data.reset_data()
         self.reset_on_option_state()
         
-    def tup_mul(self, tup1, tup2):
-        return (tup1[0] * tup2[0], tup1[1] * tup2[1])
-    
     def save_data(self):
         self.user_data.copy_data(self.temp_data)
         self.user_data.save_data(self.main)
+        self.set_option_gui()
+        self.parent.change_screen_size()
         
     def load_asset(self, root):
-        self.pop_up_img = pygame.image.load(os.path.join(root, "Material/GUI/option_pop_up.png"))
-        self.screen_size_block_imges = \
+        self.default_pop_up_img                 = pygame.image.load(os.path.join(root, "Material/GUI/option_pop_up.png"))
+        self.default_screen_size_block_imges    = \
         [
             pygame.image.load(os.path.join(root, "Material/button/640_480.png")),
             pygame.image.load(os.path.join(root, "Material/button/1280_720.png")),
             pygame.image.load(os.path.join(root, "Material/button/1920_1080.png")),
             pygame.image.load(os.path.join(root, "Material/button/2560_1440.png"))
         ]
-        self.key_button_img = pygame.image.load(os.path.join(root, "Material/button/key_button.png"))
-        self.checked_button_img = pygame.image.load(os.path.join(root, "Material/button/checked_button.png"))
-        self.volume_img  = pygame.image.load(os.path.join(root, "Material/Option/volume.png"))
-        self.volume_x_img  = pygame.image.load(os.path.join(root, "Material/Option/volume_x.png"))
-        self.sound_bar_img = pygame.image.load(os.path.join(root, "Material/Option/sound_bar.png"))
-        self.save_img = pygame.image.load(os.path.join(root, "Material/Option/save.png"))
-        self.reset_img = pygame.image.load(os.path.join(root, "Material/Option/reset.png"))
-        self.exit_img = pygame.image.load(os.path.join(root, "Material/Option/exit.png"))
-        
-        self.button_select_img = pygame.image.load(os.path.join(root, "Material/Button/button_select.png"))
-        self.button_cursor_img = pygame.image.load(os.path.join(root, "Material/Button/button_cursor.png"))
+        self.default_key_button_img             = pygame.image.load(os.path.join(root, "Material/button/key_button.png"))
+        self.default_checked_button_img         = pygame.image.load(os.path.join(root, "Material/button/checked_button.png"))
+        self.default_volume_img                 = pygame.image.load(os.path.join(root, "Material/Option/volume.png"))
+        self.default_volume_x_img               = pygame.image.load(os.path.join(root, "Material/Option/volume_x.png"))
+        self.default_sound_bar_img              = pygame.image.load(os.path.join(root, "Material/Option/sound_bar.png"))
+        self.default_save_img                   = pygame.image.load(os.path.join(root, "Material/Option/save.png"))
+        self.default_reset_img                  = pygame.image.load(os.path.join(root, "Material/Option/reset.png"))
+        self.default_reset_CM_img               = pygame.image.load(os.path.join(root, "Material/ColorMode/colormode_reset.png"))
+        self.default_exit_img                   = pygame.image.load(os.path.join(root, "Material/Option/exit.png"))
+        self.default_button_select_img          = pygame.image.load(os.path.join(root, "Material/Button/button_select.png"))
+        self.default_button_cursor_img          = pygame.image.load(os.path.join(root, "Material/Button/button_cursor.png"))
+        self.default_button_select_CM_img       = pygame.image.load(os.path.join(root, "Material/ColorMode/colormode_button_select.png"))
     
-    def set_default_pos(self):
+    def set_gui_default_poses(self):
         self.pop_up_default_pos = (0.5, 0.5)
         self.screen_size_changer_button_default_pos = (0.6, 0.15)
         self.screen_size_block_default_poses = \
@@ -503,11 +521,14 @@ class Option():
             [(0.49, 0.62), (0.62, 0.62)],
             [(0.35, 0.78), (0.5, 0.78), (0.65, 0.78)]
         ]
-            
-    def set_option_gui(self):
-        screen_size = self.temp_data.get_screen_size()
-        self.screen_size_changer_button_img = self.screen_size_block_imges[self.temp_data.screen_size_index]
         
+        self.left_key_text_default_pos = (0.52, 0.21)
+        self.right_key_text_default_pos = (0.61, 0.21)
+        self.enter_key_text_default_pos = (0.7, 0.21)
+        self.up_key_text_default_pos = (0.52, 0.30)
+        self.down_key_text_default_pos = (0.61, 0.300)
+        
+    def set_gui_poses(self, screen_size):
         self.pop_up_pos = self.tup_mul(screen_size, self.pop_up_default_pos)
         self.screen_size_block_poses = [self.tup_mul(screen_size, pos) for pos in self.screen_size_block_default_poses]
         self.screen_size_changer_button_pos = self.tup_mul(screen_size, self.screen_size_changer_button_default_pos)
@@ -527,6 +548,32 @@ class Option():
         self.button_select_poses = [[self.tup_mul(screen_size, pos) for pos in poses] for poses in self.button_select_default_poses]
         self.button_cursor_poses = self.button_select_poses
         
+        self.left_key_text_pos  = self.tup_mul(screen_size, self.left_key_text_default_pos )
+        self.right_key_text_pos = self.tup_mul(screen_size, self.right_key_text_default_pos )
+        self.enter_key_text_pos = self.tup_mul(screen_size, self.enter_key_text_default_pos )
+        self.up_key_text_pos    = self.tup_mul(screen_size, self.up_key_text_default_pos )
+        self.down_key_text_pos  = self.tup_mul(screen_size, self.down_key_text_default_pos)
+            
+    def set_gui_imges(self, screen_size):
+        scale_ratio = self.tup_div(screen_size, self.design_size)
+        self.pop_up_img                 = pygame.transform.scale(self.default_pop_up_img              , self.tup_mul(self.get_img_size(self.default_pop_up_img),scale_ratio))
+        self.screen_size_block_imges    = [pygame.transform.scale(img , self.tup_mul(self.get_img_size(img),scale_ratio)) for img in self.default_screen_size_block_imges]
+        self.key_button_img             = pygame.transform.scale(self.default_key_button_img          , self.tup_mul(self.get_img_size(self.default_key_button_img),scale_ratio))
+        self.checked_button_img         = pygame.transform.scale(self.default_checked_button_img      , self.tup_mul(self.get_img_size(self.default_checked_button_img),scale_ratio))
+        self.volume_img                 = pygame.transform.scale(self.default_volume_img              , self.tup_mul(self.get_img_size(self.default_volume_img),scale_ratio))
+        self.volume_x_img               = pygame.transform.scale(self.default_volume_x_img            , self.tup_mul(self.get_img_size(self.default_volume_x_img),scale_ratio))
+        self.sound_bar_img              = pygame.transform.scale(self.default_sound_bar_img           , self.tup_mul(self.get_img_size(self.default_sound_bar_img),scale_ratio))
+        self.save_img                   = pygame.transform.scale(self.default_save_img                , self.tup_mul(self.get_img_size(self.default_save_img),scale_ratio))
+        self.reset_img                  = pygame.transform.scale(self.default_reset_img               , self.tup_mul(self.get_img_size(self.default_reset_img),scale_ratio))
+        self.reset_CM_img               = pygame.transform.scale(self.default_reset_CM_img            , self.tup_mul(self.get_img_size(self.default_reset_img),scale_ratio))
+        self.exit_img                   = pygame.transform.scale(self.default_exit_img                , self.tup_mul(self.get_img_size(self.default_exit_img),scale_ratio))
+        self.button_select_img          = pygame.transform.scale(self.default_button_select_img       , self.tup_mul(self.get_img_size(self.default_button_select_img ),scale_ratio))
+        self.button_cursor_img          = pygame.transform.scale(self.default_button_cursor_img       , self.tup_mul(self.get_img_size(self.default_button_cursor_img),scale_ratio))
+        self.button_select_CM_img       = pygame.transform.scale(self.default_button_select_CM_img    , self.tup_mul(self.get_img_size(self.default_button_select_img ),scale_ratio))
+        self.screen_size_changer_button_img = self.screen_size_block_imges[self.user_data.screen_size_index].copy()   
+            
+            
+    def set_gui_rct(self):
         self.pop_up_rect = self.pop_up_img.get_rect(center = self.pop_up_pos)
         self.screen_size_block_rects = [self.screen_size_block_imges[i].get_rect(center = self.screen_size_block_poses[i]) for i in range(len(self.screen_size_block_imges))]
         self.screen_size_changer_button_rect = self.screen_size_changer_button_img.get_rect(center = self.screen_size_changer_button_pos)
@@ -542,17 +589,33 @@ class Option():
         self.save_rect = self.save_img.get_rect(center = self.save_pos)
         self.reset_rect = self.reset_img.get_rect(center = self.reset_pos)
         self.exit_rect = self.exit_img.get_rect(center = self.exit_pos)
-        
         self.button_select_rects = [[self.button_select_img.get_rect(center = pos) for pos in poses] for poses in self.button_select_poses]
         self.button_cursor_rects = [[self.button_cursor_img.get_rect(center = pos) for pos in poses] for poses in self.button_cursor_poses]
+            
+    def set_text(self, screen_size):
+        font_ratio = (screen_size[0]/self.design_size[0] + screen_size[1]/self.design_size[1]) / 2
+        font = pygame.font.SysFont("arial", int(self.default_font_size * font_ratio), True, True)
+        
+        self.left_key_text   = font.render(pygame.key.name(self.temp_data.key_left), True, ORANGE)
+        self.right_key_text  = font.render(pygame.key.name(self.temp_data.key_right), True, ORANGE)
+        self.enter_key_text  = font.render(pygame.key.name(self.temp_data.key_enter), True, ORANGE)
+        self.up_key_text     = font.render(pygame.key.name(self.temp_data.key_up), True, ORANGE)
+        self.down_key_text   = font.render(pygame.key.name(self.temp_data.key_down), True, ORANGE)
+            
+    def set_option_gui(self):
+        screen_size = self.user_data.get_screen_size() 
+        self.set_gui_poses(screen_size)
+        self.set_gui_imges(screen_size)
+        self.set_gui_rct()
+        self.set_text(screen_size)
         
     def set_drawing_options(self):
-        self.screen_size_changer_button_img = self.screen_size_block_imges[self.temp_data.screen_size_index]
+        self.screen_size_changer_button_img = self.screen_size_block_imges[self.user_data.screen_size_index]
         self.fill_sound_bar_xposes_max = [rect.right for rect in self.sound_bar_rects]
         self.fill_sound_bar_xposes_min = [rect.left for rect in self.sound_bar_rects]
         w = self.sound_bar_rects[0].width
-        self.fill_sound_bar_rects = [[self.sound_bar_rects[i].left, self.sound_bar_rects[i].top, w * self.temp_data.volumes[i], self.sound_bar_rects[i].height] for i in range(len(self.sound_bar_rects))] # x, y, w, h
-        self.sound_bars_w = [w * volume for volume in self.temp_data.volumes]
+        self.fill_sound_bar_rects = [[self.sound_bar_rects[i].left, self.sound_bar_rects[i].top, w * self.user_data.volumes[i], self.sound_bar_rects[i].height] for i in range(len(self.sound_bar_rects))] # x, y, w, h
+        self.sound_bars_w = [w * volume for volume in self.user_data.volumes]
     
     def set_key_hold_down(self):
         self.on_key_hold = False
@@ -561,3 +624,12 @@ class Option():
         #self.up_hold = False
         #self.down_hold = False
         #self.enter_hold = False        
+        
+    def get_img_size(self, img):
+        return (img.get_width(), img.get_height())    
+        
+    def tup_mul(self, tup1, tup2):
+        return (tup1[0] * tup2[0], tup1[1] * tup2[1])
+    
+    def tup_div(self, tup1, tup2):
+        return (tup1[0] / tup2[0], tup1[1] / tup2[1])

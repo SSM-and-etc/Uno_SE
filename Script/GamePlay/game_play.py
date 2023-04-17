@@ -18,8 +18,18 @@ class Asset:
     def __init__(self, img, pos, mag=1.0):
         self.mag = mag
         self.pos = pos
+        self.img_path = None
 
         if isinstance(img, str):
+            self.img_path = img
+            if self.user_data.color_blindness_mode:
+                if os.path.exists(os.path.join("Material/ColorMode", img)):
+                    img = os.path.join("Material/ColorMode", img)
+                else:
+                    img = os.path.join("Material", img)
+            else:
+                img = os.path.join("Material", img)
+
             self.orig_img = pygame.image.load(img)
         else:
             self.orig_img = img.copy()
@@ -27,7 +37,20 @@ class Asset:
 
         self.rect = self.img.get_rect().move(pos)
 
+    def image_reload(self):
+        if self.img_path:
+            self.set_image(self.img_path)
+
     def set_image(self, img_path):
+        if self.user_data.color_blindness_mode:
+            if os.path.exists(os.path.join("Material/ColorMode", img_path)):
+                img_path = os.path.join("Material/ColorMode", img_path)
+            else:
+                img_path = os.path.join("Material", img_path)
+        else:
+            img_path = os.path.join("Material", img_path)
+        
+
         self.orig_img = pygame.image.load(img_path)
         self.img = pygame.transform.scale_by(self.orig_img, (self.mag, self.mag))
 
@@ -128,32 +151,33 @@ class Selection:
             self.pos[0] = 0
 
 class GamePlay:
-    def __init__(self, main, stage_index = 1, playerAI_number = 1):
+    def __init__(self, main, playerlist,stage_index = 1, playerAI_number = 1):
         self.main = main
+        self.playerlist=playerlist
         self.stage_index = stage_index
         self.user_data = main.user_data
         Asset.user_data = main.user_data
-        self.option = Option(main)
+        self.option = Option(main, self)
         self.on_option = False
         self.turn_count_gimmick = 1
         self.user_turn_count_gimmick = 1
         self.color_selection = {
             "selecting": False,
             "idx": None,
-            "assets": {CardColor.RED: Asset(os.path.join(main.root_path, "Material/Extra/red.png"), (200, 400)),
-                        CardColor.GREEN: Asset(os.path.join(main.root_path, "Material/Extra/green.png"), (300, 400)),
-                        CardColor.BLUE: Asset(os.path.join(main.root_path, "Material/Extra/blue.png"), (400, 400)),
-                        CardColor.YELLOW: Asset(os.path.join(main.root_path, "Material/Extra/yellow.png"), (500, 400))
+            "assets": {CardColor.RED: Asset("Extra/red.png", (200, 400)),
+                        CardColor.GREEN: Asset("Extra/green.png", (300, 400)),
+                        CardColor.BLUE: Asset("Extra/blue.png", (400, 400)),
+                        CardColor.YELLOW: Asset("Extra/yellow.png", (500, 400))
             }
         }
 
         self.assets = {
-            "background": Asset(os.path.join(main.root_path, "Material/BG/game.png"), (0, 0)),
-            "deck": Asset(os.path.join(main.root_path, "Material/Card/deck.png"), (180, 150), mag=0.3),
-            "button_uno": Asset(os.path.join(main.root_path, "Material/Button/button_uno.png"), (600, 250)),
-            "table": Asset(os.path.join(main.root_path, "Material/Card/deck.png"), (380, 150), mag=0.3),
-            "color": Asset(os.path.join(main.root_path, "Material/Extra/red.png"), (625, 150)),
-            "cursor": Asset(os.path.join(main.root_path, "Material/Button/button_cursor.png"), (-100, -100))
+            "background": Asset("BG/game.png", (0, 0)),
+            "deck": Asset("Card/deck.png", (180, 150), mag=0.3),
+            "button_uno": Asset("Button/button_uno.png", (600, 250)),
+            "table": Asset("Card/deck.png", (380, 150), mag=0.3),
+            "color": Asset("Extra/red.png", (625, 150)),
+            "cursor": Asset("Button/button_cursor.png", (-100, -100))
         }
         self.fake_assets = {
             "counter": FakeAsset((830, 450, 0, 0))
@@ -173,7 +197,7 @@ class GamePlay:
 
         self.pane_assets = [FakeAsset((10, 514, 876, 196))]
         for i in range(len(self.players)-1):
-            self.pane_assets.append(Asset(os.path.join(main.root_path, "Material/BG/player_panel.png"), (906, 10 + 150 * i)))
+            self.pane_assets.append(Asset("BG/player_panel.png", (906, 10 + 150 * i)))
 
         self.selection = Selection(self.player, self.color_selection)
 
@@ -181,12 +205,20 @@ class GamePlay:
         self.update_table()    
 
     def player_setting(self, playerAI_number):
-        self.player = Player("ME")        
-        self.players = [self.player]
-        if self.stage_index != 0:
+        if self.stage_index == 0:
+            self.player = Player(self.playerlist[0].namebox[1])        
+            self.players = [self.player]
+            for player in self.playerlist:
+                player = PlayerAI(self.stage_index,player.namebox[1])
+                self.players.append(player)
+
+        else:
+            self.player = Player("ME")
+            self.players = [self.player]
             playerAI_number = self.player_ai_setting()
-        for _ in range(playerAI_number):
-            self.players.append(PlayerAI(self.stage_index))
+            for i in range(playerAI_number):
+                player = PlayerAI(self.stage_index, f"Computer {i}")
+                self.players.append(player)
 
     def player_ai_setting(self): # 스테이지별 ai 수 조정
         match self.stage_index:
@@ -207,10 +239,10 @@ class GamePlay:
             filename = card.color + "_" + card.card_type.split("_")[1]
         else:
             filename = "wild_" + card.card_type.split("_")[1]
-        self.assets["table"].set_image(os.path.join(self.main.root_path, f"Material/Card/{filename}.png"))
+        self.assets["table"].set_image(f"Card/{filename}.png")
 
         color = self.game.table.get_color()
-        self.assets["color"].set_image(os.path.join(self.main.root_path, f"Material/Extra/{color}.png"))
+        self.assets["color"].set_image(f"Extra/{color}.png")
 
         self.hand_assets = []
         for i, player in enumerate(self.game.players):
@@ -223,6 +255,12 @@ class GamePlay:
                     assets.append(Asset(self.assets["deck"].orig_img, (10 + self.pane_assets[i].rect[0] + w*j, 30 + y), mag))
                 self.hand_assets.append(assets)
 
+        # uno버튼에 의한 드로우 처리
+        if len(self.game.turn().hand) == 1 and self.game.turn().uno != self.game.turn():
+            self.game.draw(self.game.turn(), 1)
+            self.game.turn().uno = None
+            self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.game.turn())], 50, 0))
+        
         pygame.time.set_timer(pygame.USEREVENT, 1000)
         self.counter = 15
 
@@ -254,17 +292,25 @@ class GamePlay:
                 filename = card.color + "_" + card.card_type.split("_")[1]
             else:
                 filename = "wild_" + card.card_type.split("_")[1]
-            self.card_assets.append(Asset(os.path.join(self.main.root_path, f"Material/Card/{filename}.png"), (10+card_size[0]*i, 30+card_size[1]), mag=card_size[2]))
+            self.card_assets.append(Asset(f"Card/{filename}.png", (10+card_size[0]*i, 30+card_size[1]), mag=card_size[2]))
             
         if self.color_selection["selecting"]:
             self.color_selection["selecting"] = False
 
         self.selection.reset()
-
+    
+    def option_closed(self):
+        for name, asset in self.assets.items():
+            asset.image_reload()
+        for color, asset in self.color_selection["assets"].items():
+            asset.image_reload()
 
     def display(self, main):
         if self.on_option:
             self.on_option = self.option.display(main)
+
+            if not self.on_option:
+                self.option_closed()
         else:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -309,25 +355,34 @@ class GamePlay:
             self.animate_assets.append((self.assets["deck"].clone(), self.card_assets[-1], 50, 0))
             self.play_player(self.game.turn())  
         
-        elif self.counter == 12 and self.player != self.game.turn(): # AI Player
-            #pygame.time.set_timer(pygame.USEREVENT, 0)
-            card = self.game.turn().choose_card(self.game.table) # self.game.turn() is ai player
+        if self.player != self.game.turn(): # AI player turn
+            if self.counter == 13:
+                if self.possible_push_uno(self.game.turn()):
+                    self.player.uno = self.game.get_random_AIplayer()
+            elif self.counter == 10: 
+                #pygame.time.set_timer(pygame.USEREVENT, 0)
+                card = self.game.turn().choose_card(self.game.table) # self.game.turn() is ai player
 
-            if card: # deal
-                if card.is_color():
-                    filename = card.color + "_" + card.card_type.split("_")[1]
-                else:
-                    filename = "wild_" + card.card_type.split("_")[1]
-                pos_x, pos_y, _, _ = self.pane_assets[self.game.players.index(self.game.turn())].rect
-                asset = Asset(os.path.join(self.main.root_path, f"Material/Card/{filename}.png"), (pos_x, pos_y), mag=0.3)
-                self.animate_assets.append((asset, self.assets["table"], 50, 0))
+                if card: # deal
+                    if card.is_color():
+                        filename = card.color + "_" + card.card_type.split("_")[1]
+                    else:
+                        filename = "wild_" + card.card_type.split("_")[1]
+                    pos_x, pos_y, _, _ = self.pane_assets[self.game.players.index(self.game.turn())].rect
+                    asset = Asset(f"Card/{filename}.png", (pos_x, pos_y), mag=0.3)
+                    self.animate_assets.append((asset, self.assets["table"], 50, 0))
 
-                if card.card_type == CardType.CARD_CHANGECOLOR:
-                    card.color = self.game.turn().choose_color(self.game.table.get_color())
-            else: # draw
-                self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.game.turn())], 50, 0))
-            
-            self.play_player(self.game.turn(), card)
+                    if card.card_type == CardType.CARD_CHANGECOLOR:
+                        card.color = self.game.turn().choose_color(self.game.table.get_color())
+                else: # draw
+                    self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.game.turn())], 50, 0))
+                
+                self.play_player(self.game.turn(), card)
+        else: # user turn
+            if self.counter == 11:
+                if len(self.player.hand) <= 2 and not self.player.uno:
+                    self.player.uno = self.game.get_random_AIplayer()
+                    
 
     def play_player(self, player, card = None):
         # self.game.play() 이후의 self.game.turn()은 순서를 넘겨 받은 플레이어가 됨에 주의
@@ -337,16 +392,20 @@ class GamePlay:
         if self.game.turn() == self.player:
             self.user_turn_count_gimmick += 1
         
+        self.handle_stage_gimmick(player)
+                    
+    def handle_stage_gimmick(self, player):
         match self.stage_index:
             case 3:
                 while self.turn_count_gimmick >= 5:
                     self.turn_count_gimmick -= 5
                     print("stage 3 기믹")
-                    self.select_color()
+                    self.game.table.change_random_color()
             case 4:
                 if self.game.turn() == self.player and not (self.user_turn_count_gimmick & 1):
                     print("stage 4 드로우 기믹")
                     self.game.draw(self.game.turn(), 2)
+                    self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.player)], 50, 0))
                 if self.turn_count_gimmick == 5:
                     print("stage 4 패 교환 기믹")
                     self.game.hand_swap(player, self.game.turn())
@@ -389,6 +448,11 @@ class GamePlay:
         self.animate_asset()
         self.move_cursor()
 
+        if self.game.turn().uno:
+            self.assets["button_uno"].set_image("Button/button_uno_enabled.png")
+        else:
+            self.assets["button_uno"].set_image("Button/button_uno.png")
+        
         for name, asset in self.assets.items():
             self.main.screen.blit(*asset.scaled())
 
@@ -462,9 +526,9 @@ class GamePlay:
                 self.play_player(self.player)
 
         elif sel == "button_uno":
-            self.assets["button_uno"].set_image(os.path.join(self.main.root_path, "Material/Button/button_uno_enabled.png"))
-            self.game.uno_player = self.player
-            print("uno!")
+            if self.possible_push_uno(self.game.turn()):
+                self.game.uno_player = self.game.turn().uno = self.player
+                print("uno!")
 
         elif isinstance(sel, CardColor):
             self.player.hand[self.color_selection["idx"]].color = sel
@@ -487,6 +551,13 @@ class GamePlay:
             self.handle()
         elif key == pygame.K_ESCAPE:
             self.on_option = True
+            
+    def possible_push_uno(self, now_player):
+        if not now_player.uno and len(now_player.hand) <= 2: # TODO: 디버깅용으로 >=2로 설정함, <=2로 바꿔야함
+            return True
+        else:
+            return False
+        
 
     def apply_state_change(self):
         # TODO: 현재 state에 따라 select 이미지 적절하게 이동시키기
@@ -507,3 +578,6 @@ class GamePlay:
         elif(self.select_state == STATE_EXIT):
             main.running = False
     '''
+    
+    def change_screen_size(self):
+        pass # title의 size 변경 방식과의 호환을 위해 임시로 만듦
