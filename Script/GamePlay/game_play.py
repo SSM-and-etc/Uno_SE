@@ -184,13 +184,14 @@ class GamePlay:
         }
 
         self.on_game_gui = True
+        self.winner = None
+        self.result_asset = Asset("BG/result.png", (0, 0))
 
         self.card_assets = []
         self.hand_assets = []
         self.animate_assets = []
 
-        self.counter_font = pygame.font.SysFont(None, 50)
-        self.name_font = pygame.font.SysFont(None, 50)
+        self.font_resize() 
 
         self.player_setting(playerAI_number)
         self.game = Game(self.players, stage_index)
@@ -249,20 +250,28 @@ class GamePlay:
             if player == self.player:
                 self.hand_assets.append(None)
             else:
-                w, y, mag = self.calculate_card_size(i)
-                assets = []
-                for j in range(len(player.hand)):
-                    assets.append(Asset(self.assets["deck"].orig_img, (10 + self.pane_assets[i].rect[0] + w*j, 30 + y), mag))
-                self.hand_assets.append(assets)
+                if i > 0:
+                    w, y, mag = self.calculate_card_size(i)
+                    assets = []
+                    for j in range(len(player.hand)):
+                        assets.append(Asset(self.assets["deck"].orig_img, (10 + self.pane_assets[i].rect[0] + w*j, 30 + y), mag))
+                    self.hand_assets.append(assets)
 
         # uno버튼에 의한 드로우 처리
         if len(self.game.turn().hand) == 1 and self.game.turn().uno != self.game.turn():
-            self.game.draw(self.game.turn(), 1)
             self.game.turn().uno = None
-            self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.game.turn())], 50, 0))
+            if self.game.deck.stack:
+                self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.game.turn())], 50, 0))
+                self.game.draw(self.game.turn(), 1)  
+            else:
+                self.game.draw(self.game.turn(), 1) 
         
         pygame.time.set_timer(pygame.USEREVENT, 1000)
         self.counter = 15
+
+        for player in self.game.players:
+            if len(player.hand) == 0:
+                self.winner = player
 
     def calculate_card_size(self, player_num):
         n = len(self.game.players[player_num].hand)
@@ -305,12 +314,32 @@ class GamePlay:
         for color, asset in self.color_selection["assets"].items():
             asset.image_reload()
 
+        self.font_resize()
+
+    def font_resize(self):
+        screen_size = self.user_data.get_screen_size()
+        design_size = (1280, 720)
+        ratio = screen_size[0] / design_size[0]
+        self.counter_font = pygame.font.SysFont(None, int(50 * ratio))
+        self.result_font = pygame.font.SysFont(None, int(100 * ratio))
+        self.name_font = pygame.font.SysFont(None, int(40 * ratio))
+
     def display(self, main):
         if self.on_option:
             self.on_option = self.option.display(main)
 
             if not self.on_option:
                 self.option_closed()
+
+        elif self.winner:
+            self.draw_result()
+
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
+                    if self.stage_index != 0:
+                        self.user_data.story_level = self.stage_index
+                    main.scene_change(main.get_scene_index("title"))
+
         else:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -328,7 +357,7 @@ class GamePlay:
                     if not self.game.table.top().is_special():
                         self.collide_game(event.pos)
                 
-                if event.type == pygame.USEREVENT and self.counter > 0:
+                if event.type == pygame.USEREVENT:
                     self.counter_event()
                         
             self.main.screen.blit(*self.assets["background"].scaled())
@@ -337,30 +366,36 @@ class GamePlay:
                 self.draw_game()
     
     def counter_event(self):
+        #if self.counter == 13: # For Debugging
+        #    self.winner = self.player
+
         if self.counter > 0:
             self.counter -= 1
 
-        if self.game.table.top().is_special():
+        if self.game.table.top().is_special() and self.game.deck.stack:
             card = self.game.table.top()
 
             if card.card_type == CardType.CARD_CHANGECOLOR:
                 card.color = random.choice(list(CardColor))
             self.game.turn().hand.append(card)
             self.game.play(self.game.turn(), len(self.players), card)
-            self.animate_assets.append((self.assets["deck"].clone(), self.assets["table"], 50, 0))
-            self.game.table.put(self.game.deck.draw())
+            if self.game.deck.stack:
+                self.animate_assets.append((self.assets["deck"].clone(), self.assets["table"], 20, 0))
+                self.game.table.put(self.game.deck.draw())
 
         if self.counter == 0:
-            #pygame.time.set_timer(pygame.USEREVENT, 0)
-            self.animate_assets.append((self.assets["deck"].clone(), self.card_assets[-1], 50, 0))
-            self.play_player(self.game.turn())  
+            if self.game.deck.stack:
+                self.animate_assets.append((self.assets["deck"].clone(), self.card_assets[-1], 50, 0))
+                self.play_player(self.game.turn())
+            else:
+                self.play_player(self.game.turn())
+                self.update_table()
         
         if self.player != self.game.turn(): # AI player turn
-            if self.counter == 13:
+            if self.counter == 12:
                 if self.possible_push_uno(self.game.turn()):
-                    self.player.uno = self.game.get_random_AIplayer()
-            elif self.counter == 10: 
-                #pygame.time.set_timer(pygame.USEREVENT, 0)
+                    self.game.turn().uno = self.game.get_random_AIplayer()
+            elif self.counter == 11: 
                 card = self.game.turn().choose_card(self.game.table) # self.game.turn() is ai player
 
                 if card: # deal
@@ -374,19 +409,25 @@ class GamePlay:
 
                     if card.card_type == CardType.CARD_CHANGECOLOR:
                         card.color = self.game.turn().choose_color(self.game.table.get_color())
+
+                    self.play_player(self.game.turn(), card)
+
                 else: # draw
-                    self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.game.turn())], 50, 0))
+                    if self.game.deck.stack:
+                        self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.game.turn())], 50, 0))
+                        self.play_player(self.game.turn())
+                    else:
+                        self.play_player(self.game.turn())
+                        self.update_table()
                 
-                self.play_player(self.game.turn(), card)
         else: # user turn
-            if self.counter == 11:
+            if self.counter == random.randint(10, 13):
                 if len(self.player.hand) <= 2 and not self.player.uno:
                     self.player.uno = self.game.get_random_AIplayer()
                     
 
     def play_player(self, player, card = None):
         # self.game.play() 이후의 self.game.turn()은 순서를 넘겨 받은 플레이어가 됨에 주의
-        self.counter = 0
         self.game.play(player, len(self.players), card)
         self.turn_count_gimmick += 1
         if self.game.turn() == self.player:
@@ -404,8 +445,13 @@ class GamePlay:
             case 4:
                 if self.game.turn() == self.player and not (self.user_turn_count_gimmick & 1):
                     print("stage 4 드로우 기믹")
-                    self.game.draw(self.game.turn(), 2)
-                    self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.player)], 50, 0))
+                    if self.game.deck.stack:
+                        self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.player)], 50, 0))
+                        self.game.draw(self.game.turn(), 2)
+                    else:
+                        self.game.draw(self.game.turn())
+                        self.update_table()
+
                 if self.turn_count_gimmick == 5:
                     print("stage 4 패 교환 기믹")
                     self.game.hand_swap(player, self.game.turn())
@@ -413,12 +459,13 @@ class GamePlay:
                     
     def animate_asset(self):
         if self.animate_assets:
+            pygame.time.set_timer(pygame.USEREVENT, 0)
             asset, dest, time, tick = self.animate_assets.pop()
 
             if tick >= time:
                 new_rect = dest.rect
-                self.update_hand()
                 self.update_table()
+                self.update_hand()
 
             else:
                 new_rect = asset.pos[0] - ((asset.pos[0] - dest.rect[0]) * tick / time),\
@@ -478,11 +525,16 @@ class GamePlay:
             for color, asset in self.color_selection["assets"].items():
                 self.main.screen.blit(*asset.scaled())
 
-        if self.game.uno_player:
-            self.main.screen.blit(self.name_font.render(self.game.uno_player.tag, True, (255, 255, 255)), self.assets["button_uno"].scaled_rect().move(0, 75))
+        #if self.game.uno_player:
+        #    self.main.screen.blit(self.name_font.render(self.game.uno_player.tag, True, (255, 255, 255)), self.assets["button_uno"].scaled_rect().move(0, 75))
 
         self.main.screen.blit(*self.assets["table"].scaled())
         self.main.screen.blit(self.counter_font.render(str(self.counter), True, (255, 255, 255)), self.fake_assets["counter"].scaled_rect())
+
+    def draw_result(self):
+        font = self.result_font.render(self.winner.tag, True, (0, 0, 0))
+        self.main.screen.blit(*self.result_asset.scaled())
+        self.main.screen.blit(font, font.get_rect(center=(640, 360)))
 
     def collide_game(self, mouse_pos):
         if self.assets["button_uno"].scaled_rect().collidepoint(mouse_pos):
@@ -522,8 +574,12 @@ class GamePlay:
 
         elif sel == "deck":
             if self.game.turn() == self.player:
-                self.animate_assets.append((self.assets["deck"].clone(), self.card_assets[-1], 50, 0))
-                self.play_player(self.player)
+                if self.game.deck.stack:
+                    self.animate_assets.append((self.assets["deck"].clone(), self.card_assets[-1], 50, 0))
+                    self.play_player(self.player)
+                else:
+                    self.play_player(self.player)
+                    self.update_table()
 
         elif sel == "button_uno":
             if self.possible_push_uno(self.game.turn()):
