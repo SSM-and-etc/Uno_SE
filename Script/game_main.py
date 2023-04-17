@@ -45,6 +45,8 @@ class GameMain():
                 return 2
             case "story mode":
                 return 3
+            case "story mode game start":
+                return 4
         return -1
         
     def get_scene_obj(self, scene_state):
