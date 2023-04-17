@@ -134,8 +134,6 @@ class StoryMode:
             "현재 지역은 아프리카입니다. 도전하시겠습니까?"
         ]
 
-        self.user_data.story_level = 5
-
         for i in range(4):
             if self.user_data.story_level < i:
                 self.level_assets[i].set_image(os.path.join(main.root_path, f"Material/Avatar/{self.level_name[i]}_disabled.png"))
