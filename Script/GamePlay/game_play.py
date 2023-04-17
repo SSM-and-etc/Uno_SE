@@ -133,7 +133,7 @@ class GamePlay:
         self.stage_index = stage_index
         self.user_data = main.user_data
         Asset.user_data = main.user_data
-        self.option = Option(main)
+        self.option = Option(main, self)
         self.on_option = False
         self.turn_count_gimmick = 1
         self.user_turn_count_gimmick = 1
@@ -538,3 +538,6 @@ class GamePlay:
         elif(self.select_state == STATE_EXIT):
             main.running = False
     '''
+    
+    def change_screen_size(self):
+        pass # title의 size 변경 방식과의 호환을 위해 임시로 만듦

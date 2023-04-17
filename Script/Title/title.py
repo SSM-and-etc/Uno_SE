@@ -13,22 +13,16 @@ STATE_EXIT = 2
 class Title():
     def __init__(self, main):
         self.main = main
-        self.title_BG = pygame.image.load(os.path.join(main.root_path, "Material/BG/title.png"))
-        self.single_game_img = pygame.image.load(os.path.join(main.root_path, "Material/Button/single_game.png"))
-        self.option_img = pygame.image.load(os.path.join(main.root_path, "Material/Button/option.png"))
-        self.exit_img = pygame.image.load(os.path.join(main.root_path, "Material/Button/exit.png"))
-        self.button_select_img = pygame.image.load(os.path.join(main.root_path, "Material/Button/button_select.png"))
-
-        self.single_game_default_pos = (0.2, 0.7)
-        self.option_default_pos = (0.6, 0.7)
-        self.exit_default_pos = (0.8, 0.7)
-        self.button_select_default_poses = [ (0.2, 0.65), (0.6, 0.65), (0.8, 0.65) ]
+        self.design_size = (1280, 720)
+        
+        self.load_asset(main.root_path)
+        self.set_gui_default_poses()
         
         self.on_option = False
         self.select_state = 0 # 0: single game start, 1: option, 2: exit ...
         
         self.user_data = main.user_data
-        self.option = Option(main)
+        self.option = Option(main, self)
         
         self.set_title_gui(self.user_data.get_screen_size())
         
@@ -110,17 +104,56 @@ class Title():
             main.running = False
     
     def set_title_gui(self, screen_size):
+        self.set_gui_poses(screen_size)
+        self.set_gui_imges(screen_size)
+        self.set_gui_rct()
+        
+    def change_screen_size(self):
+        screen_size = self.user_data.get_screen_size()
+        self.set_gui_poses(screen_size)
+        self.set_gui_imges(screen_size)
+        self.set_gui_rct()
+        
+    def set_gui_default_poses(self):
+        self.single_game_default_pos = (0.2, 0.7)
+        self.option_default_pos = (0.6, 0.7)
+        self.exit_default_pos = (0.8, 0.7)
+        self.button_select_default_poses = [ (0.2, 0.65), (0.6, 0.65), (0.8, 0.65) ]
+        
+    def set_gui_poses(self, screen_size):
         self.single_game_pos = self.tup_mul(screen_size, self.single_game_default_pos)
         self.option_pos = self.tup_mul(screen_size, self.option_default_pos)
         self.exit_pos = self.tup_mul(screen_size, self.exit_default_pos)
         self.button_select_pos = self.tup_mul(screen_size, self.button_select_default_poses[self.select_state])
         
+    def set_gui_imges(self, screen_size):
+        scale_ratio = self.tup_div(screen_size, self.design_size)
+        self.title_BG           = pygame.transform.scale(self.default_title_BG, self.tup_mul(self.get_img_size(self.default_title_BG), scale_ratio))
+        self.single_game_img    = pygame.transform.scale(self.default_single_game_img, self.tup_mul(self.get_img_size(self.default_single_game_img), scale_ratio))
+        self.option_img         = pygame.transform.scale(self.default_option_img, self.tup_mul(self.get_img_size(self.default_option_img), scale_ratio))
+        self.exit_img           = pygame.transform.scale(self.default_exit_img, self.tup_mul(self.get_img_size(self.default_exit_img), scale_ratio))
+        self.button_select_img  = pygame.transform.scale(self.default_button_select_img, self.tup_mul(self.get_img_size(self.default_button_select_img), scale_ratio))
+        
+    def set_gui_rct(self):
         self.single_game_rect = self.single_game_img.get_rect(center = self.single_game_pos)
         self.option_rect = self.option_img.get_rect(center = self.option_pos)
         self.exit_rect = self.exit_img.get_rect(center = self.exit_pos)
         self.button_select_rect = self.button_select_img.get_rect(center = self.button_select_pos)
         
+    def load_asset(self, root):
+        self.default_title_BG = pygame.image.load(os.path.join(root, "Material/BG/title.png"))
+        self.default_single_game_img = pygame.image.load(os.path.join(root, "Material/Button/single_game.png"))
+        self.default_option_img = pygame.image.load(os.path.join(root, "Material/Button/option.png"))
+        self.default_exit_img = pygame.image.load(os.path.join(root, "Material/Button/exit.png"))
+        self.default_button_select_img = pygame.image.load(os.path.join(root, "Material/Button/button_select.png"))
+        
+    def get_img_size(self, img):
+        return (img.get_width(), img.get_height())
+        
     def tup_mul(self, tup1, tup2):
         return (tup1[0] * tup2[0], tup1[1] * tup2[1])
+    
+    def tup_div(self, tup1, tup2):
+        return (tup1[0] / tup2[0], tup1[1] / tup2[1])
     
     
