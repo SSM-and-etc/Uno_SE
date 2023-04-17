@@ -12,9 +12,13 @@ class Game:
     def __init__(self, players, stage_index):
         self.players = players
         self.table = Table()
-        self.deck = Deck({"number": 1, "special": 1, "wild": 10})
+        self.deck = Deck({"number": 1, "special": 1, "wild": 2})
         self.players_turn = CycleIterator(players)
         self.stage_index = stage_index
+        self.ai_players = []
+        for player in players:
+            if player.is_ai:
+                self.ai_players.append(player)
 
         self.uno_player = None
 
@@ -40,6 +44,7 @@ class Game:
     def draw(self, player, n=1):
         n = min(n, len(self.deck.stack))
         player.hand.extend([self.deck.draw() for _ in range(n)])
+        player.uno = None
         
     def weighted_draw(self, player, weights, n=1):
         picker = WeightedPicker(weights)
@@ -93,6 +98,17 @@ class Game:
 
     def hand_swap(self, player1, player2):
         player1.hand, player2.hand = player2.hand, player1.hand
+        self.handle_uno_state(player1)
+        self.handle_uno_state(player2)
+        
+    def get_random_AIplayer(self):
+        return random.choice(self.ai_players)
+        
+    def handle_uno_state(self, player):
+        if len(player.hand) <= 2:
+            player.uno = player
+        else:
+            player.uno = None
 
     def play(self, player, players_number, card=None):
         current_player = self.turn()
