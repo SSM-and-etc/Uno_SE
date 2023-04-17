@@ -7,6 +7,7 @@ from GameData.user_data import UserData
 from GameData.game_data import GameData
 from Title.title import Title
 from GamePlay.game_play import GamePlay
+from StoryMode.storymode import StoryMode
 
 
 class GameMain():
@@ -24,6 +25,7 @@ class GameMain():
         self.title = None
         self.play_game = None
         self.lobby = None
+        self.stage_index = 1
         
         
         self.set_scene_obj(self.scene_state)
@@ -41,6 +43,8 @@ class GameMain():
                 return 1
             case "game start":
                 return 2
+            case "story mode":
+                return 3
         return -1
         
     def get_scene_obj(self, scene_state):
@@ -51,6 +55,10 @@ class GameMain():
                 return self.lobby
             case 2:
                 return self.play_game
+            case 3:
+                return self.storymode
+            case 4:
+                return self.play_game_storymode
             case _:
                 return None
 
@@ -63,6 +71,10 @@ class GameMain():
                 self.lobby = Lobby(self)
             case 2:
                 self.play_game = GamePlay(self,playerlist=self.player_info,stage_index=0,playerAI_number=self.playerAI_number)
+            case 3:
+                self.storymode = StoryMode(self)
+            case 4:
+                self.play_game_storymode = GamePlay(self, None, self.stage_index)
             case _:
                 pass
     def reset_scene_obj(self, scene_state):
@@ -73,6 +85,10 @@ class GameMain():
                 self.lobby = None
             case 2:
                 self.play_game = None
+            case 3:
+                self.storymode = None
+            case 4:
+                self.play_game_storymode = None
             case _:
                 pass
             

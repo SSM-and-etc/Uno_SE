@@ -1,7 +1,7 @@
 import pygame
 
 class InputBox:
-    def __init__(self, x, y, w, h, key,name):
+    def __init__(self, x, y, w, h, key,name,font):
         self.rect = pygame.Rect(x, y, w, h)
         self.color = pygame.Color('black')
         self.namebox=['empty']
@@ -14,6 +14,7 @@ class InputBox:
         else:
             self.namebox.append(name)    
         self.key=key
+        self.font=font
         
     def handle_event(self, event):
         # for event in pygame.event.get():
@@ -39,11 +40,11 @@ class InputBox:
     def draw(self,screen):
         # Input Box와 텍스트를 화면에 그립니다.
         pygame.draw.rect(screen, self.color, self.rect, 2)
-        font = pygame.font.Font(None, 24)
+        # font = pygame.font.Font(None, int(self.screen_width/30))
         if(self.clicked==False):
-            text_surface = font.render(self.namebox[0], True, self.color)
+            text_surface = self.font.render(self.namebox[0], True, self.color)
         else:
-             text_surface = font.render(self.namebox[1], True, self.color)
+             text_surface = self.font.render(self.namebox[1], True, self.color)
         text_width, text_height = text_surface.get_size()
         center_x = self.rect.x + self.rect.width / 2
         center_y = self.rect.y + self.rect.height / 2
