@@ -128,8 +128,9 @@ class Selection:
             self.pos[0] = 0
 
 class GamePlay:
-    def __init__(self, main, stage_index = 1, playerAI_number = 1):
+    def __init__(self, main, playerlist,stage_index = 1, playerAI_number = 1):
         self.main = main
+        self.playerlist=playerlist
         self.stage_index = stage_index
         self.user_data = main.user_data
         Asset.user_data = main.user_data
@@ -181,13 +182,15 @@ class GamePlay:
         self.update_table()    
 
     def player_setting(self, playerAI_number):
-        self.player = Player("ME")        
+        print(self.playerlist[0].namebox[1])
+        self.player = Player(self.playerlist[0].namebox[1])        
         self.players = [self.player]
         if self.stage_index != 0:
             playerAI_number = self.player_ai_setting()
-        for _ in range(playerAI_number):
-            self.players.append(PlayerAI(self.stage_index))
-
+        print(self.playerlist)
+        for i,player in enumerate(self.playerlist):
+            player = PlayerAI(self.stage_index,player.namebox[1])
+            self.players.append(player)
     def player_ai_setting(self): # 스테이지별 ai 수 조정
         match self.stage_index:
             case 1:
