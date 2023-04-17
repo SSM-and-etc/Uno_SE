@@ -59,6 +59,10 @@ class Title():
         screen.blit(self.story_mode_img, self.story_mode_rect)
         screen.blit(self.exit_img, self.exit_rect)
         screen.blit(self.button_select_img, self.button_select_rect)
+        if self.user_data.color_blindness_mode:
+            screen.blit(self.button_select_CM_img, self.button_select_rect)
+        else:
+            screen.blit(self.button_select_img, self.button_select_rect)
         
         if self.ex_key_counter > 0:
             screen.blit(self.ex_key_text, self.ex_key_text_pos)
@@ -160,6 +164,7 @@ class Title():
         self.story_mode_img     = pygame.transform.scale(self.default_story_mode_img, self.tup_mul(self.get_img_size(self.default_story_mode_img), scale_ratio))
         self.exit_img           = pygame.transform.scale(self.default_exit_img, self.tup_mul(self.get_img_size(self.default_exit_img), scale_ratio))
         self.button_select_img  = pygame.transform.scale(self.default_button_select_img, self.tup_mul(self.get_img_size(self.default_button_select_img), scale_ratio))
+        self.button_select_CM_img       = pygame.transform.scale(self.default_button_select_CM_img    , self.tup_mul(self.get_img_size(self.default_button_select_img ),scale_ratio))
             
     def set_gui_rct(self):
         self.single_game_rect = self.single_game_img.get_rect(center = self.single_game_pos)
@@ -182,6 +187,7 @@ class Title():
         self.default_story_mode_img = pygame.image.load(os.path.join(root, "Material/Button/story_mode.png"))
         self.default_exit_img = pygame.image.load(os.path.join(root, "Material/Button/exit.png"))
         self.default_button_select_img = pygame.image.load(os.path.join(root, "Material/Button/button_select.png"))
+        self.default_button_select_CM_img = pygame.image.load(os.path.join(root, "Material/ColorMode/colormode_button_select.png"))
         
     def get_img_size(self, img):
         return (img.get_width(), img.get_height())
