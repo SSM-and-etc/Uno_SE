@@ -8,6 +8,7 @@ from GameData.game_data import GameData
 from Title.title import Title
 from GamePlay.game_play import GamePlay
 from StoryMode.storymode import StoryMode
+from Sound.sound import Sound
 
 
 class GameMain():
@@ -22,6 +23,7 @@ class GameMain():
         self.scene_state = self.get_scene_index("title") # title: 0, single play: 1, ...
         self.game_data = GameData()
         self.user_data = UserData()
+        self.sound = Sound(self)
         self.title = None
         self.play_game = None
         self.lobby = None
@@ -98,6 +100,7 @@ class GameMain():
     def scene_change(self, next_scene_state):
         self.reset_scene_obj(self.scene_state)
         self.set_scene_obj(next_scene_state)
+        self.sound.change_bgm(next_scene_state)
         
         self.scene_state = next_scene_state
         
@@ -126,6 +129,7 @@ class GameMain():
                     self.playerAI_number+=1
                     self.player_info.append(player)
 if __name__ == "__main__":
+    # pygame.mixer.pre_init(44100,-16,2,512)
     pygame.init()
     pygame.display.set_caption("Uno game")
     gameMain = GameMain()
