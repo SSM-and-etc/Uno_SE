@@ -9,22 +9,25 @@ STATE_NUMBER = 3
 STATE_SINGLE_GAME = 0
 STATE_OPTION = 1
 STATE_EXIT = 2
+BLUE_MAGENTA = (153, 102, 204)
 
 class Title():
     def __init__(self, main):
         self.main = main
         self.design_size = (1280, 720)
+        self.user_data = main.user_data
         
         self.load_asset(main.root_path)
         self.set_gui_default_poses()
+        self.default_font_size = 30
         
         self.on_option = False
         self.select_state = 0 # 0: single game start, 1: option, 2: exit ...
         
-        self.user_data = main.user_data
         self.option = Option(main, self)
         
         self.set_title_gui(self.user_data.get_screen_size())
+        self.ex_key_counter = 0
         
     def display(self, main):
         if self.on_option:
@@ -43,6 +46,9 @@ class Title():
                 if event.type == pygame.MOUSEMOTION:
                     self.move_collide_title(main, event.pos)
                     
+                if event.type == pygame.USEREVENT and self.ex_key_counter > 0:
+                    self.ex_key_counter -= 1
+                    
             self.draw_title(main.screen)
             
     def draw_title(self, screen):
@@ -51,6 +57,9 @@ class Title():
         screen.blit(self.option_img, self.option_rect)
         screen.blit(self.exit_img, self.exit_rect)
         screen.blit(self.button_select_img, self.button_select_rect)
+        
+        if self.ex_key_counter > 0:
+            screen.blit(self.ex_key_text, self.ex_key_text_pos)
         
     def click_collide_title(self, main, mouse_pos):
         if self.single_game_rect.collidepoint(mouse_pos):
@@ -85,7 +94,8 @@ class Title():
         elif key == pygame.K_ESCAPE:
             self.on_option = True
         else:
-            # 사용 가능한 키 보여주기
+            pygame.time.set_timer(pygame.USEREVENT, 1000)
+            self.ex_key_counter = 3
             return
         
         self.apply_state_change()
@@ -120,11 +130,15 @@ class Title():
         self.exit_default_pos = (0.8, 0.7)
         self.button_select_default_poses = [ (0.2, 0.65), (0.6, 0.65), (0.8, 0.65) ]
         
+        self.default_ex_key_text_pos = (0.35, 0.5)
+        
     def set_gui_poses(self, screen_size):
         self.single_game_pos = self.tup_mul(screen_size, self.single_game_default_pos)
         self.option_pos = self.tup_mul(screen_size, self.option_default_pos)
         self.exit_pos = self.tup_mul(screen_size, self.exit_default_pos)
         self.button_select_pos = self.tup_mul(screen_size, self.button_select_default_poses[self.select_state])
+        
+        self.ex_key_text_pos = self.tup_mul(screen_size, self.default_ex_key_text_pos)
         
     def set_gui_imges(self, screen_size):
         scale_ratio = self.tup_div(screen_size, self.design_size)
@@ -139,6 +153,12 @@ class Title():
         self.option_rect = self.option_img.get_rect(center = self.option_pos)
         self.exit_rect = self.exit_img.get_rect(center = self.exit_pos)
         self.button_select_rect = self.button_select_img.get_rect(center = self.button_select_pos)
+        
+    def set_text(self):
+        font = pygame.font.SysFont("arial", self.default_font_size, True, True)
+        text = "Left: " + pygame.key.name(self.user_data.key_left) + " , Right: " + pygame.key.name(self.user_data.key_right) + ", Enter: " + pygame.key.name(self.user_data.key_enter)
+        self.ex_key_text = font.render(text, True, BLUE_MAGENTA)
+        
         
     def load_asset(self, root):
         self.default_title_BG = pygame.image.load(os.path.join(root, "Material/BG/title.png"))
