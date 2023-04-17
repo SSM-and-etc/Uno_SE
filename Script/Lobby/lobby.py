@@ -21,7 +21,6 @@ class Lobby():
         self.main=main
         for i,info in enumerate(self.player_box_info):
             self.player_list.append(InputBox(info[0],info[1],info[2],info[3],i,'player'+str(i)))
-        
     def display(self,main):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -41,4 +40,5 @@ class Lobby():
         for ratio in ratios:
             self.player_box_info.append((width*ratio[0], height*ratio[1],self.screen_width/6,self.screen_heigth/12))
     def play_game(self):
+       self.main.add_info(self.player_list)
        self.main.scene_change(self.main.get_scene_index("game start"))

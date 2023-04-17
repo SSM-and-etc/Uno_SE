@@ -15,7 +15,9 @@ class GameMain():
         self.root_path = os.path.join(current_path, os.pardir)
         
         self.running = True
-        
+        self.player_info=[]
+        self.playerAI_number=0
+        self.add_info
         self.scene_state = self.get_scene_index("title") # title: 0, single play: 1, ...
         self.game_data = GameData()
         self.user_data = UserData()
@@ -27,8 +29,8 @@ class GameMain():
         self.set_screen()
         
         self.card_group       = pygame.sprite.Group()
-        
         self.clock = pygame.time.Clock()
+      
         
     def get_scene_index(self, scene_name):
         match scene_name:
@@ -63,14 +65,13 @@ class GameMain():
                 self.lobby = Lobby(self)
                 # self.play_game = GamePlay(self)
             case 2:
-                self.play_game = GamePlay(self)
+                self.play_game = GamePlay(self,playerlist=self.player_info,stage_index=0,playerAI_number=self.playerAI_number)
             # case 2:
             #     self.lobby = Lobby(self)
             case _:
                 pass
 
     def reset_scene_obj(self, scene_state):
-        print("hello")
         match scene_state:
             case 0:
                 self.title = None
@@ -104,7 +105,13 @@ class GameMain():
         while self.running:
             self.get_scene_obj(self.scene_state).display(self)
             pygame.display.update()
-            
+
+    def add_info(self,info):
+        if info:
+            for player in info:
+                if player.clicked ==True:
+                    self.playerAI_number+=1
+                    self.player_info.append(player)
 
 if __name__ == "__main__":
     pygame.init()

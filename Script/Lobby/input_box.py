@@ -8,8 +8,9 @@ class InputBox:
         self.active = False
         self.clicked= False
         if(name=='player0'):
-            self.namebox.append('You')
+            self.namebox.append('ME')
             self.clicked= True
+            self.active = True
         else:
             self.namebox.append(name)    
         self.key=key
@@ -22,7 +23,7 @@ class InputBox:
                     self.active = not self.active
                     self.clicked= not self.clicked
                 else:
-                    self.active = False
+                    self.active=False
             if self.active == True:
                 if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_RETURN:
