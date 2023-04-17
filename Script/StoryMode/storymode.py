@@ -248,3 +248,6 @@ class StoryMode:
     
     def enter_state(self, main):
         pass
+    
+    def change_screen_size(self):
+        pass # title의 size 변경 방식과의 호환을 위해 임시로 만듦
