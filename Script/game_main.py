@@ -72,6 +72,7 @@ class GameMain():
                 self.title = Title(self)
             case 1:
                 # 인자) 일반 모드: 0, 대전 상대 수 n / 스토리: 스테이지 n 을 인자로 추가
+                self.player_info=[]
                 self.lobby = Lobby(self)
             case 2:
                 self.play_game = GamePlay(self,playerlist=self.player_info,stage_index=0,playerAI_number=self.playerAI_number)
