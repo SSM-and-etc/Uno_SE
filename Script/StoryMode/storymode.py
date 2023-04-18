@@ -127,13 +127,6 @@ class StoryMode:
             "asset": Asset(os.path.join(main.root_path, "Material/GUI/pop_up.png"), (320, 120)),
         }
 
-        self.level_description = [
-            "Level 1. Europe", 
-            "Level 2. Asia", 
-            "Level 3. South America", 
-            "Level 4. Africa"
-        ]
-
         for i in range(4):
             if self.user_data.story_level < i:
                 self.level_assets[i].set_image(os.path.join(main.root_path, f"Material/Avatar/{self.level_name[i]}_disabled.png"))
@@ -194,9 +187,6 @@ class StoryMode:
             for popup_asset in self.popup_assets:
                 self.main.screen.blit(*popup_asset.scaled())
 
-            self.main.screen.blit(self.description_font.render(self.level_description[self.popup["level"]], True, (0, 0, 0)),
-                                                               self.popup["asset"].scaled_rect().move(50, 50))
-
         self.main.screen.blit(*self.assets["cursor"].scaled())
 
     def collide_game(self, mouse_pos):
@@ -225,6 +215,7 @@ class StoryMode:
 
         else:
             self.popup["visible"] = True
+            self.popup["asset"].set_image(os.path.join(self.main.root_path, f"Material/GUI/pop_up_level{sel+1}.png"))
             self.popup["level"] = sel
             self.selection.reset()
 
