@@ -24,6 +24,8 @@ class Lobby():
         self.start_button=StartButton("Start", self.screen_width*0.4, self.screen_heigth*0.6, self.screen_width/6, self.screen_heigth/10,self.ORANGE,self.font, self.screen,self.play_game)
         self.play_game
         self.main=main
+        self.index=0
+        self.ex_key_counter = 0
         for i,info in enumerate(self.player_box_info):
             self.player_list.append(InputBox(info[0],info[1],info[2],info[3],i,'player'+str(i),self.font))
     def display(self,main):
@@ -35,10 +37,31 @@ class Lobby():
                 self.start_button.handle_event(event)
             for computer in self.player_list:
                 computer.handle_event(event)
-                            
+            if event.type == pygame.KEYDOWN:
+                if event.key == main.user_data.key_up:
+                    self.index-=1
+                elif event.key == main.user_data.key_down:
+                    self.index+=1
+                elif event.key == main.user_data.key_left:
+                    self.index-=1
+                elif event.key ==main.user_data.key_right:
+                    self.index+=1
+                    
+                if(self.index<-1):
+                    self.index=5
+                elif(self.index>5):
+                    self.index=-1
+                    
+            if event.type ==  pygame.K_RETURN:
+                if(self.index==-1):
+                    self.start_button.action()
+                else:
+                    self.player_list[self.index].handle_key_event(event,self.index)                                    
+        print(self.index)
         main.screen.blit(self.lobby_img, (0, 0))
         for computer in self.player_list:
             computer.draw(main.screen)
+        # self.screen.blit(self.button_select_img, self.button_select_rect)
         self.start_button.draw()
             
     def make_screen(self,width,height,ratios):
@@ -47,3 +70,5 @@ class Lobby():
     def play_game(self):
        self.main.add_info(self.player_list)
        self.main.scene_change(self.main.get_scene_index("game start"))
+
+
