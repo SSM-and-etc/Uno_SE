@@ -19,8 +19,6 @@ class UserData():
         self.save_data()
         
         self.screen_sizes = [(640, 480), (1280, 720), (1920, 1080), (2560,1440)]
-        self.screen_size_index = 1
-        
         
     def load_data(self):
         with open(self.filename, "r") as f:

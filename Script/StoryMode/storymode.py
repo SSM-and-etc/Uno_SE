@@ -197,10 +197,11 @@ class StoryMode:
                     return True
         else:
             for i, level_asset in enumerate(self.level_assets):
-                if level_asset.scaled_rect().collidepoint(mouse_pos):
-                    self.selection.pos = i
-                    return True
-            
+                if i <= self.user_data.story_level:
+                    if level_asset.scaled_rect().collidepoint(mouse_pos):
+                        self.selection.pos = i
+                        return True
+                
         return False
 
     def handle(self):
