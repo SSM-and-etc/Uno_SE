@@ -449,6 +449,7 @@ class Option():
         self.user_data.save_data(self.main)
         self.set_option_gui()
         self.parent.change_screen_size()
+        self.main.sound.set_volume()
         
     def load_asset(self, root):
         self.default_pop_up_img                 = pygame.image.load(os.path.join(root, "Material/GUI/option_pop_up.png"))
