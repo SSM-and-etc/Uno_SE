@@ -81,6 +81,7 @@ class InputBox:
                     print(self.index)
     def draw(self,screen):
         # Input Box와 텍스트를 화면에 그립니다.
+        # self.color = (255, 127, 0) if self.active else (0, 0, 0)
         pygame.draw.rect(screen, self.color, self.rect, 2)
         # font = pygame.font.Font(None, int(self.screen_width/30))
         if(self.clicked==False):
