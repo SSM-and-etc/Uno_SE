@@ -108,6 +108,7 @@ class Option():
         screen.blit(self.save_img, self.save_rect)
         screen.blit(self.reset_img, self.reset_rect)
         screen.blit(self.exit_img, self.exit_rect)
+        screen.blit(self.game_exit_img, self.game_exit_rect)
         
         if self.user_data.color_blindness_mode:
             screen.blit(self.reset_CM_img, self.reset_rect)
@@ -201,7 +202,7 @@ class Option():
     
     def click_collide_setting_buttons(self, mouse_pos):
         if self.on_select:
-            if self.save_rect.collidepoint(mouse_pos) or self.reset_rect.collidepoint(mouse_pos) or self.exit_rect.collidepoint(mouse_pos):
+            if self.save_rect.collidepoint(mouse_pos) or self.reset_rect.collidepoint(mouse_pos) or self.exit_rect.collidepoint(mouse_pos) or self.game_exit_rect.collidepoint(mouse_pos):
                 self.on_select = False
             else:
                 return False
@@ -213,6 +214,9 @@ class Option():
                 self.reset_option()
             elif self.exit_rect.collidepoint(mouse_pos):
                 self.exit_option()
+            elif self.game_exit_rect.collidepoint(mouse_pos):
+                self.main.scene_change(self.main.get_scene_index("title"))
+                #self.exit_option()
             else:
                 return False
         return True
@@ -267,6 +271,8 @@ class Option():
             self.cursor_state = [7, 1]
         elif self.exit_rect.collidepoint(mouse_pos):
             self.cursor_state = [7, 2]
+        elif self.game_exit_rect.collidepoint(mouse_pos):
+            self.cursor_state = [8, 0]
             
     def keyhold_option(self):
         if self.cursor_state[0] >= 4 and self.cursor_state[0] <= 6:
@@ -469,6 +475,7 @@ class Option():
         self.default_reset_img                  = pygame.image.load(os.path.join(root, "Material/Option/reset.png"))
         self.default_reset_CM_img               = pygame.image.load(os.path.join(root, "Material/ColorMode/colormode_reset.png"))
         self.default_exit_img                   = pygame.image.load(os.path.join(root, "Material/Option/exit.png"))
+        self.default_game_exit_img              = pygame.image.load(os.path.join(root, "Material/Button/exit.png"))
         self.default_button_select_img          = pygame.image.load(os.path.join(root, "Material/Button/button_select.png"))
         self.default_button_cursor_img          = pygame.image.load(os.path.join(root, "Material/Button/button_cursor.png"))
         self.default_button_select_CM_img       = pygame.image.load(os.path.join(root, "Material/ColorMode/colormode_button_select.png"))
@@ -507,9 +514,10 @@ class Option():
             (0.62, 0.575),
             (0.62, 0.665)
         ]
-        self.save_default_pos = (0.35, 0.85)
-        self.reset_default_pos = (0.5, 0.85)
-        self.exit_default_pos = (0.65, 0.85)
+        self.save_default_pos = (0.35, 0.77)
+        self.reset_default_pos = (0.5, 0.77)
+        self.exit_default_pos = (0.65, 0.77)
+        self.game_exit_default_pos = (0.65, 0.85)
         
         self.button_select_default_poses = \
         [
@@ -520,7 +528,8 @@ class Option():
             [(0.49, 0.44), (0.62, 0.44)],
             [(0.49, 0.53), (0.62, 0.53)],
             [(0.49, 0.62), (0.62, 0.62)],
-            [(0.35, 0.78), (0.5, 0.78), (0.65, 0.78)]
+            [(0.35, 0.70), (0.5, 0.70), (0.65, 0.70)],
+            [(0.65, 0.80)],
         ]
         
         self.left_key_text_default_pos = (0.52, 0.21)
@@ -545,6 +554,7 @@ class Option():
         self.save_pos = self.tup_mul(screen_size, self.save_default_pos)
         self.reset_pos = self.tup_mul(screen_size, self.reset_default_pos)
         self.exit_pos = self.tup_mul(screen_size, self.exit_default_pos)
+        self.game_exit_pos = self.tup_mul(screen_size, self.game_exit_default_pos)
         
         self.button_select_poses = [[self.tup_mul(screen_size, pos) for pos in poses] for poses in self.button_select_default_poses]
         self.button_cursor_poses = self.button_select_poses
@@ -568,6 +578,7 @@ class Option():
         self.reset_img                  = pygame.transform.scale(self.default_reset_img               , self.tup_mul(self.get_img_size(self.default_reset_img),scale_ratio))
         self.reset_CM_img               = pygame.transform.scale(self.default_reset_CM_img            , self.tup_mul(self.get_img_size(self.default_reset_img),scale_ratio))
         self.exit_img                   = pygame.transform.scale(self.default_exit_img                , self.tup_mul(self.get_img_size(self.default_exit_img),scale_ratio))
+        self.game_exit_img              = pygame.transform.scale(self.default_game_exit_img           , self.tup_mul(self.get_img_size(self.default_game_exit_img),scale_ratio))
         self.button_select_img          = pygame.transform.scale(self.default_button_select_img       , self.tup_mul(self.get_img_size(self.default_button_select_img ),scale_ratio))
         self.button_cursor_img          = pygame.transform.scale(self.default_button_cursor_img       , self.tup_mul(self.get_img_size(self.default_button_cursor_img),scale_ratio))
         self.button_select_CM_img       = pygame.transform.scale(self.default_button_select_CM_img    , self.tup_mul(self.get_img_size(self.default_button_select_img ),scale_ratio))
@@ -590,6 +601,7 @@ class Option():
         self.save_rect = self.save_img.get_rect(center = self.save_pos)
         self.reset_rect = self.reset_img.get_rect(center = self.reset_pos)
         self.exit_rect = self.exit_img.get_rect(center = self.exit_pos)
+        self.game_exit_rect = self.game_exit_img.get_rect(center = self.game_exit_pos)
         self.button_select_rects = [[self.button_select_img.get_rect(center = pos) for pos in poses] for poses in self.button_select_poses]
         self.button_cursor_rects = [[self.button_cursor_img.get_rect(center = pos) for pos in poses] for poses in self.button_cursor_poses]
             

@@ -128,10 +128,10 @@ class StoryMode:
         }
 
         self.level_description = [
-            "현재 지역은 유럽입니다. 도전하시겠습니까?", 
-            "현재 지역은 아시아입니다. 도전하시겠습니까?", 
-            "현재 지역은 남아메리카입니다. 도전하시겠습니까?", 
-            "현재 지역은 아프리카입니다. 도전하시겠습니까?"
+            "Level 1. Europe", 
+            "Level 2. Asia", 
+            "Level 3. South America", 
+            "Level 4. Africa"
         ]
 
         for i in range(4):
@@ -140,7 +140,7 @@ class StoryMode:
             
         self.on_game_gui = True
 
-        self.description_font = pygame.font.SysFont("AppleGothic", 24)
+        self.description_font = pygame.font.SysFont(None, 32)
 
         self.selection = Selection(self.popup, min(self.user_data.story_level, 3))
 
