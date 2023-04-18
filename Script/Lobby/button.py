@@ -23,6 +23,11 @@ class StartButton:
       if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
                 self.action()
+    def handle_key_event(self,event):   
+        if event.key == pygame.K_RETURN:
+              self.action()
+
+        
 
     def text_objects(self, text, font):
         text_surface = font.render(text, True, pygame.Color('black'))
