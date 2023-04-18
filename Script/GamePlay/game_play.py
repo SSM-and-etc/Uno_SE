@@ -209,7 +209,7 @@ class GamePlay:
         if self.stage_index == 0:
             self.player = Player(self.playerlist[0].namebox[1])        
             self.players = [self.player]
-            for player in self.playerlist:
+            for player in self.playerlist[1:]:
                 player = PlayerAI(self.stage_index,player.namebox[1])
                 self.players.append(player)
 
