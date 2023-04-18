@@ -1,4 +1,6 @@
 import pygame
+import os
+import json
 
 class DataSet():
     def __init__(self):
@@ -9,22 +11,56 @@ class DataSet():
 
 class UserData():
     def __init__(self):
-        # if 기존 save파일이 있을 경우:
-        #   self.load_data()
-        # else:
-        self.reset_data()
-            # self.save_data()
+        self.filename = "uno.ini"
+        if os.path.exists(self.filename):
+            self.load_data()
+        else:
+            self.reset_data()
+        self.save_data()
         
         self.screen_sizes = [(640, 480), (1280, 720), (1920, 1080), (2560,1440)]
         self.screen_size_index = 1
         
         
     def load_data(self):
-        pass
+        with open(self.filename, "r") as f:
+            data = json.loads(f.read())
+
+        self.screen_width           = data["screen_width"]
+        self.screen_height          = data["screen_height"]
+        self.key_left               = data["key_left"]
+        self.key_right              = data["key_right"]
+        self.key_enter              = data["key_enter"]
+        self.key_up                 = data["key_up"]
+        self.key_down               = data["key_down"]
+        self.color_blindness_mode   = data["color_blindness_mode"]
+        self.volumes                = data["volumes"]
+        self.volumes_off            = data["volumes_off"]
+        self.screen_size_index = data["screen_size_index"]
+        self.story_level = data["story_level"]
     
-    def save_data(self, main):
-        self.set_screen_size(main, self.screen_size_index)
-        main.set_screen()
+    def save_data(self, main=None):
+        data = {
+            "screen_width": self.screen_width,
+            "screen_height": self.screen_height,
+            "key_left": self.key_left,
+            "key_right": self.key_right,
+            "key_enter": self.key_enter,
+            "key_up": self.key_up,
+            "key_down": self.key_down,
+            "color_blindness_mode": self.color_blindness_mode,
+            "volumes": self.volumes,
+            "volumes_off": self.volumes_off,
+            "screen_size_index": self.screen_size_index,
+            "story_level": self.story_level
+        }
+
+        with open(self.filename, "w") as f:
+            f.write(json.dumps(data))
+
+        if main:
+            self.set_screen_size(main, self.screen_size_index)
+            main.set_screen()
     
     def reset_data(self):
         self.screen_width           = 1280
