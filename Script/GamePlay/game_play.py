@@ -194,7 +194,7 @@ class GamePlay:
         self.font_resize() 
 
         self.player_setting(playerAI_number)
-        self.game = Game(self.players, stage_index)
+        self.game = Game(self.players, stage_index, main.sound)
 
         self.pane_assets = [FakeAsset((10, 514, 876, 196))]
         for i in range(len(self.players)-1):

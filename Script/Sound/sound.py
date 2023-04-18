@@ -55,6 +55,6 @@ class Sound():
         self.card_submission.set_volume(volume)
             
     def change_bgm(self, stage_idx):
-        self.bgms[self.now_stage_idx].stop()
+        self.bgms[self.now_stage_idx].fadeout(2)
         self.bgms[stage_idx].play(-1)
         self.now_stage_idx = stage_idx
