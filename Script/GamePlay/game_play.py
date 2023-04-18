@@ -342,6 +342,7 @@ class GamePlay:
                 if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN:
                     if self.stage_index != 0:
                         self.user_data.story_level = self.stage_index
+                        self.user_data.save_data()
                     main.scene_change(main.get_scene_index("title"))
 
         else:
