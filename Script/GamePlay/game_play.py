@@ -234,7 +234,7 @@ class GamePlay:
             case _:
                 return None
             
-    def update_table(self):
+    def update_table(self, only_asset=False):
         card = self.game.table.top()
         if card.is_color():
             filename = card.color + "_" + card.card_type.split("_")[1]
@@ -256,21 +256,22 @@ class GamePlay:
                     assets.append(Asset(self.assets["deck"].orig_img, (10 + self.pane_assets[i].rect[0] + w*j, 30 + y), mag))
                 self.hand_assets.append(assets)
 
-        # uno버튼에 의한 드로우 처리
-        if len(self.game.turn().hand) == 1 and self.game.turn().uno != self.game.turn():
-            self.game.turn().uno = None
-            if self.game.deck.stack:
-                self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.game.turn())], 50, 0))
-                self.game.draw(self.game.turn(), 1)  
-            else:
-                self.game.draw(self.game.turn(), 1) 
-        
-        pygame.time.set_timer(pygame.USEREVENT, 1000)
-        self.counter = 15
+        if not only_asset:
+            # uno버튼에 의한 드로우 처리
+            if len(self.game.turn().hand) == 1 and self.game.turn().uno != self.game.turn():
+                self.game.turn().uno = None
+                if self.game.deck.stack:
+                    self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.game.turn())], 50, 0))
+                    self.game.draw(self.game.turn(), 1)  
+                else:
+                    self.game.draw(self.game.turn(), 1) 
+            
+            pygame.time.set_timer(pygame.USEREVENT, 1000)
+            self.counter = 15
 
-        for player in self.game.players:
-            if len(player.hand) == 0:
-                self.winner = player
+            for player in self.game.players:
+                if len(player.hand) == 0:
+                    self.winner = player
 
     def calculate_card_size(self, player_num):
         n = max(1, len(self.game.players[player_num].hand))
@@ -291,7 +292,7 @@ class GamePlay:
 
         return card_x, pane_y + (pane_h-card_h) / 2, mag * 0.9
 
-    def update_hand(self):
+    def update_hand(self, only_asset=False):
         card_size = self.calculate_card_size(0)
 
         self.card_assets = []
@@ -302,16 +303,20 @@ class GamePlay:
                 filename = "wild_" + card.card_type.split("_")[1]
             self.card_assets.append(Asset(f"Card/{filename}.png", (10+card_size[0]*i, 30+card_size[1]), mag=card_size[2]))
             
-        if self.color_selection["selecting"]:
-            self.color_selection["selecting"] = False
+        if not only_asset:
+            if self.color_selection["selecting"]:
+                self.color_selection["selecting"] = False
 
-        self.selection.reset()
+            self.selection.reset()
     
     def option_closed(self):
         for name, asset in self.assets.items():
             asset.image_reload()
         for color, asset in self.color_selection["assets"].items():
             asset.image_reload()
+
+        self.update_table(only_asset=True)
+        self.update_hand(only_asset=True)
 
         self.font_resize()
 
