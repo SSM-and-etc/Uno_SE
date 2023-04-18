@@ -70,5 +70,6 @@ class Lobby():
     def play_game(self):
        self.main.add_info(self.player_list)
        self.main.scene_change(self.main.get_scene_index("game start"))
-
-
+       
+    def change_screen_size(self):
+        pass # title의 size 변경 방식과의 호환을 위해 임시로 만듦

@@ -64,9 +64,10 @@ class FakeAsset(Asset):
         self.rect = pygame.Rect(rect)
 
 class Selection:
-    def __init__(self, popup):
+    def __init__(self, popup, story_level):
         self.pos = 0
-        self.n = 3
+        self.story_level = story_level
+        self.n = story_level
         self.popup = popup
 
     def reset(self):
@@ -74,7 +75,7 @@ class Selection:
         if self.popup["visible"]:
             self.n = 1
         else:
-            self.n = 3
+            self.n = self.story_level
 
     def left(self):
         if self.pos > 0:
@@ -116,8 +117,8 @@ class StoryMode:
         ]
 
         self.popup_assets = [
-            Asset(os.path.join(main.root_path, "Material/Avatar/america1.png"), (500, 500), mag=0.03),
-            Asset(os.path.join(main.root_path, "Material/Avatar/africa1.png"), (720, 500), mag=0.03),            
+            Asset(os.path.join(main.root_path, "Material/Button/yes.png"), (480, 500), mag=0.5),
+            Asset(os.path.join(main.root_path, "Material/Button/no.png"), (700, 500), mag=0.5),            
         ]
 
         self.popup = {
@@ -132,7 +133,6 @@ class StoryMode:
             "현재 지역은 남아메리카입니다. 도전하시겠습니까?", 
             "현재 지역은 아프리카입니다. 도전하시겠습니까?"
         ]
-        # 지역 클리어했는지 user_data 추가하여 로드, img 흑백으로 disabled 표현
 
         for i in range(4):
             if self.user_data.story_level < i:
@@ -142,7 +142,7 @@ class StoryMode:
 
         self.description_font = pygame.font.SysFont("AppleGothic", 24)
 
-        self.selection = Selection(self.popup)
+        self.selection = Selection(self.popup, min(self.user_data.story_level, 3))
 
     def display(self, main):
         if self.on_option:
@@ -217,8 +217,8 @@ class StoryMode:
         sel = self.selection.pos
         if self.popup["visible"]:
             if sel == 0:
-                self.main.stage_level = self.popup["level"]+1
-                self.main.scene_change(self.main.get_scene_index("story mode"))
+                self.main.stage_index = self.popup["level"]+1
+                self.main.scene_change(self.main.get_scene_index("story mode game start"))
             elif sel == 1:
                 self.popup["visible"] = False
                 self.selection.reset()

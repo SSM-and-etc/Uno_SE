@@ -9,7 +9,8 @@ from System.weighted_picker import WeightedPicker
 import random
 
 class Game:
-    def __init__(self, players, stage_index):
+    def __init__(self, players, stage_index, sound):
+        self.sound = sound
         self.players = players
         self.table = Table()
         self.deck = Deck({"number": 1, "special": 1, "wild": 2})
@@ -42,6 +43,7 @@ class Game:
         
 
     def draw(self, player, n=1):
+        self.sound.card_submission.play()
         n = min(n, len(self.deck.stack))
         player.hand.extend([self.deck.draw() for _ in range(n)])
         player.uno = None
@@ -53,6 +55,8 @@ class Game:
 
     def deal(self, player, players_number, card):
         if self.table.playable(card):
+            self.sound.card_selection.play()
+            
             if card.is_number():
                self.table.put(card) 
 
@@ -97,6 +101,7 @@ class Game:
             return False
 
     def hand_swap(self, player1, player2):
+        self.sound.card_submission.play()
         player1.hand, player2.hand = player2.hand, player1.hand
         self.handle_uno_state(player1)
         self.handle_uno_state(player2)
