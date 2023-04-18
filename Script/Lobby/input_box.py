@@ -37,9 +37,10 @@ class InputBox:
                         elif event.key == pygame.K_BACKSPACE:
                             # 백스페이스 키를 누르면 Input Box의 텍스트에서 마지막 문자를 삭제합니다.
                             self.namebox[1] = self.namebox[1][:-1]
-                        if len(self.namebox[1]) < 10:
-                            if event.unicode.isalnum():
-                                self.namebox[1] += event.unicode
+                        if self.clicked==True:
+                            if len(self.namebox[1]) < 10:
+                                if event.unicode.isalnum():
+                                    self.namebox[1] += event.unicode
 
     def handle_key_event(self, event,index):
         # for event in pygame.event.get():
@@ -73,9 +74,10 @@ class InputBox:
                         # 백스페이스 키를 누르면 Input Box의 텍스트에서 마지막 문자를 삭제합니다.
                         self.namebox[1] = self.namebox[1][:-1]
                         # 키 입력이 있으면 Input Box의 텍스트에 추가합니다.
-                    if len(self.namebox[1]) < 10:
-                        if event.unicode.isalnum():
-                            self.namebox[1] += event.unicode
+                    if self.clicked==True:
+                        if len(self.namebox[1]) < 10:
+                            if event.unicode.isalnum():
+                                self.namebox[1] += event.unicode
                     print(self.index)
     def draw(self,screen):
         # Input Box와 텍스트를 화면에 그립니다.
