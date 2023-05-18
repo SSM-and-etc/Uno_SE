@@ -92,8 +92,12 @@ class Title():
             case 1:
                 main.scene_change(main.get_scene_index("story mode"))
             case 2:
-                self.on_option = True
+                main.scene_change(main.get_scene_index("multi game"))
             case 3:
+                self.on_option = True
+            case 4:
+                pass # 업적 확인 연결
+            case 5:
                 main.running = False
     
     def set_title_gui(self, screen_size):
@@ -119,7 +123,9 @@ class Title():
     def add_buttons(self):
         self.buttons.add_row("Material/Button/single_game.png", "Material/Button/single_game.png", (0, 0.7))
         self.buttons.add("Material/Button/story_mode.png", "Material/Button/story_mode.png", (0, 0.7))
+        self.buttons.add("Material/Button/multi_game.png", "Material/Button/multi_game.png", (0, 0.7))
         self.buttons.add("Material/Button/option.png", "Material/Button/option.png", (0, 0.7))
+        self.buttons.add("Material/Button/achievements.png", "Material/Button/achievements.png", (0, 0.7))
         self.buttons.add("Material/Button/exit.png", "Material/Button/exit.png", (0, 0.7))
         self.buttons.set_row_linspace(0, 0, 1)
         
