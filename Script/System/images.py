@@ -25,7 +25,7 @@ class Images():
                 for j in range(len(self.imgs[i])):
                     screen.blit(self.imgs[i][j], self.rects[i][j])
              
-    def add_row(self, img_path, img_path_c, pos, select_state_delta_pos = (0, -0.05)):
+    def add_row(self, img_path, img_path_c, pos):
         self.default_imgs.append([])
         self.default_imgs_c.append([])
         self.default_poses.append([])
