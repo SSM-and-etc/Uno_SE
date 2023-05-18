@@ -9,34 +9,36 @@ from Title.title import Title
 from GamePlay.game_play import GamePlay
 from StoryMode.storymode import StoryMode
 from Sound.sound import Sound
+from GameData.MultiLobby.multiLobby import MultiLobby
 
 
 class GameMain():
     def __init__(self):
-        current_path = os.path.dirname(__file__) 
+        current_path = os.path.dirname(__file__)
         self.root_path = os.path.join(current_path, os.pardir)
-        
+
         self.running = True
-        self.player_info=[]
-        self.playerAI_number=0
+        self.player_info = []
+        self.playerAI_number = 0
         self.add_info
-        self.scene_state = self.get_scene_index("title") # title: 0, single play: 1, ...
+        # title: 0, single play: 1, ...
+        self.scene_state = self.get_scene_index("title")
         self.game_data = GameData()
         self.user_data = UserData()
         self.sound = Sound(self)
         self.title = None
         self.play_game = None
         self.lobby = None
+        self.multi_lobby = None
         self.stage_index = 1
-        
-        
+
         self.set_scene_obj(self.scene_state)
         self.set_screen()
-        
-        self.card_group       = pygame.sprite.Group()
-        
+
+        self.card_group = pygame.sprite.Group()
+
         self.clock = pygame.time.Clock()
-        
+
     def get_scene_index(self, scene_name):
         match scene_name:
             case "title":
@@ -49,8 +51,10 @@ class GameMain():
                 return 3
             case "story mode game start":
                 return 4
+            case "multi game":
+                return 5
         return -1
-        
+
     def get_scene_obj(self, scene_state):
         match scene_state:
             case 0:
@@ -63,6 +67,9 @@ class GameMain():
                 return self.storymode
             case 4:
                 return self.play_game_storymode
+            case 5:
+                return self.multi_lobby
+
             case _:
                 return None
 
@@ -72,16 +79,21 @@ class GameMain():
                 self.title = Title(self)
             case 1:
                 # 인자) 일반 모드: 0, 대전 상대 수 n / 스토리: 스테이지 n 을 인자로 추가
-                self.player_info=[]
+                self.player_info = []
                 self.lobby = Lobby(self)
             case 2:
-                self.play_game = GamePlay(self,playerlist=self.player_info,stage_index=0,playerAI_number=self.playerAI_number)
+                self.play_game = GamePlay(
+                    self, playerlist=self.player_info, stage_index=0, playerAI_number=self.playerAI_number)
             case 3:
                 self.storymode = StoryMode(self)
             case 4:
-                self.play_game_storymode = GamePlay(self, None, self.stage_index)
+                self.play_game_storymode = GamePlay(
+                    self, None, self.stage_index)
+            case 5:
+                self.multi_lobby = MultiLobby(self)
             case _:
                 pass
+
     def reset_scene_obj(self, scene_state):
         match scene_state:
             case 0:
@@ -94,41 +106,43 @@ class GameMain():
                 self.storymode = None
             case 4:
                 self.play_game_storymode = None
+            case 5:
+                self.multi_lobby = None
             case _:
                 pass
-            
-        
+
     def scene_change(self, next_scene_state):
         self.reset_scene_obj(self.scene_state)
         self.set_scene_obj(next_scene_state)
         self.sound.change_bgm(next_scene_state)
-        
+
         self.scene_state = next_scene_state
-        
-        
+
     def set_screen(self):
         self.screen = pygame.display.set_mode(self.user_data.get_screen_size())
-        
+
     def group_reset(self):
         self.card_group.empty()
-        
+
         # self.class.update(self)
         self.card_group.update(self)
 
         # self.class.draw(screen)
-        
+
     def play(self):
         self.clock.tick(30)
         while self.running:
             self.get_scene_obj(self.scene_state).display(self)
             pygame.display.update()
-            
-    def add_info(self,info):
+
+    def add_info(self, info):
         if info:
             for player in info:
-                if player.clicked ==True:
-                    self.playerAI_number+=1
+                if player.clicked == True:
+                    self.playerAI_number += 1
                     self.player_info.append(player)
+
+
 if __name__ == "__main__":
     # pygame.mixer.pre_init(44100,-16,2,512)
     pygame.init()
