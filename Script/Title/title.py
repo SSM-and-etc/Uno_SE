@@ -3,6 +3,9 @@ import pygame
 import os
 
 from System.option import Option
+from System.images import Images
+from System.statebuttons import StateButtons
+from System.texts import Texts
 
 # Constants
 STATE_NUMBER = 4
@@ -17,7 +20,11 @@ class Title():
         self.main = main
         self.design_size = (1280, 720)
         self.user_data = main.user_data
+        self.imgs = Images(main.user_data, main.root_path)
+        self.buttons = StateButtons(main.user_data, main.root_path)
+        self.texts = Texts(main.user_data)
         
+        self.add_assets()
         self.load_asset(main.root_path)
         self.set_gui_default_poses()
         self.default_font_size = 30
@@ -53,12 +60,10 @@ class Title():
             self.draw_title(main.screen)
             
     def draw_title(self, screen):
-        screen.blit(self.title_BG, (0, 0))
-        screen.blit(self.single_game_img, self.single_game_rect)
-        screen.blit(self.option_img, self.option_rect)
-        screen.blit(self.story_mode_img, self.story_mode_rect)
-        screen.blit(self.exit_img, self.exit_rect)
-        screen.blit(self.button_select_img, self.button_select_rect)
+        self.imgs.draw(screen)
+        self.buttons.draw(screen)
+        self.texts.draw(screen)
+        
         if self.user_data.color_blindness_mode:
             screen.blit(self.button_select_CM_img, self.button_select_rect)
         else:
@@ -68,36 +73,18 @@ class Title():
             screen.blit(self.ex_key_text, self.ex_key_text_pos)
         
     def click_collide_title(self, main, mouse_pos):
-        if self.single_game_rect.collidepoint(mouse_pos):
-            self.enter_state(main)
-        elif self.option_rect.collidepoint(mouse_pos):
-            self.on_option = True
-        elif(self.story_mode_rect.collidepoint(mouse_pos)):
-            self.enter_state(main)
-        elif self.exit_rect.collidepoint(mouse_pos):
-            main.running = False
+        clicked_button_idx = self.buttons.get_clicked_button_idx(mouse_pos)
+        if clicked_button_idx != None:
+            pass
             
     def move_collide_title(self, main, mouse_pos):
-        if(self.single_game_rect.collidepoint(mouse_pos)):
-            self.select_state = 0
-        elif(self.story_mode_rect.collidepoint(mouse_pos)):
-            self.select_state = 1
-        elif(self.option_rect.collidepoint(mouse_pos)):
-            self.select_state = 2
-        elif (self.exit_rect.collidepoint(mouse_pos)):
-            self.select_state = 3
+        clicked_button_idx = self.buttons.get_clicked_button_idx(mouse_pos)
         
         self.apply_state_change()    
             
     def keydown_title(self, main, key):
-        if key == self.user_data.key_left:
-            self.select_state -= 1
-            while(self.select_state < 0):
-                self.select_state += STATE_NUMBER
-        elif key == self.user_data.key_right:
-            self.select_state += 1
-            while(self.select_state >= STATE_NUMBER):
-                self.select_state -= STATE_NUMBER
+        if self.buttons.key_down_state(key):
+            pass
         elif key == self.user_data.key_enter:
             self.enter_state(main)
             return
@@ -198,4 +185,23 @@ class Title():
     def tup_div(self, tup1, tup2):
         return (tup1[0] / tup2[0], tup1[1] / tup2[1])
     
+    def add_assets(self):
+        self.add_imgs()
+        self.add_buttons()
+        self.add_texts()
     
+    def add_imgs(self):
+        self.imgs.add_row("Material/BG/title.png", (0.5, 0.5))
+        
+    def add_buttons(self):
+        self.buttons.add_row("Material/Button/single_game.png", "Material/Button/single_game.png", (0, 0.7))
+        self.buttons.add("Material/Button/option.png", "Material/Button/option.png", (0, 0.7))
+        self.buttons.add("Material/Button/story_mode.png", "Material/Button/story_mode.png", (0, 0.7))
+        self.buttons.add("Material/Button/exit.png", "Material/Button/exit.png", (0, 0.7))
+        self.buttons.set_row_linspace(0, 0, 1)
+        
+        #self.buttons.add("Material/Button/button_select.png")
+        #self.buttons.add("Material/ColorMode/colormode_button_select.png")
+        
+    def add_texts(self):
+        pass
