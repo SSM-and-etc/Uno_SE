@@ -79,28 +79,20 @@ class Title():
             
     def move_collide_title(self, main, mouse_pos):
         clicked_button_idx = self.buttons.get_clicked_button_idx(mouse_pos)
-        
-        self.apply_state_change()    
+        if clicked_button_idx != None:
+            pass
             
     def keydown_title(self, main, key):
         if self.buttons.key_down_state(key):
             pass
         elif key == self.user_data.key_enter:
             self.enter_state(main)
-            return
         elif key == pygame.K_ESCAPE:
             self.on_option = True
         else:
             pygame.time.set_timer(pygame.USEREVENT, 1000)
             self.ex_key_counter = 3
-            return
         
-        self.apply_state_change()
-            
-    def apply_state_change(self):
-        screen_size = self.user_data.get_screen_size()
-        self.button_select_pos = self.tup_mul(screen_size, self.button_select_default_poses[self.select_state])
-        self.button_select_rect = self.button_select_img.get_rect(center = self.button_select_pos)
     
     def enter_state(self, main):
         if(self.select_state == STATE_SINGLE_GAME):
@@ -126,38 +118,19 @@ class Title():
         self.set_text(screen_size)
         
     def set_gui_default_poses(self):
-        self.single_game_default_pos = (0.2, 0.7)
-        self.option_default_pos = (0.6, 0.7)
-        self.story_mode_default_pos = (0.4, 0.7)
-        self.exit_default_pos = (0.8, 0.7)
         self.button_select_default_poses = [ (0.2, 0.65), (0.4, 0.65), (0.6, 0.65), (0.8, 0.65) ]
-        
         self.default_ex_key_text_pos = (0.35, 0.5)
         
     def set_gui_poses(self, screen_size):
-        self.single_game_pos = self.tup_mul(screen_size, self.single_game_default_pos)
-        self.option_pos = self.tup_mul(screen_size, self.option_default_pos)
-        self.story_mode_pos = self.tup_mul(screen_size, self.story_mode_default_pos)
-        self.exit_pos = self.tup_mul(screen_size, self.exit_default_pos)
         self.button_select_pos = self.tup_mul(screen_size, self.button_select_default_poses[self.select_state])
-        
         self.ex_key_text_pos = self.tup_mul(screen_size, self.default_ex_key_text_pos)
         
     def set_gui_imges(self, screen_size):
         scale_ratio = self.tup_div(screen_size, self.design_size)
-        self.title_BG           = pygame.transform.scale(self.default_title_BG, self.tup_mul(self.get_img_size(self.default_title_BG), scale_ratio))
-        self.single_game_img    = pygame.transform.scale(self.default_single_game_img, self.tup_mul(self.get_img_size(self.default_single_game_img), scale_ratio))
-        self.option_img         = pygame.transform.scale(self.default_option_img, self.tup_mul(self.get_img_size(self.default_option_img), scale_ratio))
-        self.story_mode_img     = pygame.transform.scale(self.default_story_mode_img, self.tup_mul(self.get_img_size(self.default_story_mode_img), scale_ratio))
-        self.exit_img           = pygame.transform.scale(self.default_exit_img, self.tup_mul(self.get_img_size(self.default_exit_img), scale_ratio))
         self.button_select_img  = pygame.transform.scale(self.default_button_select_img, self.tup_mul(self.get_img_size(self.default_button_select_img), scale_ratio))
         self.button_select_CM_img       = pygame.transform.scale(self.default_button_select_CM_img    , self.tup_mul(self.get_img_size(self.default_button_select_img ),scale_ratio))
             
     def set_gui_rct(self):
-        self.single_game_rect = self.single_game_img.get_rect(center = self.single_game_pos)
-        self.option_rect = self.option_img.get_rect(center = self.option_pos)
-        self.story_mode_rect = self.story_mode_img.get_rect(center = self.story_mode_pos)
-        self.exit_rect = self.exit_img.get_rect(center = self.exit_pos)
         self.button_select_rect = self.button_select_img.get_rect(center = self.button_select_pos)
         
     def set_text(self, screen_size):
@@ -168,11 +141,6 @@ class Title():
         self.ex_key_text = font.render(ex_key_text, True, BLUE_MAGENTA)
         
     def load_asset(self, root):
-        self.default_title_BG = pygame.image.load(os.path.join(root, "Material/BG/title.png"))
-        self.default_single_game_img = pygame.image.load(os.path.join(root, "Material/Button/single_game.png"))
-        self.default_option_img = pygame.image.load(os.path.join(root, "Material/Button/option.png"))
-        self.default_story_mode_img = pygame.image.load(os.path.join(root, "Material/Button/story_mode.png"))
-        self.default_exit_img = pygame.image.load(os.path.join(root, "Material/Button/exit.png"))
         self.default_button_select_img = pygame.image.load(os.path.join(root, "Material/Button/button_select.png"))
         self.default_button_select_CM_img = pygame.image.load(os.path.join(root, "Material/ColorMode/colormode_button_select.png"))
         
@@ -191,7 +159,7 @@ class Title():
         self.add_texts()
     
     def add_imgs(self):
-        self.imgs.add_row("Material/BG/title.png", (0.5, 0.5))
+        self.imgs.add_row("Material/BG/title.png", "Material/ColorMode/BG/title.png", (0.5, 0.5))
         
     def add_buttons(self):
         self.buttons.add_row("Material/Button/single_game.png", "Material/Button/single_game.png", (0, 0.7))

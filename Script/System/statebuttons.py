@@ -2,14 +2,15 @@ import pygame
 
 import os
 
-from images import Images
+from System.images import Images
 
 
 class StateButtons(Images): 
     def __init__(self, data, root, design_size = (1280, 720)):
-        super.__init__(data, root, design_size)
+        super().__init__(data, root, design_size)
         self.state = [0, 0]
         self.is_state_holding = False
+        self.on_state = True
         
         
     def draw(self, screen):
@@ -70,3 +71,6 @@ class StateButtons(Images):
     
     def get_state(self):
         return self.state[0], self.state[1]
+    
+    def set_state(self, is_on):
+        self.on_state = is_on

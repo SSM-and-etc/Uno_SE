@@ -49,13 +49,13 @@ class Images():
         self.apply_rect_scale(i, j)
         
     def set_row_linspace(self, i, start, end):
-        linspace = np.linspace(start, end, len(self.imgs[i] + 2))[1:-1]
+        linspace = np.linspace(start, end, len(self.imgs[i]) + 2)[1:-1]
         for j in range(len(self.imgs[i])):
-            self.default_poses[i][j] = (linspace[i], self.default_poses[i][j][1])
+            self.default_poses[i][j] = (linspace[j], self.default_poses[i][j][1])
             self.apply_rect_scale(i, j)
         
     def set_col_linspace(self, j, start, end):
-        linspace = np.linspace(start, end, len(self.imgs + 2))[1:-1]
+        linspace = np.linspace(start, end, len(self.imgs) + 2)[1:-1]
         for i in range(len(self.imgs)):
             self.default_poses[i][j] = (self.default_poses[i][j][0], linspace[i])
             self.apply_rect_scale(i, j)
