@@ -49,6 +49,8 @@ class GameMain():
                 return 3
             case "story mode game start":
                 return 4
+            case "multi game":
+                return 5
         return -1
         
     def get_scene_obj(self, scene_state):
@@ -63,6 +65,8 @@ class GameMain():
                 return self.storymode
             case 4:
                 return self.play_game_storymode
+            case 5:
+                pass # TODO: multi게임 진행 scene으로 연결 (로비 등등)
             case _:
                 return None
 
@@ -82,6 +86,7 @@ class GameMain():
                 self.play_game_storymode = GamePlay(self, None, self.stage_index)
             case _:
                 pass
+            
     def reset_scene_obj(self, scene_state):
         match scene_state:
             case 0:
