@@ -6,6 +6,7 @@ from System.option import Option
 from System.images import Images
 from System.statebuttons import StateButtons
 from System.texts import Texts
+from System.achievements import Achievements
 
 # Constants
 STATE_NUMBER = 4
@@ -18,7 +19,6 @@ BLUE_MAGENTA = (153, 102, 204)
 class Title():
     def __init__(self, main):
         self.main = main
-        self.design_size = (1280, 720)
         self.user_data = main.user_data
         self.imgs = Images(main.user_data, main.root_path)
         self.buttons = StateButtons(main.user_data, main.root_path)
@@ -28,9 +28,11 @@ class Title():
         self.default_font_size = 30
         
         self.on_option = False
+        self.on_achievements = False
         self.select_state = 0 # 0: single game start, 1: option, 2: exit ...
         
         self.option = Option(main, self)
+        self.achievements = Achievements(main)
         
         self.set_title_gui(self.user_data.get_screen_size())
         self.ex_key_counter = 0
@@ -38,6 +40,8 @@ class Title():
     def display(self, main):
         if self.on_option:
             self.on_option = self.option.display(main)
+        elif self.on_achievements:
+            self.on_achievements = self.achievements.display(main)
         else:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -96,7 +100,7 @@ class Title():
             case 3:
                 self.on_option = True
             case 4:
-                pass # 업적 확인 연결
+                self.on_achievements = True
             case 5:
                 main.running = False
     
@@ -116,6 +120,11 @@ class Title():
         self.add_imgs()
         self.add_buttons()
         self.add_texts()
+        
+    def apply_screen_size(self):
+        self.imgs.apply_screen_size()
+        self.buttons.apply_screen_size()
+        self.ex_texts.apply_screen_size()
     
     def add_imgs(self):
         self.imgs.add_row("Material/BG/title.png", "Material/ColorMode/BG/title.png", (0.5, 0.5))

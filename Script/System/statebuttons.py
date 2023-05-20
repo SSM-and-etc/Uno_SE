@@ -6,12 +6,13 @@ from System.images import Images
 
 
 class StateButtons(Images): 
-    def __init__(self, data, root, design_size = (1280, 720)):
+    def __init__(self, data, root, design_size = (1280, 720), on_state = True):
         super().__init__(data, root, design_size)
         self.state = [0, 0]
         self.is_state_holding = False
-        self.on_state = True
+        self.on_state = on_state
         self.state_rects = []
+        self.state_design_size = (1280, 720)
         
         self.set_state_img()
         
@@ -19,7 +20,10 @@ class StateButtons(Images):
         if self.user_data.color_blindness_mode:
             for i in range(len(self.imgs)):
                 for j in range(len(self.imgs[i])):
-                    screen.blit(self.imgs_c[i][j], self.rects[i][j])
+                    if self.is_checked[i][j]:
+                        screen.blit(self.checked_imgs_c[i][j], self.rects[i][j])
+                    else:
+                        screen.blit(self.imgs_c[i][j], self.rects[i][j])
             if self.on_state:
                 if self.is_state_holding:
                     screen.blit(self.state_imgs_c[1], self.state_rects[self.state[0]][self.state[1]])
@@ -28,7 +32,10 @@ class StateButtons(Images):
         else:
             for i in range(len(self.imgs)):
                 for j in range(len(self.imgs[i])):
-                    screen.blit(self.imgs[i][j], self.rects[i][j])
+                    if self.is_checked[i][j]:
+                        screen.blit(self.checked_imgs[i][j], self.rects[i][j])
+                    else:
+                        screen.blit(self.imgs[i][j], self.rects[i][j])
             if self.on_state:
                 if self.is_state_holding:
                     screen.blit(self.state_imgs[1], self.state_rects[self.state[0]][self.state[1]])
@@ -51,10 +58,12 @@ class StateButtons(Images):
                 self.state[1] += 1
             case self.user_data.key_up:
                 self.state[0] -= 1
+                self.state_index_handling()
                 if self.state[1] >= len(self.imgs[self.state[0]]):
                     self.state[1] = len(self.imgs[self.state[0]]) - 1
             case self.user_data.key_down:
                 self.state[0] += 1
+                self.state_index_handling()
                 if self.state[1] >= len(self.imgs[self.state[0]]):
                     self.state[1] = len(self.imgs[self.state[0]]) 
             case pygame.K_ESCAPE:
@@ -78,26 +87,40 @@ class StateButtons(Images):
         elif self.state[1] >= len(self.imgs[self.state[0]]):
             self.state[1] -= len(self.imgs[self.state[0]])
         
-    def add_row(self, img_path, img_path_c, pos):
+    def add_row(self, img_path, img_path_c = None, pos = (0, 0), checked_img_path = None, checked_img_path_c = None):
         self.default_imgs.append([])
         self.default_imgs_c.append([])
+        self.default_checked_imgs.append([])
+        self.default_checked_imgs_c.append([])
         self.default_poses.append([])
         self.imgs.append([])
         self.imgs_c.append([])
         self.rects.append([])
         self.state_rects.append([])
-        self.add(img_path, img_path_c, pos)
+        self.checked_imgs.append([])
+        self.checked_imgs_c.append([])
+        self.is_checked.append([])
+        self.add(img_path, img_path_c, pos, checked_img_path, checked_img_path_c)
              
-    def add(self, img_path, img_path_c, pos):
-        img = pygame.image.load(os.path.join(self.root, img_path))
-        img_c = pygame.image.load(os.path.join(self.root, img_path_c))
-        self.default_imgs[-1].append(img)
-        self.default_imgs_c[-1].append(img_c)
+    def add(self, img_path, img_path_c = None, pos = (0, 0), checked_img_path = None, checked_img_path_c = None):
+        if not img_path_c:
+            img_path_c = img_path
+        if not checked_img_path:
+            checked_img_path = img_path
+        if not checked_img_path_c:
+            checked_img_path_c = img_path_c
+        self.default_imgs[-1].append(pygame.image.load(os.path.join(self.root, img_path)))
+        self.default_imgs_c[-1].append(pygame.image.load(os.path.join(self.root, img_path_c)))
+        self.default_checked_imgs[-1].append(pygame.image.load(os.path.join(self.root, checked_img_path)))
+        self.default_checked_imgs_c[-1].append(pygame.image.load(os.path.join(self.root, checked_img_path_c)))
         self.default_poses[-1].append(pos)
         self.imgs[-1].append(None)
         self.imgs_c[-1].append(None)
+        self.checked_imgs[-1].append(None)
+        self.checked_imgs_c[-1].append(None)
         self.rects[-1].append(None)
         self.state_rects[-1].append(None)
+        self.is_checked[-1].append(False)
         
         i, j = len(self.imgs) - 1, len(self.imgs[-1]) - 1
         self.apply_img_scale(self.get_scale_ratio(), i, j)
@@ -109,13 +132,14 @@ class StateButtons(Images):
                 
     def apply_screen_size(self):
         scale_ratio = self.get_scale_ratio()
+        state_scale_ratio = self.get_scale_ratio2(self.state_design_size)
         for i in range(len(self.imgs)):
             for j in range(len(self.imgs[i])):
                 self.apply_img_scale(scale_ratio, i, j)
                 self.apply_rect_scale(i, j)
         for i in range(len(self.default_state_imgs)):
-            self.state_imgs[i] = pygame.transform.scale(self.default_state_imgs[i], self.tup_mul(self.get_img_size(self.default_state_imgs[i]), scale_ratio))
-            self.state_imgs_c[i] = pygame.transform.scale(self.default_state_imgs_c[i], self.tup_mul(self.get_img_size(self.default_state_imgs_c[i]), scale_ratio))     
+            self.state_imgs[i] = pygame.transform.scale(self.default_state_imgs[i], self.tup_mul(self.get_img_size(self.default_state_imgs[i]), state_scale_ratio))
+            self.state_imgs_c[i] = pygame.transform.scale(self.default_state_imgs_c[i], self.tup_mul(self.get_img_size(self.default_state_imgs_c[i]), state_scale_ratio))     
     
     def get_button_pos(self, i, j):
         return self.rects[i][j].center
@@ -128,7 +152,7 @@ class StateButtons(Images):
         self.default_state_imgs_c.append(pygame.image.load(os.path.join(self.root, "Material/Button/button_cursor.png")))
         self.default_state_imgs_c.append(pygame.image.load(os.path.join(self.root, "Material/ColorMode/colormode_button_select.png")))
         
-        scale_ratio = self.get_scale_ratio()
+        scale_ratio = self.get_scale_ratio2(self.state_design_size)
         self.state_imgs = []
         self.state_imgs_c = []
         for i in range(len(self.default_state_imgs)):
@@ -140,3 +164,6 @@ class StateButtons(Images):
     
     def set_state(self, is_on):
         self.on_state = is_on
+        
+    def get_scale_ratio2(self, design_size):
+        return self.tup_div(self.user_data.get_screen_size(), design_size)   

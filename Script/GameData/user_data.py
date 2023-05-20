@@ -34,8 +34,9 @@ class UserData():
         self.color_blindness_mode   = data["color_blindness_mode"]
         self.volumes                = data["volumes"]
         self.volumes_off            = data["volumes_off"]
-        self.screen_size_index = data["screen_size_index"]
-        self.story_level = data["story_level"]
+        self.screen_size_index      = data["screen_size_index"]
+        self.story_level            = data["story_level"]
+        self.achievements           = data["achievements"]
     
     def save_data(self, main=None):
         data = {
@@ -50,7 +51,8 @@ class UserData():
             "volumes": self.volumes,
             "volumes_off": self.volumes_off,
             "screen_size_index": self.screen_size_index,
-            "story_level": self.story_level
+            "story_level": self.story_level,
+            "achievements": self.achievements 
         }
 
         with open(self.filename, "w") as f:
@@ -71,8 +73,9 @@ class UserData():
         self.color_blindness_mode   = False
         self.volumes                = [1, 1, 1] # master, bgm, eft 순서 0 ~ 1?
         self.volumes_off            = [False, False, False] # 위와 동일
-        self.screen_size_index = 1
-        self.story_level = 0
+        self.screen_size_index      = 1
+        self.story_level            = 0
+        self.achievements           = [(False, "--.--.--") for _ in range(12)]
         
     def get_screen_size(self):
         return self.screen_sizes[self.screen_size_index]
@@ -107,5 +110,7 @@ class UserData():
         self.color_blindness_mode   = other_data.color_blindness_mode
         self.volumes                = [i for i in other_data.volumes]
         self.volumes_off            = [i for i in other_data.volumes_off]   
-        self.screen_size_index = other_data.screen_size_index
-        self.story_level = other_data.story_level
+        self.screen_size_index      = other_data.screen_size_index
+        self.story_level            = other_data.story_level
+        self.achievements           = [i for i in other_data.achievements]  
+        
