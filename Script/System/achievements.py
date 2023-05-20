@@ -6,48 +6,8 @@ from System.images import Images
 from System.statebuttons import StateButtons
 from System.texts import Texts
 
-Achievements_scripts = \
-[
-    [
-        ("First win" , "Win a Single Player Battle"),
-        ("Africa win" , "Win story mode area 1"),
-        ("America win" , "Win story mode area 2"),
-        ("Asia win" , "Win story mode area 3")
-    ],
-    [
-        ("Europe win" , "Win story mode area 4"),
-        ("Fast win" , "Win in 10 turns in a single player game"),
-        ("Fair" , "Win without ever using a skill card"),
-        ("Uno dos" , "Win after the other player declares uno")
-    ],
-    [
-        ("Perfect win" , "Win with 10 or more cards in your opponent's hand in a single player game"),
-        ("3 combo" , "Play 3 cards in a row."),
-        ("tajja" , "When only skill cards are collected in the first draw"),
-        ("lucky guy" , "Win without a draw except for the first throw")
-    ]
-]
-Achievements_path = \
-[
-    [
-        ("Material/Challenge/first_win.png", "Material/Challenge/first_win.png"),
-        ("Material/Challenge/africa_win.png", "Material/Challenge/africa_win.png"),
-        ("Material/Challenge/america_win.png", "Material/Challenge/america_win.png"),
-        ("Material/Challenge/asia_win.png", "Material/Challenge/asia_win.png")
-    ],
-    [
-        ("Material/Challenge/europe_win.png", "Material/Challenge/europe_win.png"),
-        ("Material/Challenge/fast_win.png", "Material/Challenge/fast_win.png"),
-        ("Material/Challenge/fair.png", "Material/Challenge/fair.png"),
-        ("Material/Challenge/uno_dos.png", "Material/Challenge/uno_dos.png")
-    ],
-    [
-        ("Material/Challenge/perfect_win.png", "Material/Challenge/perfect_win.png"),
-        ("Material/Challenge/3_combo.png", "Material/Challenge/3_combo.png"),
-        ("Material/Challenge/tajja.png", "Material/Challenge/tajja.png"),
-        ("Material/Challenge/lucky_guy.png", "Material/Challenge/lucky_guy.png")
-    ]
-]
+Achievements_scripts = [[("First win" , "Win a Single Player Battle"),("Africa win" , "Win story mode area 1"),("America win" , "Win story mode area 2"),("Asia win" , "Win story mode area 3")],[("Europe win" , "Win story mode area 4"),("Fast win" , "Win in 10 turns in a single player game"),("Fair" , "Win without ever using a skill card"),("Uno dos" , "Win after the other player declares uno")],[("Perfect win" , "Win with 10 or more cards in your opponent's hand in a single player game"),("3 combo" , "Play 3 cards in a row."),("tajja" , "When only skill cards are collected in the first draw"),("lucky guy" , "Win without a draw except for the first throw")]]
+Achievements_path = [[("Material/Challenge/first_win.png", "Material/Challenge/first_win.png"),("Material/Challenge/africa_win.png", "Material/Challenge/africa_win.png"),("Material/Challenge/america_win.png", "Material/Challenge/america_win.png"),("Material/Challenge/asia_win.png", "Material/Challenge/asia_win.png")],[("Material/Challenge/europe_win.png", "Material/Challenge/europe_win.png"),("Material/Challenge/fast_win.png", "Material/Challenge/fast_win.png"),("Material/Challenge/fair.png", "Material/Challenge/fair.png"),("Material/Challenge/uno_dos.png", "Material/Challenge/uno_dos.png")],[("Material/Challenge/perfect_win.png", "Material/Challenge/perfect_win.png"),("Material/Challenge/3_combo.png", "Material/Challenge/3_combo.png"),("Material/Challenge/tajja.png", "Material/Challenge/tajja.png"),("Material/Challenge/lucky_guy.png", "Material/Challenge/lucky_guy.png")]]
 Achievements_None_path = "Material/Challenge/None.png"
 
 class Achievements():
@@ -65,13 +25,14 @@ class Achievements():
         
         
     def display(self, main):
+        self.draw(main.screen)
         self.on_achievements = True
         for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     main.running = False
                     
                 if event.type == pygame.KEYDOWN:
-                    self.keydown_title(main, event.key)
+                    self.keydown(main, event.key)
                 
                 if event.type == pygame.MOUSEBUTTONDOWN: 
                     self.click_collide(main, event.pos)
@@ -79,15 +40,16 @@ class Achievements():
                 if event.type == pygame.MOUSEMOTION:
                     self.move_collide(main, event.pos)
         
-        self.BG.draw(main.screen)
-        self.now_achi_imgs.draw(main.screen)
-        self.buttons.draw(main.screen)
-        self.texts.draw(main.screen)
-        self.now_achi_texts.draw(main.screen)
-        
         return self.on_achievements
         
-    def keydown_title(self, main, key):
+    def draw(self, screen):
+        self.BG.draw(screen)
+        self.now_achi_imgs.draw(screen)
+        self.buttons.draw(screen)
+        self.texts.draw(screen)
+        self.now_achi_texts.draw(screen)
+        
+    def keydown(self, main, key):
         if not self.buttons.key_down_state(key):
             match key:
                 case self.user_data.key_enter:
@@ -114,6 +76,7 @@ class Achievements():
         self.BG.apply_screen_size()
         self.now_achi_imgs.apply_screen_size()
         self.buttons.apply_screen_size()
+        self.now_achi_texts.apply_screen_size()
         #self.imgs.apply_screen_size()
         
     def add_imgs(self):

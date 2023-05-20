@@ -132,14 +132,17 @@ class StateButtons(Images):
                 
     def apply_screen_size(self):
         scale_ratio = self.get_scale_ratio()
-        state_scale_ratio = self.get_scale_ratio2(self.state_design_size)
+        self.apply_screen_size_state_img()
         for i in range(len(self.imgs)):
             for j in range(len(self.imgs[i])):
                 self.apply_img_scale(scale_ratio, i, j)
                 self.apply_rect_scale(i, j)
+        
+    def apply_screen_size_state_img(self):
+        scale_ratio = self.get_scale_ratio2(self.state_design_size)
         for i in range(len(self.default_state_imgs)):
-            self.state_imgs[i] = pygame.transform.scale(self.default_state_imgs[i], self.tup_mul(self.get_img_size(self.default_state_imgs[i]), state_scale_ratio))
-            self.state_imgs_c[i] = pygame.transform.scale(self.default_state_imgs_c[i], self.tup_mul(self.get_img_size(self.default_state_imgs_c[i]), state_scale_ratio))     
+            self.state_imgs[i] = pygame.transform.scale(self.default_state_imgs[i], self.tup_mul(self.get_img_size(self.default_state_imgs[i]), scale_ratio))
+            self.state_imgs_c[i] = pygame.transform.scale(self.default_state_imgs_c[i], self.tup_mul(self.get_img_size(self.default_state_imgs_c[i]), scale_ratio))
     
     def get_button_pos(self, i, j):
         return self.rects[i][j].center
