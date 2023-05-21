@@ -418,10 +418,10 @@ class GamePlay:
                 self.play_player(self.game.turn())
                 self.update_table()
         
-        if self.player != self.game.turn(): # AI player turn
+        if isinstance(self.game.turn(), PlayerAI): # AI player turn
             if self.counter == 12:
                 if self.possible_push_uno(self.game.turn()):
-                    self.game.turn().uno = self.game.get_random_AIplayer()
+                    self.play_uno(self.game.turn(), self.game.get_random_AIplayer())
             elif self.counter == 11: 
                 card = self.game.turn().choose_card(self.game.table) # self.game.turn() is ai player
 
@@ -450,7 +450,7 @@ class GamePlay:
         else: # user turn
             if self.counter == random.randint(10, 13):
                 if len(self.player.hand) <= 2 and not self.player.uno:
-                    self.player.uno = self.game.get_random_AIplayer()
+                    self.play_uno(self.player, self.game.get_random_AIplayer())
                     
 
     def play_player(self, player, card = None):
