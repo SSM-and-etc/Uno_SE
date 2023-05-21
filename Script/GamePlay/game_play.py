@@ -593,6 +593,9 @@ class GamePlay:
         return False
         
     def handle(self):
+        if self.animate_assets:
+            return
+
         sel, idx = self.selection.current()
 
         if sel == "card":
