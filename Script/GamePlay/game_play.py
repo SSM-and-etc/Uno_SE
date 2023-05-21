@@ -10,6 +10,8 @@ import random
 
 import os
 
+USEREVENT2 = pygame.USEREVENT
+
 
 class Asset:
     design_size = (1280, 720)
@@ -377,11 +379,16 @@ class GamePlay:
                 
                 if event.type == pygame.USEREVENT:
                     self.counter_event()
+                if event.type == USEREVENT2:
+                    self.achi_comp_counter -= 1
                         
             self.main.screen.blit(*self.assets["background"].scaled())
 
             if self.on_game_gui:
                 self.draw_game()
+                
+        if self.achi_comp_counter > 0:
+            self.esc.achievements.comp_draw(main.screen)
     
     def counter_event(self):
         #if self.counter == 13: # For Debugging
@@ -652,6 +659,7 @@ class GamePlay:
         self.esc.apply_screen_size()
         
     def set_achi_data(self):
+        self.achi_comp_counter = 0
         self.game_turn_count = 0
         self.use_special_card = False
         self.is_uno_another = False
@@ -706,5 +714,6 @@ class GamePlay:
                 
     def complete_achi(self, i):
         if self.user_data.complete_achi(i):
-            pass
-            # 업적 알림
+            pygame.time.set_timer(USEREVENT2, 1000)
+            self.achi_comp_counter = 3
+            self.esc.achievements.set_comp(i)

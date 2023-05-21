@@ -101,6 +101,7 @@ class UserData():
         if not self.achievements[i][0]:
             d = datetime.datetime.now()
             self.achievements[i] = (True, d.strftime("%x"))
+            self.save_data()
             return True
         return False
                 

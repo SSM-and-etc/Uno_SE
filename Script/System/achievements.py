@@ -20,8 +20,12 @@ class Achievements():
         self.now_achi_imgs = Images(main.user_data, main.root_path, (12800, 7200))
         self.now_achi_texts = Texts(main.user_data)
         
+        self.comp_imgs = Images(main.user_data, main.root_path, (19200, 10800))
+        self.comp_texts = Texts(main.user_data)
+        
         self.add_assets()
         self.default_font_size = 20
+        self.apply_check()
         
         
     def display(self, main):
@@ -41,13 +45,23 @@ class Achievements():
                     self.move_collide(main, event.pos)
         
         return self.on_achievements
-        
+    
     def draw(self, screen):
         self.BG.draw(screen)
         self.now_achi_imgs.draw(screen)
         self.buttons.draw(screen)
         self.texts.draw(screen)
         self.now_achi_texts.draw(screen)
+        
+    def comp_draw(self, screen):
+        self.comp_imgs.draw(screen)
+        self.comp_texts.draw(screen)
+        
+    def set_comp(self, index):
+        i, j = divmod(index, len(self.buttons.imgs[0]))
+        print((i, j))
+        self.comp_imgs.change_img(0, 0, self.buttons.get_img(i, j))
+        self.comp_texts.change_text(0, Achievements_scripts[i][j][0])
         
     def keydown(self, main, key):
         if not self.buttons.key_down_state(key):
@@ -81,6 +95,7 @@ class Achievements():
         
     def add_imgs(self):
         self.now_achi_imgs.add_row(Achievements_None_path, Achievements_None_path, (0.3, 0.67))
+        self.comp_imgs.add_row(Achievements_None_path, Achievements_None_path, (0.45, 0.1))
         
     def add_buttons(self):
         self.BG.add_row("Material/GUI/pop_up.png", "Material/GUI/pop_up.png", (0.5, 0.5))
@@ -98,12 +113,14 @@ class Achievements():
     def add_texts(self):
         self.now_achi_texts.add("-", (0.35, 0.6), 30, "arial", "BLUE_GREEN")
         self.now_achi_texts.add("-", (0.35, 0.67), 15, "arial", "BLACK", "BLACK")
-        self.now_achi_texts.add("--.--.--", (0.275, 0.73), 30, "arial", "VERMILION", "VERMILION")
+        self.now_achi_texts.add("--.--.--", (0.275, 0.73), 20, "arial", "VERMILION", "VERMILION")
+        self.comp_texts.add("", (0.5, 0.07), 30, "arial", "REDDISH_PURPLE", "VERMILION")
         
     def apply_check(self):
         for i in range(len(Achievements_path)):
             for j in range(len(Achievements_path[i])):
                 self.buttons.set_checked(i, j, self.user_data.achievements[i * len(Achievements_path[0]) + j][0])
+        self.comp_imgs.set_checked(0, 0, True)
         
     def change_achi(self):
         i, j = self.buttons.get_state()
