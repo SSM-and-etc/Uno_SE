@@ -8,7 +8,6 @@ class MultiLobby:
     def __init__(self,main):
         self.WHITE = (255, 255, 255)
         self.ORANGE = (255, 163, 0)
-        self.screen = pygame.display.set_mode((800, 600))
         self.clock = pygame.time.Clock()
         self.lobby_img = pygame.image.load("Material/BG/Title.png")
        
@@ -25,11 +24,11 @@ class MultiLobby:
         self.lobby_img = pygame.transform.scale(
             self.lobby_img, (self.new_width, self.new_height))
         self.font = pygame.font.Font(None, int(self.screen_width/30))
-        self.make_screen(self.screen_width,
-                         self.screen_heigth, self.ratio_list)
+        # self.make_screen(self.screen_width,
+        #                  self.screen_heigth, self.ratio_list)
         self.mouse_pos = pygame.mouse.get_pos()
         
-        self.check_user
+        # self.check_user
         self.BUTTON_WIDTH = 200
         self.BUTTON_HEIGHT = 50
         self.BUTTON_SPACING = 20
@@ -42,14 +41,14 @@ class MultiLobby:
         self.client = None
 
     def handle_button_click(self, button_name):
-        if button_name == "Server":
+        if button_name == "방만들기":
             self.server = ServerUser()
-        elif button_name == "Client":
+        elif button_name == "방들어가기":
             self.client = ClientUser()
 
     def create_button(self, text, x, y):
-        font = pygame.font.Font(None, self.FONT_SIZE)
-        text_surface = font.render(text, True, self.TEXT_COLOR)
+        font = pygame.font.Font(None, self.font)
+        text_surface = font.render(text, True, self.ORANGE)
         button_rect = pygame.Rect(x, y, self.BUTTON_WIDTH, self.BUTTON_HEIGHT)
         pygame.draw.rect(self.screen, self.BUTTON_COLOR, button_rect)
         self.screen.blit(text_surface, (x + (self.BUTTON_WIDTH - text_surface.get_width()) //
@@ -66,7 +65,7 @@ class MultiLobby:
                 elif self.client_button_rect.collidepoint(event.pos):
                     self.handle_button_click("Client")
 
-        self.screen.fill((0, 0, 0))
+        main.screen.blit(self.lobby_img, (0, 0))
 
         # Calculate button positions
         total_button_width = (
