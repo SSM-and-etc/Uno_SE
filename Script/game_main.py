@@ -9,7 +9,7 @@ from Title.title import Title
 from GamePlay.game_play import GamePlay
 from StoryMode.storymode import StoryMode
 from Sound.sound import Sound
-from MultiLobby.multi_lobby import MultiLobby
+
 
 class GameMain():
     def __init__(self):
@@ -28,7 +28,6 @@ class GameMain():
         self.play_game = None
         self.lobby = None
         self.stage_index = 1
-        self.multi_lobby=None
         
         
         self.set_scene_obj(self.scene_state)
@@ -67,7 +66,7 @@ class GameMain():
             case 4:
                 return self.play_game_storymode
             case 5:
-                return self.multi_lobby
+                pass # TODO: multi게임 진행 scene으로 연결 (로비 등등)
             case _:
                 return None
 
@@ -85,8 +84,6 @@ class GameMain():
                 self.storymode = StoryMode(self)
             case 4:
                 self.play_game_storymode = GamePlay(self, None, self.stage_index)
-            case 5:
-                self.multi_lobby = MultiLobby(self)
             case _:
                 pass
             
@@ -102,8 +99,6 @@ class GameMain():
                 self.storymode = None
             case 4:
                 self.play_game_storymode = None
-            case 5:
-                self.multi_lobby = None
             case _:
                 pass
             
