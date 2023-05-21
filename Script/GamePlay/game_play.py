@@ -4,7 +4,7 @@ from uno.game import Game
 from uno.player import Player
 from uno.enums import CardColor, CardType
 from Player.PlayerAI import PlayerAI
-from System.option import Option
+from System.esc_menu import EscMenu
 
 import random
 
@@ -157,8 +157,8 @@ class GamePlay:
         self.stage_index = stage_index
         self.user_data = main.user_data
         Asset.user_data = main.user_data
-        self.option = Option(main, self)
-        self.on_option = False
+        self.esc = EscMenu(main, self)
+        self.on_esc = False
         self.turn_count_gimmick = 1
         self.user_turn_count_gimmick = 1
         self.color_selection = {
@@ -309,7 +309,7 @@ class GamePlay:
 
             self.selection.reset()
     
-    def option_closed(self):
+    def esc_menu_closed(self):
         for name, asset in self.assets.items():
             asset.image_reload()
         for color, asset in self.color_selection["assets"].items():
@@ -329,11 +329,11 @@ class GamePlay:
         self.name_font = pygame.font.SysFont(None, int(40 * ratio))
 
     def display(self, main):
-        if self.on_option:
-            self.on_option = self.option.display(main)
+        if self.on_esc:
+            self.on_esc = self.esc.display(main)
 
-            if not self.on_option:
-                self.option_closed()
+            if not self.on_esc:
+                self.esc_menu_closed()
 
         elif self.winner:
             self.draw_result()
@@ -614,7 +614,7 @@ class GamePlay:
         elif key == self.user_data.key_enter:
             self.handle()
         elif key == pygame.K_ESCAPE:
-            self.on_option = True
+            self.on_esc = True
             
     def possible_push_uno(self, now_player):
         if not now_player.uno and len(now_player.hand) <= 2: # TODO: 디버깅용으로 >=2로 설정함, <=2로 바꿔야함
@@ -629,19 +629,6 @@ class GamePlay:
     
     def enter_state(self, main):
         pass
-
-
-    '''
-        if(self.select_state == STATE_SINGLE_GAME):
-            # TODO: 싱글 게임 시작 호출 
-            pass
-        elif(self.select_state == STATE_OPTION):
-            self.on_title_gui = False
-            # TODO: 옵션창 호출
-            pass
-        elif(self.select_state == STATE_EXIT):
-            main.running = False
-    '''
     
     def change_screen_size(self):
-        pass # title의 size 변경 방식과의 호환을 위해 임시로 만듦
+        self.esc.apply_screen_size()

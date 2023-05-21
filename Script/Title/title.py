@@ -6,6 +6,8 @@ from System.option import Option
 from System.images import Images
 from System.statebuttons import StateButtons
 from System.texts import Texts
+from System.achievements import Achievements
+from System.esc_menu import EscMenu
 
 # Constants
 STATE_NUMBER = 4
@@ -18,26 +20,33 @@ BLUE_MAGENTA = (153, 102, 204)
 class Title():
     def __init__(self, main):
         self.main = main
-        self.design_size = (1280, 720)
         self.user_data = main.user_data
         self.imgs = Images(main.user_data, main.root_path)
         self.buttons = StateButtons(main.user_data, main.root_path)
         self.ex_texts = Texts(main.user_data)
         
         self.add_assets()
-        self.default_font_size = 30
         
         self.on_option = False
+        self.on_achievements = False
+        self.on_esc = False
         self.select_state = 0 # 0: single game start, 1: option, 2: exit ...
         
         self.option = Option(main, self)
+        self.achievements = Achievements(main)
+        self.esc = EscMenu(main, self)
         
-        self.set_title_gui(self.user_data.get_screen_size())
+        self.set_text(self.user_data.get_screen_size())
         self.ex_key_counter = 0
         
     def display(self, main):
+        self.draw_title(main.screen)
         if self.on_option:
             self.on_option = self.option.display(main)
+        elif self.on_achievements:
+            self.on_achievements = self.achievements.display(main)
+        elif self.on_esc:
+            self.on_esc = self.esc.display(main)
         else:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -54,8 +63,6 @@ class Title():
                     
                 if event.type == pygame.USEREVENT and self.ex_key_counter > 0:
                     self.ex_key_counter -= 1
-                    
-            self.draw_title(main.screen)
             
     def draw_title(self, screen):
         self.imgs.draw(screen)
@@ -66,7 +73,7 @@ class Title():
     def click_collide_title(self, main, mouse_pos):
         clicked_button_idx = self.buttons.get_clicked_button_idx(mouse_pos)
         if clicked_button_idx != None:
-            self.enter_state(main, self.buttons.get_state()[1])
+            self.enter_state(main)
             
     def move_collide_title(self, main, mouse_pos):
         clicked_button_idx = self.buttons.get_clicked_button_idx(mouse_pos)
@@ -77,16 +84,16 @@ class Title():
         if self.buttons.key_down_state(key):
             pass
         elif key == self.user_data.key_enter:
-            self.enter_state(main, self.buttons.get_state()[1])
+            self.enter_state(main)
         elif key == pygame.K_ESCAPE:
-            self.on_option = True
+            self.on_esc = True
         else:
             pygame.time.set_timer(pygame.USEREVENT, 1000)
             self.ex_key_counter = 3
         
     
-    def enter_state(self, main, state_i):
-        match state_i:
+    def enter_state(self, main):
+        match self.buttons.get_state()[1]:
             case 0:
                 main.scene_change(main.get_scene_index("single game"))
             case 1:
@@ -96,18 +103,19 @@ class Title():
             case 3:
                 self.on_option = True
             case 4:
-                pass # 업적 확인 연결
+                self.on_achievements = True
             case 5:
                 main.running = False
     
-    def set_title_gui(self, screen_size):
-        self.set_text(screen_size)
         
     def change_screen_size(self):
         screen_size = self.user_data.get_screen_size()
         self.imgs.apply_screen_size()
         self.buttons.apply_screen_size()
         self.set_text(screen_size)
+        self.option.apply_screen_size()
+        self.achievements.apply_screen_size()
+        self.esc.apply_screen_size()
         
     def set_text(self, screen_size):
         self.ex_texts.change_text(0, self.get_ex_text())
@@ -116,6 +124,11 @@ class Title():
         self.add_imgs()
         self.add_buttons()
         self.add_texts()
+        
+    def apply_screen_size(self):
+        self.imgs.apply_screen_size()
+        self.buttons.apply_screen_size()
+        self.ex_texts.apply_screen_size()
     
     def add_imgs(self):
         self.imgs.add_row("Material/BG/title.png", "Material/ColorMode/BG/title.png", (0.5, 0.5))
