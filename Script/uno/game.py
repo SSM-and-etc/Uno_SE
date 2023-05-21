@@ -33,7 +33,10 @@ class Game:
         if not table and not deck:
             self.draw_setting()
             self.table.put(self.deck.draw()) # TODO: 첫 카드가 숫자 카드가 아닐 때
-        
+
+    def remove_player(self, player):
+        self.players.remove(player)
+        self.players_turn.update()
 
     def draw_setting(self, default_card_num = 7):
         match self.stage_index:
