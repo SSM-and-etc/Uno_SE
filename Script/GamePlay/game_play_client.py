@@ -17,14 +17,14 @@ import pickle
 import os
 
 class GamePlayClient(GamePlay):
-    def __init__(self, main, stage_index = 1, server = None):
+    def __init__(self, main, stage_index = 0):
+        self.set_achi_data()
         self.main = main
         self.stage_index = stage_index
         self.user_data = main.user_data
         Asset.user_data = main.user_data
-        self.option = Option(main, self)
-        self.on_option = False
-        self.on_game_gui = False
+        self.esc = EscMenu(main, self)
+        self.on_esc = False
         self.turn_count_gimmick = 1
         self.user_turn_count_gimmick = 1
         self.color_selection = {
@@ -49,6 +49,7 @@ class GamePlayClient(GamePlay):
             "counter": FakeAsset((830, 450, 0, 0))
         }
 
+        self.on_game_gui = False
         self.winner = None
         self.result_asset = Asset("BG/result.png", (0, 0))
 
@@ -56,13 +57,13 @@ class GamePlayClient(GamePlay):
         self.hand_assets = []
         self.animate_assets = []
 
+        self.font_resize() 
+
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.connect(("127.0.0.1", 12345))
 
         self.server = server
         self.server.setblocking(0)
-
-        self.font_resize() 
 
         self.multiplay = True
         self.game = None

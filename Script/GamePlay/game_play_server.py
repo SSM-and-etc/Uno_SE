@@ -15,14 +15,14 @@ import pickle
 import os
 
 class GamePlayServer(GamePlay):
-    def __init__(self, main, playerlist = None,stage_index = 0, playerAI_number = 1):
+    def __init__(self, main, stage_index = 0):
+        self.set_achi_data()
         self.main = main
-        self.playerlist=playerlist
         self.stage_index = stage_index
         self.user_data = main.user_data
         Asset.user_data = main.user_data
-        self.option = Option(main, self)
-        self.on_option = False
+        self.esc = EscMenu(main, self)
+        self.on_esc = False
         self.turn_count_gimmick = 1
         self.user_turn_count_gimmick = 1
         self.color_selection = {
