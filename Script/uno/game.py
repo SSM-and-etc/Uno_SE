@@ -25,8 +25,9 @@ class Game:
 
         self.draw_setting()
         self.table.put(self.deck.draw())
-        if self.stage_bit & (1 << 2):
+        if self.stage_bit & (1 << 2) and (not self.table.top().is_special()):
             self.deck.pop_all()
+        
         
 
     def draw_setting(self, default_card_num = 5):

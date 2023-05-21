@@ -152,6 +152,7 @@ class Selection:
 
 class GamePlay:
     def __init__(self, main, playerlist, stage_index = 1, playerAI_number = 1, players_idx = [0, 0, 0, 0, 0, 0]):
+        self.set_achi_data()
         self.main = main
         self.playerlist=playerlist
         self.stage_index = stage_index
@@ -206,6 +207,8 @@ class GamePlay:
 
         self.update_hand()
         self.update_table()    
+        
+        self.achi_first_draw() #업적
                 
 
     def player_setting(self, playerAI_number):
@@ -281,6 +284,7 @@ class GamePlay:
             for player in self.game.players:
                 if len(player.hand) == 0:
                     self.winner = player
+                    self.achi_win() # 업적
 
     def calculate_card_size(self, player_num):
         n = max(1, len(self.game.players[player_num].hand))
@@ -396,6 +400,8 @@ class GamePlay:
             if self.game.deck.stack:
                 self.animate_assets.append((self.assets["deck"].clone(), self.assets["table"], 20, 0))
                 self.game.table.put(self.game.deck.draw())
+            if self.stage_bit & (1 << 2):
+                self.game.deck.pop_all()
 
         if self.counter == 0:
             if self.game.deck.stack:
@@ -442,6 +448,8 @@ class GamePlay:
 
     def play_player(self, player, card = None):
         # self.game.play() 이후의 self.game.turn()은 순서를 넘겨 받은 플레이어가 됨에 주의
+        self.game_turn_count += 1
+        self.achi_put_card(card)
         self.game.play(player, len(self.players), card)
         self.handle_stage_gimmick(player)
                     
@@ -626,6 +634,8 @@ class GamePlay:
             
     def possible_push_uno(self, now_player):
         if not now_player.uno and len(now_player.hand) <= 2: # TODO: 디버깅용으로 >=2로 설정함, <=2로 바꿔야함
+            if now_player != self.player:
+                self.is_uno_another = True
             return True
         else:
             return False
@@ -640,3 +650,61 @@ class GamePlay:
     
     def change_screen_size(self):
         self.esc.apply_screen_size()
+        
+    def set_achi_data(self):
+        self.game_turn_count = 0
+        self.use_special_card = False
+        self.is_uno_another = False
+        self.is_draw = False
+        self.count_put_card_num_in_a_row = 0
+    
+    def achi_first_draw(self):
+        is_all_skill_card = True
+        for card in self.player.hand:
+            if card.is_number():
+                is_all_skill_card = False
+        if is_all_skill_card:
+            self.complete_achi(10)
+    
+    def achi_put_card(self, card):
+        if self.game.turn() == self.player:
+            if self.game.table.playable(card):
+                self.count_put_card_num_in_a_row += 1
+                if card.is_special():
+                    self.use_special_card = True
+            else:
+                self.count_put_card_num_in_a_row = 0   
+                self.is_draw = True 
+        else:
+            self.count_put_card_num_in_a_row = 0
+        
+        if self.count_put_card_num_in_a_row == 3:
+            self.complete_achi(9)
+    
+    def achi_win(self):
+        if self.player != self.winner:
+            return
+        
+        self.complete_achi(self.stage_index)
+        if self.game_turn_count <= 10:
+            self.complete_achi(5)
+        if self.use_special_card:
+            self.complete_achi(6)
+        if self.is_uno_another:
+            self.complete_achi(7)
+        if self.stage_index == 0:
+            is_more10 = True
+            for player in self.players:
+                if self.player != player:
+                    if len(player.hand) < 10:
+                        is_more10 = False
+            if is_more10:
+                self.complete_achi(8)
+        if not self.is_draw:
+            self.complete_achi(11)
+            
+                
+    def complete_achi(self, i):
+        if self.user_data.complete_achi(i):
+            pass
+            # 업적 알림

@@ -100,6 +100,11 @@ class Achievements():
         self.now_achi_texts.add("-", (0.35, 0.67), 15, "arial", "BLACK", "BLACK")
         self.now_achi_texts.add("--.--.--", (0.275, 0.73), 30, "arial", "VERMILION", "VERMILION")
         
+    def apply_check(self):
+        for i in range(len(Achievements_path)):
+            for j in range(len(Achievements_path[i])):
+                self.buttons.set_checked(i, j, self.user_data.achievements[i * len(Achievements_path[0]) + j][0])
+        
     def change_achi(self):
         i, j = self.buttons.get_state()
         is_on, date = self.user_data.achievements[i * len(Achievements_path[0]) + j]

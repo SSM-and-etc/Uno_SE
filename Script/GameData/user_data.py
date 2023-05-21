@@ -1,6 +1,7 @@
 import pygame
 import os
 import json
+import datetime
 
 class DataSet():
     def __init__(self):
@@ -17,7 +18,6 @@ class UserData():
         else:
             self.reset_data()
         self.save_data()
-        
         self.screen_sizes = [(640, 480), (1280, 720), (1920, 1080), (2560,1440)]
         
     def load_data(self):
@@ -96,6 +96,13 @@ class UserData():
                 self.key_up = new_key
             case 4:
                 self.key_down = new_key
+                
+    def complete_achi(self, i):
+        if not self.achievements[i][0]:
+            d = datetime.datetime.now()
+            self.achievements[i] = (True, d.strftime("%x"))
+            return True
+        return False
                 
     def copy_data(self, other_data):
         # TODO: 노가다 말고 뭔가 좋은 방법이 없을까..?
