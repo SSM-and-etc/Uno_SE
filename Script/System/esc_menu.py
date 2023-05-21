@@ -73,12 +73,17 @@ class EscMenu():
             case 1:
                 self.on_option = True
             case 2:
-                self.on_achievements = True
+                self.diplay_achievements()
             case 3:
                 self.main.scene_change(self.main.get_scene_index("title"))
             case 4:
                 self.main.running = False
         
+    def diplay_achievements(self):
+        self.on_achievements = True
+        self.achievements.apply_check()
+        
+    
     def add_assets(self):
         self.add_imgs()
         self.add_buttons()
