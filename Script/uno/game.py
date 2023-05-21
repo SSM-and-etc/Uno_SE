@@ -27,7 +27,7 @@ class Game:
         self.table.put(self.deck.draw()) # TODO: 첫 카드가 숫자 카드가 아닐 때
         
 
-    def draw_setting(self, default_card_num = 7):
+    def draw_setting(self, default_card_num = 5):
         match self.stage_index:
             case 1:
                 self.draw(self.players[0], default_card_num)
