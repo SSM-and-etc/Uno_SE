@@ -1,7 +1,6 @@
 import pygame
 
 import os
-import copy
 
 from GameData.user_data import UserData
 
@@ -621,6 +620,8 @@ class Option():
         self.set_gui_imges(screen_size)
         self.set_gui_rct()
         self.set_text(screen_size)
+        self.set_drawing_options()
+        
         
     def set_drawing_options(self):
         self.screen_size_changer_button_img = self.screen_size_block_imges[self.user_data.screen_size_index]
@@ -646,3 +647,11 @@ class Option():
     
     def tup_div(self, tup1, tup2):
         return (tup1[0] / tup2[0], tup1[1] / tup2[1])
+    
+    def apply_screen_size(self):
+        screen_size = self.user_data.get_screen_size() 
+        self.set_gui_poses(screen_size)
+        self.set_gui_imges(screen_size)
+        self.set_gui_rct()
+        self.set_text(screen_size)
+        self.set_drawing_options()

@@ -1,6 +1,7 @@
 import pygame
 import os
 import json
+import datetime
 
 class DataSet():
     def __init__(self):
@@ -17,7 +18,6 @@ class UserData():
         else:
             self.reset_data()
         self.save_data()
-        
         self.screen_sizes = [(640, 480), (1280, 720), (1920, 1080), (2560,1440)]
         
     def load_data(self):
@@ -34,8 +34,9 @@ class UserData():
         self.color_blindness_mode   = data["color_blindness_mode"]
         self.volumes                = data["volumes"]
         self.volumes_off            = data["volumes_off"]
-        self.screen_size_index = data["screen_size_index"]
-        self.story_level = data["story_level"]
+        self.screen_size_index      = data["screen_size_index"]
+        self.story_level            = data["story_level"]
+        self.achievements           = data["achievements"]
     
     def save_data(self, main=None):
         data = {
@@ -50,7 +51,8 @@ class UserData():
             "volumes": self.volumes,
             "volumes_off": self.volumes_off,
             "screen_size_index": self.screen_size_index,
-            "story_level": self.story_level
+            "story_level": self.story_level,
+            "achievements": self.achievements 
         }
 
         with open(self.filename, "w") as f:
@@ -71,8 +73,9 @@ class UserData():
         self.color_blindness_mode   = False
         self.volumes                = [1, 1, 1] # master, bgm, eft 순서 0 ~ 1?
         self.volumes_off            = [False, False, False] # 위와 동일
-        self.screen_size_index = 1
-        self.story_level = 0
+        self.screen_size_index      = 1
+        self.story_level            = 0
+        self.achievements           = [(False, "--.--.--") for _ in range(12)]
         
     def get_screen_size(self):
         return self.screen_sizes[self.screen_size_index]
@@ -94,6 +97,14 @@ class UserData():
             case 4:
                 self.key_down = new_key
                 
+    def complete_achi(self, i):
+        if not self.achievements[i][0]:
+            d = datetime.datetime.now()
+            self.achievements[i] = (True, d.strftime("%x"))
+            self.save_data()
+            return True
+        return False
+                
     def copy_data(self, other_data):
         # TODO: 노가다 말고 뭔가 좋은 방법이 없을까..?
         # 단일 변수 아닌 애들은 깊은 복사 안 되게 조정
@@ -107,5 +118,7 @@ class UserData():
         self.color_blindness_mode   = other_data.color_blindness_mode
         self.volumes                = [i for i in other_data.volumes]
         self.volumes_off            = [i for i in other_data.volumes_off]   
-        self.screen_size_index = other_data.screen_size_index
-        self.story_level = other_data.story_level
+        self.screen_size_index      = other_data.screen_size_index
+        self.story_level            = other_data.story_level
+        self.achievements           = [i for i in other_data.achievements]  
+        

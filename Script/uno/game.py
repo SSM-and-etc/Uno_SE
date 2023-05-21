@@ -9,7 +9,7 @@ from System.weighted_picker import WeightedPicker
 import random
 
 class Game:
-    def __init__(self, players, stage_index, sound, table=None, deck=None):
+    def __init__(self, players, stage_bit, sound, table=None, deck=None):
         self.sound = sound
         self.players = players
         if table:
@@ -22,7 +22,7 @@ class Game:
         else:
             self.deck = Deck({"number": 1, "special": 1, "wild": 2})
         self.players_turn = CycleIterator(players)
-        self.stage_index = stage_index
+        self.stage_bit = stage_bit
         self.ai_players = []
         for player in players:
             if player.is_ai:
@@ -32,25 +32,32 @@ class Game:
 
         if not table and not deck:
             self.draw_setting()
-            self.table.put(self.deck.draw()) # TODO: 첫 카드가 숫자 카드가 아닐 때
+            self.table.put(self.deck.draw())
+            if self.stage_bit & (1 << 2) and (not self.table.top().is_special()):
+                self.deck.pop_all()
 
     def remove_player(self, player):
         self.players.remove(player)
         self.players_turn.update()
 
-    def draw_setting(self, default_card_num = 7):
-        match self.stage_index:
-            case 1:
-                self.draw(self.players[0], default_card_num)
-                self.weighted_draw(self.players[1],{"number": 2, "special": 3}, default_card_num)
-                # 가중치 하드코딩? 어딘가에 저장해 놓는 것이 좋을지
-            case 2:
-                n = len(self.deck.stack) // len(self.players)
+    def draw_setting(self, default_card_num = 5):
+        if self.stage_bit & (1 << 2):
+                n = (len(self.deck.stack) // len(self.players)) - 1
                 for player in self.players:
+                    self.draw_by_type(player, n)
+        else:
+            for player in self.players:
+                self.draw_by_type(player, default_card_num)
+        
+    def draw_by_type(self, player, n = 1):
+        if player.is_ai:
+            match player.index:
+                case 1:
+                    self.weighted_draw(player, {"number": 2, "special": 3}, n)
+                case _:
                     self.draw(player, n)
-            case _: # 0, 3, 4
-                for player in self.players:
-                    self.draw(player, default_card_num)
+        else:
+            self.draw(player, n)
         
 
     def draw(self, player, n=1):

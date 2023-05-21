@@ -1,6 +1,17 @@
 import pygame
 
-COLORS = {"BLUE_MAGENTA" : (153, 102, 204), "REDDISH_PURPLE" : (149, 53, 83)} # color.py 따로 작성하는 것이 좋아 보임
+COLORS = \
+{
+    "BLUE_MAGENTA"      : (153, 102, 204), 
+    "REDDISH_PURPLE"    : (149, 53, 83),
+    "SKY_BLUE"          : (135,206,235),
+    "BLACK"             : (0, 0, 0),
+    "ORANGE"            : (255, 165, 0),
+    "BLUE_GREEN"        : (13, 152, 186),
+    "YELLOW"            : (255,255,0),
+    "BLUE"              : (0, 0, 255),
+    "VERMILION"         : (227, 66, 52)
+}
 
 
 class Texts():
@@ -24,6 +35,9 @@ class Texts():
         else:
             for i in range(len(self.texts)):
                 screen.blit(self.texts[i], self.poses[i])
+                
+    def get_text_data(self, i):
+        return (self.texts[i], self.poses[i]), (self.texts_c[i], self.poses[i])
             
     def add(self, text, pos, size = 30, font_name = "arial", font_color = "BLUE_MAGENTA", font_color_c = "REDDISH_PURPLE"):
         self.default_texts.append(text)
@@ -40,7 +54,12 @@ class Texts():
         self.apply_pos_scale(i)
         self.apply_text_scale(i, self.get_font_ratio())
         
-    def change_text(self, i, text, size = 30, font_name = "arial", font_color = "BLUE_MAGENTA", font_color_c = "REDDISH_PURPLE"):
+    def change_text(self, i, text):
+        self.default_texts[i] = text
+        self.apply_text_scale(i, self.get_font_ratio())
+        self.apply_pos_scale(i)
+        
+    def change_text_all(self, i, text, size = 30, font_name = "arial", font_color = "BLUE_MAGENTA", font_color_c = "REDDISH_PURPLE"):
         self.default_texts[i] = text
         self.default_sizes[i] = size
         self.colors[i] = COLORS[font_color]

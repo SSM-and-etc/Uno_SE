@@ -2,6 +2,12 @@ import pygame
 import numpy as np
 
 import os
+# imges.add_row:  새로운 행 추가 + 버튼 하나 추가
+# imges.add:      새로운 열 추가 + 버튼 하나 추가(마지막 행, 마지막 열의 뒤에)
+# imges.draw:     넣어놓은 이미지들을 화면에 출력
+# imges.set_row_linspace(i, s, d): i번째 행의 이미지들을 s, d 좌표 사이에 정렬(y값은 그대로)
+# imges.set_col_linspace(j, s, d): j번째 열의 이미지들을 s, d 좌표 사이에 정렬(x값은 그대로)
+# imges.apply_screen_size(): screen size에 맞게 이미지들 크기 변환
 
 class Images():
     def __init__(self, data, root, design_size = (1280, 720)):
@@ -10,43 +16,74 @@ class Images():
         self.design_size = design_size
         self.default_imgs = []
         self.default_imgs_c = []
+        self.default_checked_imgs = []
+        self.default_checked_imgs_c = []
         self.default_poses = []
         self.imgs = []
         self.imgs_c = []
+        self.checked_imgs = []
+        self.checked_imgs_c = []
         self.rects = []
+        self.is_checked = []
         
     def draw(self, screen):
         if self.user_data.color_blindness_mode:
             for i in range(len(self.imgs)):
                 for j in range(len(self.imgs[i])):
-                    screen.blit(self.imgs_c[i][j], self.rects[i][j])
+                    if self.is_checked[i][j]:
+                        screen.blit(self.checked_imgs_c[i][j], self.rects[i][j])
+                    else:
+                        screen.blit(self.imgs_c[i][j], self.rects[i][j])
         else:
             for i in range(len(self.imgs)):
                 for j in range(len(self.imgs[i])):
-                    screen.blit(self.imgs[i][j], self.rects[i][j])
+                    if self.is_checked[i][j]:
+                        screen.blit(self.checked_imgs[i][j], self.rects[i][j])
+                    else:
+                        screen.blit(self.imgs[i][j], self.rects[i][j])
              
-    def add_row(self, img_path, img_path_c, pos):
+    def add_row(self, img_path, img_path_c = None, pos = (0, 0), checked_img_path = None, checked_img_path_c = None):
         self.default_imgs.append([])
         self.default_imgs_c.append([])
+        self.default_checked_imgs.append([])
+        self.default_checked_imgs_c.append([])
         self.default_poses.append([])
         self.imgs.append([])
         self.imgs_c.append([])
         self.rects.append([])
-        self.add(img_path, img_path_c, pos)
+        self.checked_imgs.append([])
+        self.checked_imgs_c.append([])
+        self.is_checked.append([])
+        self.add(img_path, img_path_c, pos, checked_img_path, checked_img_path_c)
              
-    def add(self, img_path, img_path_c, pos):
-        img = pygame.image.load(os.path.join(self.root, img_path))
-        img_c = pygame.image.load(os.path.join(self.root, img_path_c))
-        self.default_imgs[-1].append(img)
-        self.default_imgs_c[-1].append(img_c)
+    def add(self, img_path, img_path_c = None, pos = (0, 0), checked_img_path = None, checked_img_path_c = None):
+        if not img_path_c:
+            img_path_c = img_path
+        if not checked_img_path:
+            checked_img_path = img_path
+        if not checked_img_path_c:
+            checked_img_path_c = img_path_c
+        self.default_imgs[-1].append(pygame.image.load(os.path.join(self.root, img_path)))
+        self.default_imgs_c[-1].append(pygame.image.load(os.path.join(self.root, img_path_c)))
+        self.default_checked_imgs[-1].append(pygame.image.load(os.path.join(self.root, checked_img_path)))
+        self.default_checked_imgs_c[-1].append(pygame.image.load(os.path.join(self.root, checked_img_path_c)))
         self.default_poses[-1].append(pos)
         self.imgs[-1].append(None)
         self.imgs_c[-1].append(None)
         self.rects[-1].append(None)
+        self.checked_imgs[-1].append(None)
+        self.checked_imgs_c[-1].append(None)
+        self.is_checked[-1].append(False)
         
         i, j = len(self.imgs) - 1, len(self.imgs[-1]) - 1
         self.apply_img_scale(self.get_scale_ratio(), i, j)
         self.apply_rect_scale(i, j)
+        
+    def set_checked(self, i, j, is_checked):
+        self.is_checked[i][j] = is_checked
+        
+    def get_checked(self, i, j):
+        return self.is_checked[i][j]
         
     def set_row_linspace(self, i, start, end):
         linspace = np.linspace(start, end, len(self.imgs[i]) + 2)[1:-1]
@@ -60,14 +97,22 @@ class Images():
             self.default_poses[i][j] = (self.default_poses[i][j][0], linspace[i])
             self.apply_rect_scale(i, j)
         
-    def change_img(self, img, i, j):
-        self.default_imgs[i][j] = img
+    def get_img(self, i, j):
+        return self.default_imgs[i][j], self.default_imgs_c[i][j], self.default_checked_imgs[i][j], self.default_checked_imgs_c[i][j]
+        
+    def change_img(self, i, j, imgs):
+        self.default_imgs[i][j] = imgs[0]
+        self.default_imgs_c[i][j] = imgs[1]
+        self.default_checked_imgs[i][j] = imgs[2]
+        self.default_checked_imgs_c[i][j] = imgs[3]
         self.apply_img_scale(self.get_scale_ratio(), i, j)
         self.apply_rect_scale(i, j)
         
     def apply_img_scale(self, scale_ratio, i, j):
         self.imgs[i][j] = pygame.transform.scale(self.default_imgs[i][j], self.tup_mul(self.get_img_size(self.default_imgs[i][j]), scale_ratio))
-        self.imgs_c[i][j] = pygame.transform.scale(self.default_imgs_c[i][j], self.tup_mul(self.get_img_size(self.default_imgs[i][j]), scale_ratio))
+        self.imgs_c[i][j] = pygame.transform.scale(self.default_imgs_c[i][j], self.tup_mul(self.get_img_size(self.default_imgs_c[i][j]), scale_ratio))
+        self.checked_imgs[i][j] = pygame.transform.scale(self.default_checked_imgs[i][j], self.tup_mul(self.get_img_size(self.default_checked_imgs[i][j]), scale_ratio))
+        self.checked_imgs_c[i][j] = pygame.transform.scale(self.default_checked_imgs_c[i][j], self.tup_mul(self.get_img_size(self.default_checked_imgs_c[i][j]), scale_ratio))
         
     def apply_rect_scale(self, i, j):
         self.rects[i][j] = self.imgs[i][j].get_rect(center = self.get_scaled_pos(self.default_poses[i][j]))
