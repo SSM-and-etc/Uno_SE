@@ -10,8 +10,6 @@ import random
 
 import os
 
-USEREVENT2 = pygame.USEREVENT
-
 
 class Asset:
     design_size = (1280, 720)
@@ -153,8 +151,7 @@ class Selection:
             self.pos[0] = 0
 
 class GamePlay:
-    def __init__(self, main, playerlist, stage_index = 1, playerAI_number = 1, players_idx = [0, 0, 0, 0, 0, 0]):
-        self.set_achi_data()
+    def __init__(self, main, playerlist,stage_index = 1, playerAI_number = 1):
         self.main = main
         self.playerlist=playerlist
         self.stage_index = stage_index
@@ -196,10 +193,8 @@ class GamePlay:
 
         self.font_resize() 
 
-        self.players_idx = players_idx
         self.player_setting(playerAI_number)
-        self.set_stage_bit()
-        self.game = Game(self.players, self.stage_bit, main.sound)
+        self.game = Game(self.players, stage_index, main.sound)
 
         self.pane_assets = [FakeAsset((10, 514, 876, 196))]
         for i in range(len(self.players)-1):
@@ -209,17 +204,14 @@ class GamePlay:
 
         self.update_hand()
         self.update_table()    
-        
-        self.achi_first_draw() #업적
-                
 
     def player_setting(self, playerAI_number):
         if self.stage_index == 0:
             self.player = Player(self.playerlist[0].namebox[1])        
             self.players = [self.player]
-            for i in range(1, len(self.playerlist)):
-                self.playerlist[i] = PlayerAI(self.players_idx[i], self.playerlist[i].namebox[1])
-                self.players.append(self.playerlist[i])
+            for player in self.playerlist[1:]:
+                player = PlayerAI(self.stage_index,player.namebox[1])
+                self.players.append(player)
 
         else:
             self.player = Player("ME")
@@ -228,12 +220,6 @@ class GamePlay:
             for i in range(playerAI_number):
                 player = PlayerAI(self.stage_index, f"Computer {i}")
                 self.players.append(player)
-                
-    def set_stage_bit(self):
-        self.stage_bit = 0
-        for player in self.players:
-            if player.is_ai:
-                self.stage_bit |= (1 << player.index)
 
     def player_ai_setting(self): # 스테이지별 ai 수 조정
         match self.stage_index:
@@ -286,7 +272,6 @@ class GamePlay:
             for player in self.game.players:
                 if len(player.hand) == 0:
                     self.winner = player
-                    self.achi_win() # 업적
 
     def calculate_card_size(self, player_num):
         n = max(1, len(self.game.players[player_num].hand))
@@ -379,16 +364,11 @@ class GamePlay:
                 
                 if event.type == pygame.USEREVENT:
                     self.counter_event()
-                if event.type == USEREVENT2:
-                    self.achi_comp_counter -= 1
                         
             self.main.screen.blit(*self.assets["background"].scaled())
 
             if self.on_game_gui:
                 self.draw_game()
-                
-        if self.achi_comp_counter > 0:
-            self.esc.achievements.comp_draw(main.screen)
     
     def counter_event(self):
         #if self.counter == 13: # For Debugging
@@ -407,8 +387,6 @@ class GamePlay:
             if self.game.deck.stack:
                 self.animate_assets.append((self.assets["deck"].clone(), self.assets["table"], 20, 0))
                 self.game.table.put(self.game.deck.draw())
-            if self.stage_bit & (1 << 2):
-                self.game.deck.pop_all()
 
         if self.counter == 0:
             if self.game.deck.stack:
@@ -455,35 +433,34 @@ class GamePlay:
 
     def play_player(self, player, card = None):
         # self.game.play() 이후의 self.game.turn()은 순서를 넘겨 받은 플레이어가 됨에 주의
-        self.game_turn_count += 1
-        self.achi_put_card(card)
         self.game.play(player, len(self.players), card)
-        self.handle_stage_gimmick(player)
-                    
-    def handle_stage_gimmick(self, player):
         self.turn_count_gimmick += 1
         if self.game.turn() == self.player:
             self.user_turn_count_gimmick += 1
-            
-        if self.stage_bit & (1 << 3):
-            while self.turn_count_gimmick >= 5:
-                self.turn_count_gimmick -= 5
-                print("stage 3 기믹")
-                self.game.table.change_random_color()
-        if self.stage_bit & (1 << 4):
-            if self.game.turn() == self.player and not (self.user_turn_count_gimmick & 1):
-                print("stage 4 드로우 기믹")
-                if self.game.deck.stack:
-                    self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.player)], 50, 0))
-                    self.game.draw(self.game.turn(), 2)
-                else:
-                    self.game.draw(self.game.turn())
-                    self.update_table()
+        
+        self.handle_stage_gimmick(player)
+                    
+    def handle_stage_gimmick(self, player):
+        match self.stage_index:
+            case 3:
+                while self.turn_count_gimmick >= 5:
+                    self.turn_count_gimmick -= 5
+                    print("stage 3 기믹")
+                    self.game.table.change_random_color()
+            case 4:
+                if self.game.turn() == self.player and not (self.user_turn_count_gimmick & 1):
+                    print("stage 4 드로우 기믹")
+                    if self.game.deck.stack:
+                        self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.player)], 50, 0))
+                        self.game.draw(self.game.turn(), 2)
+                    else:
+                        self.game.draw(self.game.turn())
+                        self.update_table()
 
-            if self.turn_count_gimmick == 5:
-                print("stage 4 패 교환 기믹")
-                self.game.hand_swap(player, self.game.turn())
-                self.turn_count_gimmick = 0
+                if self.turn_count_gimmick == 5:
+                    print("stage 4 패 교환 기믹")
+                    self.game.hand_swap(player, self.game.turn())
+                    self.turn_count_gimmick = 0
                     
     def animate_asset(self):
         if self.animate_assets:
@@ -641,8 +618,6 @@ class GamePlay:
             
     def possible_push_uno(self, now_player):
         if not now_player.uno and len(now_player.hand) <= 2: # TODO: 디버깅용으로 >=2로 설정함, <=2로 바꿔야함
-            if now_player != self.player:
-                self.is_uno_another = True
             return True
         else:
             return False
@@ -657,63 +632,3 @@ class GamePlay:
     
     def change_screen_size(self):
         self.esc.apply_screen_size()
-        
-    def set_achi_data(self):
-        self.achi_comp_counter = 0
-        self.game_turn_count = 0
-        self.use_special_card = False
-        self.is_uno_another = False
-        self.is_draw = False
-        self.count_put_card_num_in_a_row = 0
-    
-    def achi_first_draw(self):
-        is_all_skill_card = True
-        for card in self.player.hand:
-            if card.is_number():
-                is_all_skill_card = False
-        if is_all_skill_card:
-            self.complete_achi(10)
-    
-    def achi_put_card(self, card):
-        if self.game.turn() == self.player:
-            if self.game.table.playable(card):
-                self.count_put_card_num_in_a_row += 1
-                if card.is_special():
-                    self.use_special_card = True
-            else:
-                self.count_put_card_num_in_a_row = 0   
-                self.is_draw = True 
-        else:
-            self.count_put_card_num_in_a_row = 0
-        
-        if self.count_put_card_num_in_a_row == 3:
-            self.complete_achi(9)
-    
-    def achi_win(self):
-        if self.player != self.winner:
-            return
-        
-        self.complete_achi(self.stage_index)
-        if self.game_turn_count <= 10:
-            self.complete_achi(5)
-        if self.use_special_card:
-            self.complete_achi(6)
-        if self.is_uno_another:
-            self.complete_achi(7)
-        if self.stage_index == 0:
-            is_more10 = True
-            for player in self.players:
-                if self.player != player:
-                    if len(player.hand) < 10:
-                        is_more10 = False
-            if is_more10:
-                self.complete_achi(8)
-        if not self.is_draw:
-            self.complete_achi(11)
-            
-                
-    def complete_achi(self, i):
-        if self.user_data.complete_achi(i):
-            pygame.time.set_timer(USEREVENT2, 1000)
-            self.achi_comp_counter = 3
-            self.esc.achievements.set_comp(i)

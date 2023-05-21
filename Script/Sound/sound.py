@@ -31,8 +31,7 @@ class Sound():
             energy,
             downtown,
             hey,
-            downtown,
-            hey
+            downtown
         ]
         
     def set_volume(self):

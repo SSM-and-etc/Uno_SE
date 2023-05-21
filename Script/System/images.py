@@ -2,12 +2,6 @@ import pygame
 import numpy as np
 
 import os
-# imges.add_row:  새로운 행 추가 + 버튼 하나 추가
-# imges.add:      새로운 열 추가 + 버튼 하나 추가(마지막 행, 마지막 열의 뒤에)
-# imges.draw:     넣어놓은 이미지들을 화면에 출력
-# imges.set_row_linspace(i, s, d): i번째 행의 이미지들을 s, d 좌표 사이에 정렬(y값은 그대로)
-# imges.set_col_linspace(j, s, d): j번째 열의 이미지들을 s, d 좌표 사이에 정렬(x값은 그대로)
-# imges.apply_screen_size(): screen size에 맞게 이미지들 크기 변환
 
 class Images():
     def __init__(self, data, root, design_size = (1280, 720)):

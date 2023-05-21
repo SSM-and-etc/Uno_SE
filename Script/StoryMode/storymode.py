@@ -1,6 +1,6 @@
 import pygame
 
-from System.esc_menu import EscMenu
+from System.option import Option
 
 import random
 
@@ -97,8 +97,8 @@ class StoryMode:
     def __init__(self, main):
         self.main = main
         self.user_data = main.user_data
-        self.esc = EscMenu(main, self)
-        self.on_esc = False
+        self.option = Option(main, self)
+        self.on_option = False
         
         Asset.user_data = main.user_data
         
@@ -138,8 +138,8 @@ class StoryMode:
         self.selection = Selection(self.popup, min(self.user_data.story_level, 3))
 
     def display(self, main):
-        if self.on_esc:
-            self.on_esc = self.esc.display(main)
+        if self.on_option:
+            self.on_option = self.option.display(main)
         else:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -232,7 +232,7 @@ class StoryMode:
         elif key == self.user_data.key_enter:
             self.handle()
         elif key == pygame.K_ESCAPE:
-            self.on_esc = True
+            self.on_option = True
             
     def apply_state_change(self):
         # TODO: 현재 state에 따라 select 이미지 적절하게 이동시키기
@@ -242,4 +242,4 @@ class StoryMode:
         pass
     
     def change_screen_size(self):
-        self.esc.apply_screen_size()
+        pass # title의 size 변경 방식과의 호환을 위해 임시로 만듦

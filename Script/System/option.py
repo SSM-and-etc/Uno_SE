@@ -1,6 +1,7 @@
 import pygame
 
 import os
+import copy
 
 from GameData.user_data import UserData
 

@@ -4,14 +4,6 @@ import os
 
 from System.images import Images
 
-# buttons.add_row:  새로운 행 추가 + 버튼 하나 추가
-# buttons.add:      새로운 열 추가 + 버튼 하나 추가(마지막 행, 마지막 열의 뒤에)
-# buttons.draw:     버튼들, 현재 가리키는 버튼을 가리키는 화살표를 화면에 출력
-# buttons.get_clicked_button_idx: 현재 버튼 중 클릭된 버튼의 i, j를 반환, 그 외 클릭시 None 반환
-# buttons.key_down_state: 방향키 상하좌우의 이동으로 현재 가리키는 커서 위치 변경후 True 반환, 그 외의 버튼 False 반환
-# buttons.set_row_linspace(i, s, d): i번째 행의 버튼들을 s, d 좌표 사이에 정렬(y값은 그대로)
-# buttons.set_col_linspace(j, s, d): j번째 열의 버튼들을 s, d 좌표 사이에 정렬(x값은 그대로)
-# buttons.apply_screen_size(): screen size에 맞게 버튼들 크기 변환
 
 class StateButtons(Images): 
     def __init__(self, data, root, design_size = (1280, 720), on_state = True):

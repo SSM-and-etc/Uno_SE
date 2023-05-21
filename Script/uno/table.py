@@ -34,10 +34,7 @@ class Table:
         return self.cards[-1]
 
     def playable(self, card):
-        if card:
-            if card.card_type.is_wild():
-                return True
-            else:
-                return card.card_type == self.top().card_type or self.get_color() == card.color
+        if card.card_type.is_wild():
+            return True
         else:
-            return False
+            return card.card_type == self.top().card_type or self.get_color() == card.color
