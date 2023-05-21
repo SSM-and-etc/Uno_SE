@@ -26,3 +26,7 @@ class Deck:
     def draw(self):
         return self.stack.pop()
     
+    def pop_all(self):
+        while self.stack:
+            self.stack.pop()
+    

@@ -9,13 +9,13 @@ from System.weighted_picker import WeightedPicker
 import random
 
 class Game:
-    def __init__(self, players, stage_index, sound):
+    def __init__(self, players, stage_bit, sound):
         self.sound = sound
         self.players = players
         self.table = Table()
         self.deck = Deck({"number": 1, "special": 1, "wild": 2})
         self.players_turn = CycleIterator(players)
-        self.stage_index = stage_index
+        self.stage_bit = stage_bit
         self.ai_players = []
         for player in players:
             if player.is_ai:
@@ -24,22 +24,29 @@ class Game:
         self.uno_player = None
 
         self.draw_setting()
-        self.table.put(self.deck.draw()) # TODO: 첫 카드가 숫자 카드가 아닐 때
+        self.table.put(self.deck.draw())
+        if self.stage_bit & (1 << 2):
+            self.deck.pop_all()
         
 
     def draw_setting(self, default_card_num = 5):
-        match self.stage_index:
-            case 1:
-                self.draw(self.players[0], default_card_num)
-                self.weighted_draw(self.players[1],{"number": 2, "special": 3}, default_card_num)
-                # 가중치 하드코딩? 어딘가에 저장해 놓는 것이 좋을지
-            case 2:
-                n = len(self.deck.stack) // len(self.players)
+        if self.stage_bit & (1 << 2):
+                n = (len(self.deck.stack) // len(self.players)) - 1
                 for player in self.players:
+                    self.draw_by_type(player, n)
+        else:
+            for player in self.players:
+                self.draw_by_type(player, default_card_num)
+        
+    def draw_by_type(self, player, n = 1):
+        if player.is_ai:
+            match player.index:
+                case 1:
+                    self.weighted_draw(player, {"number": 2, "special": 3}, n)
+                case _:
                     self.draw(player, n)
-            case _: # 0, 3, 4
-                for player in self.players:
-                    self.draw(player, default_card_num)
+        else:
+            self.draw(player, n)
         
 
     def draw(self, player, n=1):

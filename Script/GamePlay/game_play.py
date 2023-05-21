@@ -151,7 +151,7 @@ class Selection:
             self.pos[0] = 0
 
 class GamePlay:
-    def __init__(self, main, playerlist,stage_index = 1, playerAI_number = 1):
+    def __init__(self, main, playerlist, stage_index = 1, playerAI_number = 1, players_idx = [0, 0, 0, 0, 0, 0]):
         self.main = main
         self.playerlist=playerlist
         self.stage_index = stage_index
@@ -193,8 +193,10 @@ class GamePlay:
 
         self.font_resize() 
 
+        self.players_idx = players_idx
         self.player_setting(playerAI_number)
-        self.game = Game(self.players, stage_index, main.sound)
+        self.set_stage_bit()
+        self.game = Game(self.players, self.stage_bit, main.sound)
 
         self.pane_assets = [FakeAsset((10, 514, 876, 196))]
         for i in range(len(self.players)-1):
@@ -204,14 +206,15 @@ class GamePlay:
 
         self.update_hand()
         self.update_table()    
+                
 
     def player_setting(self, playerAI_number):
         if self.stage_index == 0:
             self.player = Player(self.playerlist[0].namebox[1])        
             self.players = [self.player]
-            for player in self.playerlist[1:]:
-                player = PlayerAI(self.stage_index,player.namebox[1])
-                self.players.append(player)
+            for i in range(1, len(self.playerlist)):
+                self.playerlist[i] = PlayerAI(self.players_idx[i], self.playerlist[i].namebox[1])
+                self.players.append(self.playerlist[i])
 
         else:
             self.player = Player("ME")
@@ -220,6 +223,12 @@ class GamePlay:
             for i in range(playerAI_number):
                 player = PlayerAI(self.stage_index, f"Computer {i}")
                 self.players.append(player)
+                
+    def set_stage_bit(self):
+        self.stage_bit = 0
+        for player in self.players:
+            if player.is_ai:
+                self.stage_bit |= (1 << player.index)
 
     def player_ai_setting(self): # 스테이지별 ai 수 조정
         match self.stage_index:
@@ -434,33 +443,32 @@ class GamePlay:
     def play_player(self, player, card = None):
         # self.game.play() 이후의 self.game.turn()은 순서를 넘겨 받은 플레이어가 됨에 주의
         self.game.play(player, len(self.players), card)
-        self.turn_count_gimmick += 1
-        if self.game.turn() == self.player:
-            self.user_turn_count_gimmick += 1
-        
         self.handle_stage_gimmick(player)
                     
     def handle_stage_gimmick(self, player):
-        match self.stage_index:
-            case 3:
-                while self.turn_count_gimmick >= 5:
-                    self.turn_count_gimmick -= 5
-                    print("stage 3 기믹")
-                    self.game.table.change_random_color()
-            case 4:
-                if self.game.turn() == self.player and not (self.user_turn_count_gimmick & 1):
-                    print("stage 4 드로우 기믹")
-                    if self.game.deck.stack:
-                        self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.player)], 50, 0))
-                        self.game.draw(self.game.turn(), 2)
-                    else:
-                        self.game.draw(self.game.turn())
-                        self.update_table()
+        self.turn_count_gimmick += 1
+        if self.game.turn() == self.player:
+            self.user_turn_count_gimmick += 1
+            
+        if self.stage_bit & (1 << 3):
+            while self.turn_count_gimmick >= 5:
+                self.turn_count_gimmick -= 5
+                print("stage 3 기믹")
+                self.game.table.change_random_color()
+        if self.stage_bit & (1 << 4):
+            if self.game.turn() == self.player and not (self.user_turn_count_gimmick & 1):
+                print("stage 4 드로우 기믹")
+                if self.game.deck.stack:
+                    self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.player)], 50, 0))
+                    self.game.draw(self.game.turn(), 2)
+                else:
+                    self.game.draw(self.game.turn())
+                    self.update_table()
 
-                if self.turn_count_gimmick == 5:
-                    print("stage 4 패 교환 기믹")
-                    self.game.hand_swap(player, self.game.turn())
-                    self.turn_count_gimmick = 0
+            if self.turn_count_gimmick == 5:
+                print("stage 4 패 교환 기믹")
+                self.game.hand_swap(player, self.game.turn())
+                self.turn_count_gimmick = 0
                     
     def animate_asset(self):
         if self.animate_assets:
