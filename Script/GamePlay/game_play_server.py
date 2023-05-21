@@ -71,9 +71,8 @@ class GamePlayServer(GamePlay):
         self.sockets.append(client[0])
         self.players.append(Player("Client"))
 
-        client = self.sock.accept()
-        self.sockets.append(client[0])
-        self.players.append(Player("Client2"))
+        self.sockets.append(None)
+        self.players.append(PlayerAI(tag="AI"))
 
         '''
         client = self.sock.accept()
@@ -115,12 +114,12 @@ class GamePlayServer(GamePlay):
     def socket_handle(self):
         query_players = lambda p: self.players[self.players.index(p)]
 
-        for sock in self.sockets:
+        for sock in filter(None, self.sockets):
             sock.setblocking(0)
             try:
                 recv = sock.recv(4096)
 
-                for sock2 in self.sockets:
+                for sock2 in filter(None, self.sockets):
                     sock2.send(recv)
 
                 data = pickle.loads(recv)
@@ -163,7 +162,7 @@ class GamePlayServer(GamePlay):
                     self.update_hand()
                     self.update_table()
 
-                    for sock2 in self.sockets:
+                    for sock2 in filter(None, self.sockets):
                         sock2.send(pickle.dumps({
                             "action": "DISCONNECTED",
                             "payload": {"player": player},
@@ -171,49 +170,14 @@ class GamePlayServer(GamePlay):
             except:
                 pass
         
-    def socket_health_check(self):
-        for sock in self.sockets:
-            try:
-                sock.send(pickle.dumps({"action": "PING"}))
-            except:
-                pass
 
     def display(self, main):
         self.socket_handle()
         super().display(main)
 
-    def counter_event(self):
-        self.socket_health_check()
-
-        if self.counter > 0:
-            self.counter -= 1
-
-        if self.game.table.top().is_special() and self.game.deck.stack:
-            card = self.game.table.top()
-
-            if card.card_type == CardType.CARD_CHANGECOLOR:
-                card.color = random.choice(list(CardColor))
-
-            self.game.turn().hand.append(card)
-            self.game.play(self.game.turn(), len(self.players), card)
-
-            if self.game.deck.stack:
-                self.animate_assets.append((self.assets["deck"].clone(), self.assets["table"], 20, 0))
-                self.game.table.put(self.game.deck.draw())
-
-        if self.counter == 0:
-            if self.game.turn() == self.player:
-                if self.game.deck.stack:
-                    self.animate_assets.append((self.assets["deck"].clone(), self.card_assets[-1], 50, 0))
-                    self.play_player(self.game.turn())
-                else:
-                    self.play_player(self.game.turn())
-                    self.update_table()
-
-            self.counter = 15
-
     def play_player(self, player, card = None):
-        for sock in self.sockets:
+        for sock in filter(None, self.sockets):
+            print(sock, player, card)
             sock.send(pickle.dumps({
                 "action": "PLAY",
                 "payload": {
@@ -224,7 +188,7 @@ class GamePlayServer(GamePlay):
         self.game.play(player, len(self.players), card)
     
     def play_uno(self, uno_player, player):
-        for sock in self.sockets:
+        for sock in filter(None, self.sockets):
             sock.send(pickle.dumps({
                 "action": "UNO",
                 "payload": {
