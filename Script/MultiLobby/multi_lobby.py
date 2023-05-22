@@ -1,7 +1,7 @@
 import pygame
 
-from ServerUser.server_user import ServerUser
-from ClientUser.client_user import ClientUser
+from MultiLobby.server_user import ServerUser
+from MultiLobby.client_user import ClientUser
 
 
 class MultiLobby:
