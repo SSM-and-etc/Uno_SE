@@ -73,7 +73,7 @@ class MultiLobby():
     def keydown(self, main, event):
         if self.on_input_string:
             self.write_string(event)
-        if not self.buttons[self.state].key_down_state(key):
+        if not self.buttons[self.state].key_down_state(event.key):
             match event.key:
                 case self.user_data.key_enter:
                     self.enter_state()
