@@ -14,6 +14,10 @@ class CycleIterator:
         else:
             return self.prev()
 
+    def update(self):
+        self.n = len(self.data)
+        self.i = self.i % self.n
+
     def look_next(self):
         if self.forward:
             return self.data[(self.i + 1) % self.n]
