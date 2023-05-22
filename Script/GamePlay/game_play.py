@@ -203,7 +203,7 @@ class GamePlay:
 
         self.pane_assets = [FakeAsset((10, 514, 876, 196))]
         for i in range(len(self.players)-1):
-            self.pane_assets.append(Asset("BG/player_panel.png", (906, 10 + 150 * i)))
+            self.pane_assets.append(Asset("BG/player_panel.png", (906, 10 + 140 * i)))
 
         self.selection = Selection(self.player, self.color_selection)
 
