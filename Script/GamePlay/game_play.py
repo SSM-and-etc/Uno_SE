@@ -10,7 +10,7 @@ import random
 
 import os
 
-USEREVENT2 = pygame.USEREVENT
+USEREVENT2 = pygame.USEREVENT + 1
 
 
 class Asset:

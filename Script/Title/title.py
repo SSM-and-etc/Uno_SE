@@ -1,7 +1,5 @@
 import pygame
 
-import os
-
 from System.option import Option
 from System.images import Images
 from System.statebuttons import StateButtons
