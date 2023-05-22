@@ -24,8 +24,10 @@ class ServerUser:
         self.players = [Player(f"Player {i + 1}") for i in range(6)]
         self.player_rects = []
         self.button_rects = []
-        self.box_width = 100
+        self.box_width = 150
         self.box_height = 50
+        self.box_x= 0
+        self.box_y=0
         self.ip_box = pygame.Rect(self.screen_width - 250, 50, 200, 30)
         self.password_box = pygame.Rect(self.screen_width - 250, 90, 200, 30)
         self.start_button = pygame.Rect(
@@ -82,26 +84,26 @@ class ServerUser:
         self.player_rects = []
         for i, player in enumerate(self.players):
             color = (0, 255, 0) if player.activeBox else (150, 150, 150)
-            box_x = 200
-            box_y = 50 + (self.box_height + 20) * i
+            self.box_x = 200
+            self.box_y = 50 + (self.box_height + 20) * i
             rect = pygame.Rect(
-                box_x, box_y, self.box_width, self.box_height)
+                self.box_x, self.box_y, self.box_width, self.box_height)
             pygame.draw.rect(self.screen, color, rect)
             self.player_rects.append(rect)
 
             text = self.font.render(player.name, True, (255, 255, 255))
             text_rect = text.get_rect(
-                top=box_y + self.offset, left=box_x + self.offset)
+                top=self.box_y + self.offset, left=self.box_x + self.offset, width=self.box_width - self.offset * 2)
             self.screen.blit(text, text_rect)
 
     def draw_kick_buttons(self):
 
         for i, player in enumerate(self.players):
             if player.activeBox:
-                box_x = 200
-                box_y = 50 + (self.box_height + 20) * i
-                button_x = box_x + self.box_width + self.offset
-                button_y = box_y + (self.box_height - self.button_size[1]) // 2
+                self.box_x = 200
+                self.box_y = 50 + (self.box_height + 20) * i
+                button_x = self.box_x + self.box_width + self.offset
+                button_y = self.box_y + (self.box_height - self.button_size[1]) // 2
                 button_rect = pygame.Rect(
                     button_x, button_y, self.button_size[0], self.button_size[1])
                 pygame.draw.rect(self.screen, self.button_color, button_rect)
@@ -122,8 +124,8 @@ class ServerUser:
                     button_x = button_rect.x + button_rect.width
                     button_y = button_rect.y
                     button_spacing = 20
-                    popup_x = button_x + button_spacing
-                    popup_y = button_y
+                    popup_x = button_x + button_rect.width + self.offset
+                    popup_y = button_y+(button_rect.height - self.popup_height) // 2
                     popup_rect = pygame.Rect(
                         popup_x, popup_y, self.popup_width, self.popup_height)
                     pygame.draw.rect(self.screen, (255, 255, 255), popup_rect)
