@@ -1,5 +1,5 @@
 import pygame
-
+import numpy as np
 from System.images import Images
 from System.statebuttons import StateButtons
 from System.texts import Texts
@@ -16,6 +16,7 @@ PLAYER0_NAME = 0; PLAYER1_NAME = 1; PLAYER2_NAME = 2; PLAYER3_NAME = 3; PLAYER4_
 IP_STRING    = 6
 PW_STRING    = 7
 # ...이후는 초기값으로 문자열 고정
+MAX_PLAYER_COUNT = 6
 
 
 class MultiLobby():
@@ -35,6 +36,7 @@ class MultiLobby():
         self.state = 0          # 0: 방만들기/참여, 1: 비밀번호설정, 방 만들기, 2: 방 참여, 3: 방 비밀번호 입력, 4: 로비
         self.reset()
         self.add_assets()
+        self.input_string_reset()
         self.ex_texts_counter = 0
         
     def display(self, main):
@@ -147,17 +149,19 @@ class MultiLobby():
     def enter_write_state(self, i):
         if self.on_input_string:
             self.on_input_string = False
+            self.buttons[self.state].is_state_holding = False
         else:
+            self.buttons[self.state].is_state_holding = True
             self.on_input_string = True
             self.now_text_index = i
             self.now_input_string = self.texts[self.state].get_only_text(self.now_text_index)
         
     def write_string(self, event):
-        if len(self.now_input_string) > 0 and len(self.now_input_string) <= 10:
+        if len(self.now_input_string) > 0 and event.key == pygame.K_BACKSPACE:
+                self.now_input_string = self.now_input_string[:-1]
+                self.texts[self.state].change_text(self.now_text_index, self.now_input_string)
+        elif len(self.now_input_string) <= 10:
             match event.key:
-                case pygame.K_BACKSPACE:
-                    self.now_input_string = self.now_input_string[:-1]
-                    self.texts[self.state].change_text(self.now_text_index, self.now_input_string)
                 case self.user_data.key_enter:
                     self.on_input_string = False
                 case _:
@@ -166,7 +170,7 @@ class MultiLobby():
                         self.texts[self.state].change_text(self.now_text_index, self.now_input_string)
 
     def move_collide(self, main, mouse_pos):
-        clicked_button_idx = self.buttons[self.state].get_clicked_button_idx(mouse_pos)
+        clicked_button_idx = self.buttons[self.state].get_on_cursor_buttton_idx(mouse_pos)
         
     def add_assets(self):
         self.add_imgs()
@@ -174,7 +178,7 @@ class MultiLobby():
         self.add_texts()
         
     def add_imgs(self):
-        self.BG.add_row("Material/BG/title.png", "Material/ColorMode/BG/title.png", (0.5, 0.5))
+        self.BG.add_row("Material/BG/white.png", "Material/ColorMode/BG/sky_blue.png", (0.5, 0.5))
         self.imgs[0].add_row("Material/GUI/pop_up.png", "Material/ColorMode/GUI/pop_up.png", (0.5, 0.5))
         self.imgs[1].add_row("Material/GUI/pop_up.png", "Material/ColorMode/GUI/pop_up.png", (0.5, 0.5))
         self.imgs[2].add_row("Material/GUI/pop_up.png", "Material/ColorMode/GUI/pop_up.png", (0.5, 0.5))
@@ -185,27 +189,96 @@ class MultiLobby():
         self.buttons[0].add("Material/Button/Lobby/enter_lobby.png", "Material/Button/Lobby/enter_lobby.png", (0.5, 0.5))
         self.buttons[0].set_row_linspace(0, 0.1, 0.9)
         self.buttons[0].add_row("Material/Button/Lobby/back.png", "Material/Button/Lobby/back.png", (0.75, 0.2))
-        self.buttons[1].add_row("Material/Button/Lobby/string_bar.png", "Material/Button/Lobby/string_bar.png", (0.6, 0.4))
+        self.buttons[1].add_row("Material/Button/Lobby/string_bar.png", "Material/Button/Lobby/string_bar.png", (0.55, 0.4))
         self.buttons[1].add_row("Material/Button/Lobby/create_lobby.png", "Material/Button/Lobby/create_lobby.png", (0.5, 0.65))
         self.buttons[1].add_row("Material/Button/Lobby/back.png", "Material/Button/Lobby/back.png", (0.75, 0.2))
-        self.buttons[2].add_row("Material/Button/Lobby/string_bar.png", "Material/Button/Lobby/string_bar.png", (0.6, 0.4))
+        self.buttons[2].add_row("Material/Button/Lobby/string_bar.png", "Material/Button/Lobby/string_bar.png", (0.55, 0.4))
         self.buttons[2].add_row("Material/Button/Lobby/enter_lobby.png", "Material/Button/Lobby/enter_lobby.png", (0.5, 0.65))
         self.buttons[2].add_row("Material/Button/Lobby/back.png", "Material/Button/Lobby/back.png", (0.75, 0.2))
-        self.buttons[3].add_row("Material/Button/Lobby/string_bar.png", "Material/Button/Lobby/string_bar.png", (0.6, 0.4))
+        self.buttons[3].add_row("Material/Button/Lobby/string_bar.png", "Material/Button/Lobby/string_bar.png", (0.55, 0.4))
         self.buttons[3].add_row("Material/Button/Lobby/enter_lobby.png", "Material/Button/Lobby/enter_lobby.png", (0.5, 0.65))
         self.buttons[3].add_row("Material/Button/Lobby/back.png", "Material/Button/Lobby/back.png", (0.75, 0.2))
+       
+        self.buttons[4].add_row("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.05, 0), "Material/Button/Lobby/ban_box.png", "Material/Button/Lobby/ban_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.125, 0), "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/host.png", "Material/Button/Lobby/host.png", (0.225, 0))
+        self.buttons[4].add("Material/Button/Lobby/string_bar.png", "Material/Button/Lobby/string_bar.png", (0.43, 0))
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.6, 0), "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.65, 0), "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.7, 0), "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.75, 0), "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/string_bar.png", "Material/Button/Lobby/string_bar.png", (0.96, 0.225))
+        self.buttons[4].add_row("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.05, 0), "Material/Button/Lobby/ban_box.png", "Material/Button/Lobby/ban_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.125, 0), "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/player1.png", "Material/Button/Lobby/player1.png", (0.225, 0))
+        self.buttons[4].add("Material/Button/Lobby/string_bar.png", "Material/Button/Lobby/string_bar.png", (0.43, 0))
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.6, 0),  "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.65, 0),"Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.7, 0),  "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.75, 0),"Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add_row("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.05, 0), "Material/Button/Lobby/ban_box.png", "Material/Button/Lobby/ban_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.125, 0), "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/player2.png", "Material/Button/Lobby/player2.png", (0.225, 0))
+        self.buttons[4].add("Material/Button/Lobby/string_bar.png", "Material/Button/Lobby/string_bar.png", (0.43, 0))
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.6, 0),  "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.65, 0),"Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.7, 0),  "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.75, 0),"Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add_row("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.05, 0), "Material/Button/Lobby/ban_box.png", "Material/Button/Lobby/ban_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.125, 0), "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/player3.png", "Material/Button/Lobby/player3.png", (0.225, 0))
+        self.buttons[4].add("Material/Button/Lobby/string_bar.png", "Material/Button/Lobby/string_bar.png", (0.43, 0))
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.6, 0),  "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.65, 0),"Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.7, 0),  "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.75, 0),"Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add_row("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.05, 0), "Material/Button/Lobby/ban_box.png", "Material/Button/Lobby/ban_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.125, 0), "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/player4.png", "Material/Button/Lobby/player4.png", (0.225, 0))
+        self.buttons[4].add("Material/Button/Lobby/string_bar.png", "Material/Button/Lobby/string_bar.png", (0.43, 0))
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.6, 0),  "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.65, 0),"Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.7, 0),  "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.75, 0),"Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/start_game.png", "Material/Button/Lobby/start_game.png", (0.89, 0.743))
+        self.buttons[4].add_row("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.05, 0), "Material/Button/Lobby/ban_box.png", "Material/Button/Lobby/ban_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.125, 0), "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/player5.png", "Material/Button/Lobby/player5.png", (0.225, 0))
+        self.buttons[4].add("Material/Button/Lobby/string_bar.png", "Material/Button/Lobby/string_bar.png", (0.43, 0))
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.6, 0),  "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.65, 0),"Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.7, 0),  "Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/box.png", "Material/Button/Lobby/box.png", (0.75, 0),"Material/Button/Lobby/check_box.png", "Material/Button/Lobby/check_box.png")
+        self.buttons[4].add("Material/Button/Lobby/exit_room.png", "Material/Button/Lobby/exit_room.png", (0.89, 0.871))
+        
+        for i in range(8):
+            self.buttons[4].set_col_linspace(i, 0.1, 1)
         
         
     def add_texts(self):
-        self.texts[1].add("", (0.4, 0.3), 30, "arial", "BLACK", "BLACK") 
-        self.texts[1].add("PW: ", (0.3, 0.3), 30, "arial", "BLACK", "BLACK")
+        self.texts[1].add("", (0.45, 0.36), 40, "arial", "BLACK", "BLACK")
+        self.texts[1].add("PW: ", (0.32, 0.37), 40, "arial", "BLACK", "BLACK")
+        self.texts[2].add("", (0.45, 0.36), 40, "arial", "BLACK", "BLACK") 
+        self.texts[2].add("IP: ", (0.32, 0.37), 40, "arial", "BLACK", "BLACK")
+        self.texts[3].add("", (0.45, 0.36), 40, "arial", "BLACK", "BLACK") 
+        self.texts[3].add("PW: ", (0.32, 0.37), 40, "arial", "BLACK", "BLACK")
         
+        self.texts[4].add("", (0.33, 0.21), 40, "BLACK", "BLACK")
+        self.texts[4].add("", (0.33, 0.339), 40, "BLACK", "BLACK")
+        self.texts[4].add("", (0.33, 0.468), 40, "BLACK", "BLACK")
+        self.texts[4].add("", (0.33, 0.597), 40, "BLACK", "BLACK")
+        self.texts[4].add("", (0.33, 0.726), 40, "BLACK", "BLACK")
+        self.texts[4].add("", (0.33, 0.855), 40, "BLACK", "BLACK")
+        self.texts[4].add("", (0.82, 0.1), 40, "BLACK", "BLACK")
+        self.texts[4].add("", (0.82, 0.21), 40, "BLACK", "BLACK")
+        self.texts[4].add("IP: ", (0.78, 0.1), 40, "BLACK", "BLACK")
+        self.texts[4].add("PW: ", (0.78, 0.21), 40, "BLACK", "BLACK")
         self.ex_texts.add("", (0.3, 0.07), 20, "arial")
         
     def apply_screen_size(self):
         self.BG.apply_screen_size()
         # for i in range(len(self.imgs)):
-        for i in range(4):
+        for i in range(5):
             self.imgs[i].apply_screen_size()
             self.buttons[i].apply_screen_size()
             self.texts[i].apply_screen_size()
@@ -228,12 +301,9 @@ class MultiLobby():
         self.now_text_index = 0
         self.room_password = ""
         
-        # for i in range(len(self.texts)):
-        for i in range(4):
-            self.texts[i].reset()
-        
     def exit(self):
         self.reset()
+        self.input_string_reset()
         match self.state:
             case 0:
                 self.main.scene_change(self.main.get_scene_index("title"))
@@ -245,6 +315,20 @@ class MultiLobby():
                 self.state = 2
             case 4:
                 self.state = 1
+    
+    def input_string_reset(self):
+        for i in range(1, 4):
+            self.texts[i].change_text(0, "")
+        self.set_default_name()
+        for i in range(MAX_PLAYER_COUNT, PW_STRING + 1):
+            self.texts[4].change_text(i, "")
+            
+    def set_default_name(self):
+        self.texts[4].change_text(0, "Host")
+        for i in range(1, MAX_PLAYER_COUNT):
+            self.texts[4].change_text(i, "Player" + str(i))
+        self.texts[4].change_text(IP_STRING, self.get_my_ip())
+        self.texts[4].change_text(PW_STRING, self.room_password)
                 
     def set_pw(self, pw):
         self.room_password = pw
@@ -254,7 +338,8 @@ class MultiLobby():
     
     def create_lobby(self):  #TODO: 방장의 로비 생성, 소켓 관련 연결, 
         self.state = 4
-        self.room_password = self.now_input_string
+        self.change_pw(self.now_input_string)
+        self.set_default_name()
         
     def check_lobby(self):  #TODO: ip주소로 방 접속 가능 여부 확인(1: 빈자리 여부(없으면 오류 메시지, 있으면 2로), 2: 비밀번호 여부 검사(있으면 self.state = 3설정, 비밀번호 입력 화면으로 이동 3으로, 없으면 self.state = 4 설정 후 로비 접속)
         if True:                # 로비의 빈자리 확인 (방장의 self.)
@@ -271,14 +356,17 @@ class MultiLobby():
         self.state = 4
         
         # 참가하고자 입력했던 방의 ip
-    def get_input_ip_address(self): # state2(방 참여: ip주소 입력 화면), state3(비밀번호 입력 화면)에서만 올바른 값 반환
+    def get_input_ip(self):
         return self.texts[2].get_only_text(0)
+    
+    def get_my_ip(self): #TODO: 자기 IP 반환
+        return "12.34.56.78"
     
     def get_empty_seat(self):
         return self.possible_player_count - self.exist_player_count
     
     def check_pw(self):     # 방의 비밀번호와 맞는지 확인
-        ip = self.get_input_ip_address()
+        ip = self.get_input_ip()
         # pw = 방의 비밀번호
         #if self.now_input_string == pw:
         if True:
@@ -287,3 +375,6 @@ class MultiLobby():
             self.ex_texts.change_text(0, "Invalid password.")
             self.ex_texts_counter = 3
             pygame.time.set_timer(pygame.USEREVENT, 1000)
+            
+    def change_pw(self, pw): # 방 비밀번호 변경시 처리
+        self.room_password = pw

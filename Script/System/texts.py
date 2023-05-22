@@ -103,3 +103,4 @@ class Texts():
     def reset(self):
         for i in range(len(self.texts)):
             self.change_text(i, "")
+            

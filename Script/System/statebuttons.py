@@ -60,6 +60,19 @@ class StateButtons(Images):
                         return None
                     self.state = [i, j]
                     return i, j
+        if self.is_state_holding:
+            self.is_state_holding = False
+            
+        return None
+    
+    def get_on_cursor_buttton_idx(self, mouse_pos):
+        if self.is_state_holding:
+            return None
+        for i in range(len(self.imgs)):
+            for j in range(len(self.imgs[i])):
+                if self.rects[i][j].collidepoint(mouse_pos):
+                    self.state = [i, j]
+                    return i, j
         return None
     
     def key_down_state(self, key):

@@ -74,7 +74,7 @@ class Title():
             self.enter_state(main)
             
     def move_collide_title(self, main, mouse_pos):
-        clicked_button_idx = self.buttons.get_clicked_button_idx(mouse_pos)
+        clicked_button_idx = self.buttons.get_on_cursor_buttton_idx(mouse_pos)
         if clicked_button_idx != None:
             pass
             

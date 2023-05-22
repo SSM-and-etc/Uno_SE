@@ -79,7 +79,7 @@ class Achievements():
             self.change_achi()
         
     def move_collide(self, main, mouse_pos):
-        self.buttons.get_clicked_button_idx(mouse_pos)
+        clicked_button_idx = self.buttons.get_on_cursor_buttton_idx(mouse_pos)
         
     def add_assets(self):
         self.add_imgs()
@@ -113,7 +113,7 @@ class Achievements():
     def add_texts(self):
         self.now_achi_texts.add("-", (0.35, 0.6), 30, "arial", "BLUE_GREEN")
         self.now_achi_texts.add("-", (0.35, 0.67), 15, "arial", "BLACK", "BLACK")
-        self.now_achi_texts.add("--.--.--", (0.275, 0.73), 20, "arial", "VERMILION", "VERMILION")
+        self.now_achi_texts.add("--.--.--", (0.275, 0.74), 20, "arial", "VERMILION", "VERMILION")
         self.comp_texts.add("", (0.5, 0.07), 30, "arial", "REDDISH_PURPLE", "VERMILION")
         
     def apply_check(self):
