@@ -238,7 +238,7 @@ class MultiLobby():
             case 0:
                 self.main.scene_change(self.main.get_scene_index("title"))
             case 1:
-                self.state = 1
+                self.state = 0
             case 2:
                 self.state = 0
             case 3:
