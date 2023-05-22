@@ -5,19 +5,19 @@ from ClientUser.client_user import ClientUser
 
 
 class MultiLobby:
-    def __init__(self,main):
+    def __init__(self, main):
         self.WHITE = (255, 255, 255)
         self.ORANGE = (255, 163, 0)
         self.clock = pygame.time.Clock()
         self.lobby_img = pygame.image.load("Material/BG/Title.png")
-       
+
         self.ratio_list = [(0.8, 0.05), (0.8, 0.2), (0.8, 0.35),
                            (0.8, 0.5), (0.8, 0.65), (0.8, 0.8)]
         self.original_size = self.lobby_img.get_rect().size
         self.screen = main.screen
         self.screen_width = main.screen.get_width()
         self.screen_heigth = main.screen.get_height()
-        
+
         self.aspect_ratio = self.screen_width / 1280, self.screen_heigth / 720
         self.new_width = int(self.original_size[0] * self.aspect_ratio[0])
         self.new_height = int(self.original_size[1] * self.aspect_ratio[1])
@@ -27,7 +27,7 @@ class MultiLobby:
         # self.make_screen(self.screen_width,
         #                  self.screen_heigth, self.ratio_list)
         self.mouse_pos = pygame.mouse.get_pos()
-        
+
         # self.check_user
         self.BUTTON_WIDTH = 200
         self.BUTTON_HEIGHT = 50
@@ -41,13 +41,14 @@ class MultiLobby:
         self.client = None
 
     def handle_button_click(self, button_name):
-        if button_name == "방만들기":
-            self.server = ServerUser()
-        elif button_name == "방들어가기":
+        if button_name == "Server":
+            self.server = ServerUser(self)
+            self.server.run()
+        elif button_name == "Client":
             self.client = ClientUser()
 
     def create_button(self, text, x, y):
-        font = pygame.font.Font(None, self.font)
+        font = self.font
         text_surface = font.render(text, True, self.ORANGE)
         button_rect = pygame.Rect(x, y, self.BUTTON_WIDTH, self.BUTTON_HEIGHT)
         pygame.draw.rect(self.screen, self.BUTTON_COLOR, button_rect)
