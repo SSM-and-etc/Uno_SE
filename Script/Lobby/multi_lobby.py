@@ -144,7 +144,11 @@ class MultiLobby():
         
     def enter_state4(self):
         i, j = self.buttons[self.state].get_state()
-        # 로비
+        match j:
+            case 0:
+                match i:
+                    case 0:
+                        pass
         
     def enter_write_state(self, i):
         if self.on_input_string:
@@ -273,6 +277,11 @@ class MultiLobby():
         self.texts[4].add("", (0.82, 0.21), 40, "BLACK", "BLACK")
         self.texts[4].add("IP: ", (0.78, 0.1), 40, "BLACK", "BLACK")
         self.texts[4].add("PW: ", (0.78, 0.21), 40, "BLACK", "BLACK")
+        self.texts[4].add("block", (0.01, 0.1), 40, "BLACK", "BLACK")
+        self.texts[4].add("exist", (0.1, 0.1), 40, "BLACK", "BLACK")
+        self.texts[4].add("ban", (0.2, 0.1), 40, "BLACK", "BLACK")
+        self.texts[4].add("name", (0.35, 0.1), 40, "BLACK", "BLACK")
+        self.texts[4].add("StoryAI(0: default)", (0.57, 0.1), 40, "BLACK", "BLACK")
         self.ex_texts.add("", (0.3, 0.07), 20, "arial")
         
     def apply_screen_size(self):
@@ -330,6 +339,11 @@ class MultiLobby():
         self.texts[4].change_text(IP_STRING, self.get_my_ip())
         self.texts[4].change_text(PW_STRING, self.room_password)
                 
+    def set_ai_default_name(self):
+        for i in range(1, MAX_PLAYER_COUNT):
+            if self.ai_index >= 0:
+                self.texts[4].change_text(i, "AiPlayer" + str(i))
+                
     def set_pw(self, pw):
         self.room_password = pw
         
@@ -378,3 +392,4 @@ class MultiLobby():
             
     def change_pw(self, pw): # 방 비밀번호 변경시 처리
         self.room_password = pw
+        
