@@ -47,9 +47,9 @@ class Lobby():
             for computer in self.player_list:
                 computer.handle_event(event)
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
+                if event.key == main.user_data.key_up:
                     self.index -= 1
-                if event.key == pygame.K_DOWN:
+                if event.key == main.user_data.key_down:
                     self.index += 1
 
                 if (self.index < -1):
@@ -57,17 +57,27 @@ class Lobby():
                 if (self.index > 5):
                     self.index = -1
                 if (self.index > -1):
-                    self.player_list[self.index].handle_key_event(
-                        event, self.index)
-
-                if event.key == pygame.K_RETURN:
-                    if (self.index == -1):
-                        self.start_button.handle_key_event(event)
+                    self.player_list[self.index].handle_key_event(event, main.user_data)
+                if (self.index == -1):
+                    if event.key == main.user_data.key_enter:
+                        self.start_button.action()
 
         main.screen.blit(self.lobby_img, (0, 0))
         for computer in self.player_list:
             computer.draw(main.screen)
         self.start_button.draw()
+
+        if self.index != -1:
+            x, y, w, h = self.player_box_info[self.index]
+            x -= 20
+            y += h//2
+        
+        else:
+            x, y = self.start_button.x, self.start_button.y
+            x -= 20
+            y += self.start_button.h//2
+            
+        pygame.draw.circle(main.screen, self.ORANGE, (x, y), 10)
 
     def make_screen(self, width, height, ratios):
         for ratio in ratios:
