@@ -7,6 +7,9 @@ class Card:
 
     def __repr__(self):
         return f"({self.card_type} / {self.color})"
+
+    def __eq__(self, value):
+        return self.card_type == value.card_type and self.color == value.color
         
     def is_number(self):
         return self.card_type.is_number()

@@ -7,4 +7,6 @@ class Player:
 
     def __repr__(self):
         return f"<Player {self.tag}: {self.hand}>"
-    
+
+    def __eq__(self, value):
+        return self.tag == value.tag

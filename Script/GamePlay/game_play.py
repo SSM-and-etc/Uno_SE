@@ -308,7 +308,7 @@ class GamePlay:
         return card_x, pane_y + (pane_h-card_h) / 2, mag * 0.9
 
     def update_hand(self, only_asset=False):
-        card_size = self.calculate_card_size(0)
+        card_size = self.calculate_card_size(self.players.index(self.player))
 
         self.card_assets = []
         for i, card in enumerate(self.player.hand):
@@ -418,10 +418,10 @@ class GamePlay:
                 self.play_player(self.game.turn())
                 self.update_table()
         
-        if self.player != self.game.turn(): # AI player turn
+        if isinstance(self.game.turn(), PlayerAI): # AI player turn
             if self.counter == 12:
                 if self.possible_push_uno(self.game.turn()):
-                    self.game.turn().uno = self.game.get_random_AIplayer()
+                    self.play_uno(self.game.turn(), self.game.get_random_AIplayer())
             elif self.counter == 11: 
                 card = self.game.turn().choose_card(self.game.table) # self.game.turn() is ai player
 
@@ -450,7 +450,7 @@ class GamePlay:
         else: # user turn
             if self.counter == random.randint(10, 13):
                 if len(self.player.hand) <= 2 and not self.player.uno:
-                    self.player.uno = self.game.get_random_AIplayer()
+                    self.play_uno(self.player, self.game.get_random_AIplayer())
                     
 
     def play_player(self, player, card = None):
@@ -459,6 +459,9 @@ class GamePlay:
         self.achi_put_card(card)
         self.game.play(player, len(self.players), card)
         self.handle_stage_gimmick(player)
+
+    def play_uno(self, uno_player, player):
+        self.game.uno_player = uno_player.uno = player
                     
     def handle_stage_gimmick(self, player):
         self.turn_count_gimmick += 1
@@ -538,7 +541,7 @@ class GamePlay:
             self.main.screen.blit(*card_asset.scaled())
 
         for i, pane_asset in enumerate(self.pane_assets):
-            if i != 0:
+            if self.player != self.players[i]:
                 self.main.screen.blit(*pane_asset.scaled())
 
                 for hand_asset in self.hand_assets[i]:
@@ -590,6 +593,9 @@ class GamePlay:
         return False
         
     def handle(self):
+        if self.animate_assets:
+            return
+
         sel, idx = self.selection.current()
 
         if sel == "card":
@@ -614,7 +620,7 @@ class GamePlay:
 
         elif sel == "button_uno":
             if self.possible_push_uno(self.game.turn()):
-                self.game.uno_player = self.game.turn().uno = self.player
+                self.play_uno(self.game.turn(), self.player)
                 print("uno!")
 
         elif isinstance(sel, CardColor):
