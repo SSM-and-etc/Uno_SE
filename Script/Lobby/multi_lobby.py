@@ -13,8 +13,8 @@ IP_STRING    = 0
 PW_STRING    = 0
 # texts[4] index
 PLAYER0_NAME = 0; PLAYER1_NAME = 1; PLAYER2_NAME = 2; PLAYER3_NAME = 3; PLAYER4_NAME = 4; PLAYER5_NAME = 5
-IP_STRING    = 6
-PW_STRING    = 7
+PW_STRING    = 6
+IP_STRING    = 7
 # ...이후는 초기값으로 문자열 고정
 MAX_PLAYER_COUNT = 6
 
@@ -54,8 +54,8 @@ class MultiLobby():
                     if event.type == pygame.MOUSEBUTTONDOWN: 
                         self.click_collide(main, event.pos)
                         
-                    if not self.buttons[self.state].is_state_holding: # esc, 범위 외 클릭에 의한 string 입력상태 해제
-                        self.on_input_string = False
+                    if self.on_input_string and (not self.buttons[self.state].is_state_holding): # esc, 범위 외 클릭에 의한 string 입력상태 해제
+                        self.apply_change_string()
                         
                     if event.type == pygame.MOUSEMOTION:
                         self.move_collide(main, event.pos)
@@ -73,8 +73,11 @@ class MultiLobby():
         
     def keydown(self, main, event):
         if self.on_input_string:
-            self.write_string(event)
-        if not self.buttons[self.state].key_down_state(event.key):
+            if event.key == self.user_data.key_enter or event.key == pygame.K_ESCAPE:
+                self.apply_change_string()
+            else:
+                self.write_string(event)
+        elif not self.buttons[self.state].key_down_state(event.key):
             match event.key:
                 case self.user_data.key_enter:
                     self.enter_state()
@@ -99,7 +102,7 @@ class MultiLobby():
             case 4:
                 self.enter_state4()
         
-    def enter_state0(self):
+    def enter_state0(self): # 방 만들기, 참여 창
         i, j = self.buttons[self.state].get_state()
         match i:
             case 0:
@@ -111,7 +114,7 @@ class MultiLobby():
             case 1:
                 self.exit()
         
-    def enter_state1(self):
+    def enter_state1(self): # 방 생성, 비밀번호 설정 창
         i, j = self.buttons[self.state].get_state()
         match i:
             case 0:
@@ -122,7 +125,7 @@ class MultiLobby():
                 self.exit()
                 
         
-    def enter_state2(self):
+    def enter_state2(self): # 방 참가, ip 입력창
         i, j = self.buttons[self.state].get_state()
         match i:
             case 0:
@@ -132,7 +135,7 @@ class MultiLobby():
             case 2:
                 self.exit()
         
-    def enter_state3(self):
+    def enter_state3(self): # 방 참가, pw 입력창
         i, j = self.buttons[self.state].get_state()
         match i:
             case 0:
@@ -142,18 +145,46 @@ class MultiLobby():
             case 2:
                 self.exit()
         
-    def enter_state4(self):
+    def enter_state4(self): # 로비 창
+        if self.is_server:
+            self.enter_stage4_host()
+        else:
+            self.enter_stage4_member()
+                
+    def enter_stage4_host(self):
         i, j = self.buttons[self.state].get_state()
         match j:
             case 0:
+                self.ban_player(i)
+            case 1:
+                if i == self.lobby_index or self.is_ai(i):
+                    self.enter_write_state(i)
+            case 6:
                 match i:
-                    case 0:
-                        pass
+                    case 0: # pw 변경
+                        self.enter_write_state(j)
+                    case 4:
+                        self.start_game()
+                    case 5:
+                        self.exit()
+            case _: # 2~5 ai 설정
+                self.set_ai_player(i, j - 2)
+    
+    def enter_stage4_member(self):
+        i, j = self.buttons[self.state].get_state()
+        match j:
+            case 1:
+                if i == self.lobby_index:
+                    self.enter_write_state(0)
+            case 6:
+                match i:
+                    case 5:
+                        self.exit()
+            
         
     def enter_write_state(self, i):
         if self.on_input_string:
-            self.on_input_string = False
-            self.buttons[self.state].is_state_holding = False
+            self.apply_change_string()
         else:
             self.buttons[self.state].is_state_holding = True
             self.on_input_string = True
@@ -167,7 +198,7 @@ class MultiLobby():
         elif len(self.now_input_string) <= 10:
             match event.key:
                 case self.user_data.key_enter:
-                    self.on_input_string = False
+                    self.apply_change_string()
                 case _:
                     if event.unicode.isalnum():
                         self.now_input_string += event.unicode
@@ -276,8 +307,8 @@ class MultiLobby():
         self.texts[4].add("", (0.33, 0.597), 40, "BLACK", "BLACK")
         self.texts[4].add("", (0.33, 0.726), 40, "BLACK", "BLACK")
         self.texts[4].add("", (0.33, 0.855), 40, "BLACK", "BLACK")
-        self.texts[4].add("", (0.82, 0.1), 40, "BLACK", "BLACK")
         self.texts[4].add("", (0.82, 0.21), 40, "BLACK", "BLACK")
+        self.texts[4].add("", (0.82, 0.1), 40, "BLACK", "BLACK")
         self.texts[4].add("IP: ", (0.78, 0.1), 40, "BLACK", "BLACK")
         self.texts[4].add("PW: ", (0.78, 0.21), 40, "BLACK", "BLACK")
         self.texts[4].add("ban", (0.02, 0.1), 40, "BLACK", "BLACK")
@@ -301,12 +332,11 @@ class MultiLobby():
         self.apply_screen_size()
         
     def reset(self):
-        self.is_server = False
         self.lobby_index = -1   # 0: 방장, 1 ~ 5: 참가 유저
         self.possible_invite = [False, False, False, False, False, False] # 각 자리에 접속 가능 여부
-        self.ai_index        = [-1, -1, -1, -1, -1, -1] # -1: 유저, 0 ~ 4: 각 스테이지 ai(0은 defaultAI)
-        self.possible_player_count = 0  # 최대 접속 가능 유저 수(닫힌 칸 제외)
-        self.exist_player_count = 0     # 접속 유저 수(방장 포함)
+        self.player_info        = [-2, -2, -2, -2, -2, -2] # -2: 빈 칸, -1: 유저, 0 ~ 4: 각 스테이지 ai(0은 defaultAI)
+        self.possible_player_count = MAX_PLAYER_COUNT  # 최대 접속 가능 유저 수(닫힌 칸 제외)
+        self.exist_player_count = 1     # 접속 유저 수(방장 포함)
         self.on_input_string = False
         self.now_input_string = ""
         self.now_text_index = 0
@@ -325,7 +355,8 @@ class MultiLobby():
             case 3:
                 self.state = 2
             case 4:
-                self.state = 1
+                self.room_exit()
+        self.is_server = False
     
     def input_string_reset(self):
         for i in range(1, 4):
@@ -337,14 +368,18 @@ class MultiLobby():
     def set_default_name(self):
         self.texts[4].change_text(0, "Host")
         for i in range(1, MAX_PLAYER_COUNT):
-            self.texts[4].change_text(i, "Player" + str(i))
+            if self.player_info[i] >= 0:
+                self.texts[4].change_text(i, "Player" + str(i))
         self.texts[4].change_text(IP_STRING, self.get_my_ip())
         self.texts[4].change_text(PW_STRING, self.room_password)
                 
-    def set_ai_default_name(self):
+    def set_ai_default_name_all(self):
         for i in range(1, MAX_PLAYER_COUNT):
-            if self.ai_index >= 0:
+            if self.player_info >= 0:
                 self.texts[4].change_text(i, "AiPlayer" + str(i))
+                
+    def set_ai_default_name(self, i):
+        self.texts[4].change_text(i, "AiPlayer" + str(i))
                 
     def set_pw(self, pw):
         self.room_password = pw
@@ -354,6 +389,10 @@ class MultiLobby():
     
     def create_lobby(self):  #TODO: 방장의 로비 생성, 소켓 관련 연결, 
         self.state = 4
+        self.is_server = True
+        self.lobby_index = 0
+        self.player_info[0] = -1
+        self.imgs[4].set_checked(0, 0, True)
         self.change_pw(self.now_input_string)
         self.set_default_name()
         
@@ -368,7 +407,7 @@ class MultiLobby():
             self.ex_texts_counter = 3
             pygame.time.set_timer(pygame.USEREVENT, 1000)
                 
-    def enter_lobby(self):  #TODO: 방 참가, 소켓 관련 연결
+    def enter_lobby(self):  #TODO: 방 참가, 소켓 관련 연결, 방에서의 번호(1~5) self.lobby_index에 저장해주기
         self.state = 4
         
         # 참가하고자 입력했던 방의 ip
@@ -378,8 +417,15 @@ class MultiLobby():
     def get_my_ip(self): #TODO: 자기 IP 반환
         return "12.34.56.78"
     
-    def get_empty_seat(self):
+    def get_empty_seat_count(self):
         return self.possible_player_count - self.exist_player_count
+    
+    def get_empty_set_index(self): # 빈 자리의 index 반환(1 ~ 5)
+        for i in MAX_PLAYER_COUNT:
+            if self.player_info[i] == -2:
+                return i
+        return -1 # error
+            
     
     def check_pw(self):     # 방의 비밀번호와 맞는지 확인
         ip = self.get_input_ip()
@@ -395,3 +441,80 @@ class MultiLobby():
     def change_pw(self, pw): # 방 비밀번호 변경시 처리
         self.room_password = pw
         
+    def ban_player(self, i): # i: 0(host), 1~5: 유저 or ai or 빈칸
+        if i == 0:
+            return
+        if self.is_ai(i):
+            self.set_ai_story_index(i)
+            #TODO: i번쨰 AiPlayer 
+        elif self.is_user(i):
+            pass #TODO: i번째 유저 추방
+        else:
+            return
+        
+        self.room_member_exit(i)
+        
+    def is_ai(self, i):
+        return self.player_info[i] >= 0
+    
+    def is_user(self, i):
+        return self.player_info[i] == -1
+    
+    def set_exist_players(self):
+        for i in range(MAX_PLAYER_COUNT):
+            self.imgs[4].set_checked(i, 0, self.player_info[i] >= -1)
+            
+    def apply_change_string(self):
+        self.on_input_string = False
+        if self.state == 4:
+            self.buttons[4].is_state_holding = False
+            if self.now_text_index < MAX_PLAYER_COUNT:  #TODO: i번째 유저가 닉네임 변경, 변경한 이름은 self.now_input_string에 존재
+                self.now_input_string
+            elif self.now_text_index == PW_STRING:      #TODO: 방 비밀번호 변경 적용
+                self.room_password = self.now_input_string
+                
+    def room_exit(self):
+        if self.is_server: # TODO: 방장이 방 폭파
+            pass
+        else: # TODO: 참여 멤버가 방에서 나감, 호스트한테 알리기
+            pass
+        self.state = 0
+        
+    def room_member_exit(self, i): # TODO: 멤버 한 명이 나갔음(팅김, 자기가 나감)을 확인한 경우 host가 호출해주기
+        self.imgs[4].set_checked(i, 0, False)
+        self.texts[4].change_text(i, "")
+        self.possible_player_count += 1
+        self.exist_player_count -= 1
+        self.player_info[i] = -2
+        
+    def set_ai_player(self, i, story_index):
+        if self.player_info[i] == -1 or self.user_data.story_level < story_index: # 플레이어 존재시, stage 레벨 부족시 ai 설정 불가
+            return
+        if self.player_info[i] == -2: # 빈칸일 경우
+            self.set_ai_default_name(i)
+            self.imgs[4].set_checked(i, 0, True)
+            self.possible_player_count -= 1
+            self.exist_player_count += 1
+        self.set_ai_story_index(i, story_index)
+        self.player_info[i] = story_index
+        
+    def start_game(self):
+        if self.exist_player_count < 2:
+            return
+        # TODO 멀티게임 시작
+        self.process_game_start()
+        self.main.scene_change(self.main.get_scene_index("multi game"))
+        
+    def process_game_start(self):
+        self.main.player_info = self.player_info
+    
+    def get_players_name_list(self):
+        name_list = []
+        for i in MAX_PLAYER_COUNT:
+            name_list.append(self.texts[4].get_only_text(i))
+            
+    def set_ai_story_index(self, i, story_index = -1):
+        for j in range(2, 6):
+            self.buttons[4].set_checked(i, j, False)
+        if story_index >= 0:
+            self.buttons[4].set_checked(i, story_index + 2, True)

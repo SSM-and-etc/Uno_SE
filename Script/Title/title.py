@@ -97,7 +97,7 @@ class Title():
             case 1:
                 main.scene_change(main.get_scene_index("story mode"))
             case 2:
-                main.scene_change(main.get_scene_index("multi game"))
+                main.scene_change(main.get_scene_index("multi lobby"))
             case 3:
                 self.on_option = True
             case 4:

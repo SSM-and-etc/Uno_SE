@@ -50,8 +50,10 @@ class GameMain():
                 return 3
             case "story mode game start":
                 return 4
-            case "multi game":
+            case "multi lobby":
                 return 5
+            case "multi game":
+                return 6
         return -1
         
     def get_scene_obj(self, scene_state):
@@ -68,6 +70,8 @@ class GameMain():
                 return self.play_game_storymode
             case 5:
                 return self.multi_lobby
+            #case 6:
+            #    return self.multi_game
             case _:
                 return None
 
@@ -86,7 +90,10 @@ class GameMain():
             case 4:
                 self.play_game_storymode = GamePlay(self, None, self.stage_index)
             case 5:
+                self.player_info=[]
                 self.multi_lobby = MultiLobby(self)
+            # case 6:
+                #  ... # self.player_info 넣어주면 됨
             case _:
                 pass
             
