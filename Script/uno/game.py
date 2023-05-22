@@ -9,11 +9,18 @@ from System.weighted_picker import WeightedPicker
 import random
 
 class Game:
-    def __init__(self, players, stage_bit, sound):
+    def __init__(self, players, stage_bit, sound, table=None, deck=None):
         self.sound = sound
         self.players = players
-        self.table = Table()
-        self.deck = Deck({"number": 1, "special": 1, "wild": 2})
+        if table:
+            self.table = table
+        else:
+            self.table = Table()
+
+        if deck:
+            self.deck = deck
+        else:
+            self.deck = Deck({"number": 1, "special": 1, "wild": 2})
         self.players_turn = CycleIterator(players)
         self.stage_bit = stage_bit
         self.ai_players = []
@@ -23,12 +30,15 @@ class Game:
 
         self.uno_player = None
 
-        self.draw_setting()
-        self.table.put(self.deck.draw())
-        if self.stage_bit & (1 << 2) and (not self.table.top().is_special()):
-            self.deck.pop_all()
-        
-        
+        if not table and not deck:
+            self.draw_setting()
+            self.table.put(self.deck.draw())
+            if self.stage_bit & (1 << 2) and (not self.table.top().is_special()):
+                self.deck.pop_all()
+
+    def remove_player(self, player):
+        self.players.remove(player)
+        self.players_turn.update()
 
     def draw_setting(self, default_card_num = 5):
         if self.stage_bit & (1 << 2):
@@ -88,6 +98,7 @@ class Game:
                 elif card.card_type == CardType.CARD_CHANGECOLOR:
                     print(card.color)
                     self.table.change_color(card.color)
+                    card.color = None
                     
                 elif card.card_type == CardType.CARD_DRAW:
                     self.draw(self.players_turn.look_next(), 4)
