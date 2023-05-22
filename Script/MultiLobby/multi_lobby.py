@@ -45,7 +45,8 @@ class MultiLobby:
             self.server = ServerUser(self)
             self.server.run()
         elif button_name == "Client":
-            self.client = ClientUser()
+            self.client = ClientUser(self)
+            self.client.run()
 
     def create_button(self, text, x, y):
         font = self.font
