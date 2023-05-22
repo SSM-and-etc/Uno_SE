@@ -57,7 +57,7 @@ class GamePlayServer(GamePlay):
 
         self.font_resize() 
 
-        self.multiplay = True
+        self.no_pause = True
         self.sockets = []
         self.player = Player("Server")
         self.players = [self.player]

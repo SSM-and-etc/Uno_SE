@@ -10,7 +10,7 @@ import random
 
 import os
 
-USEREVENT2 = pygame.USEREVENT
+USEREVENT2 = pygame.USEREVENT + 1
 
 
 class Asset:
@@ -211,6 +211,8 @@ class GamePlay:
         self.update_table()    
         
         self.achi_first_draw() #업적
+
+        self.no_pause = False
                 
 
     def player_setting(self, playerAI_number):
@@ -345,6 +347,12 @@ class GamePlay:
 
     def display(self, main):
         if self.on_esc:
+            if self.no_pause:
+                self.animate_asset()
+                event = pygame.event.poll()
+                if event.type == pygame.USEREVENT:
+                    self.counter_event()
+
             self.on_esc = self.esc.display(main)
 
             if not self.on_esc:

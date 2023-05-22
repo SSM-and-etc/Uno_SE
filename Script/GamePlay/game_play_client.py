@@ -65,7 +65,7 @@ class GamePlayClient(GamePlay):
         self.server = server
         self.server.setblocking(0)
 
-        self.multiplay = True
+        self.no_pause = True
         self.game = None
 
     def socket_handle(self):

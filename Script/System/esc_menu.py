@@ -43,6 +43,9 @@ class EscMenu():
                     
                 if event.type == pygame.MOUSEMOTION:
                     self.move_collide(main, event.pos)
+
+                if event.type == pygame.USEREVENT:
+                    pygame.event.post(pygame.event.Event(pygame.USEREVENT))
             
         return self.on_esc
     
@@ -113,5 +116,6 @@ class EscMenu():
         
     def exit(self):
         self.on_esc = False
+        pygame.event.clear()
         
         
