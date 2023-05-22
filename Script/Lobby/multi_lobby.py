@@ -33,8 +33,8 @@ class MultiLobby():
         self.esc = EscMenu(main, self)
 
         self.state = 0          # 0: 방만들기/참여, 1: 비밀번호설정, 방 만들기, 2: 방 참여, 3: 방 비밀번호 입력, 4: 로비
-        self.add_assets()
         self.reset()
+        self.add_assets()
         self.ex_texts_counter = 0
         
     def display(self, main):
@@ -60,7 +60,6 @@ class MultiLobby():
 
                     if event.type == pygame.USEREVENT and self.ex_texts_counter > 0:
                         self.ex_texts_counter -= 1
-        
     
     def draw(self, screen):
         self.BG.draw(screen)
@@ -80,12 +79,10 @@ class MultiLobby():
                 case pygame.K_ESCAPE:
                     self.on_esc = True
                     
-    
     def click_collide(self, main, mouse_pos):
         clicked_button_idx = self.buttons[self.state].get_clicked_button_idx(mouse_pos)
         if clicked_button_idx:
             self.enter_state()
-        
             
     def enter_state(self):
         match self.state:
@@ -180,6 +177,8 @@ class MultiLobby():
         self.BG.add_row("Material/BG/title.png", "Material/ColorMode/BG/title.png", (0.5, 0.5))
         self.imgs[0].add_row("Material/GUI/pop_up.png", "Material/ColorMode/GUI/pop_up.png", (0.5, 0.5))
         self.imgs[1].add_row("Material/GUI/pop_up.png", "Material/ColorMode/GUI/pop_up.png", (0.5, 0.5))
+        self.imgs[2].add_row("Material/GUI/pop_up.png", "Material/ColorMode/GUI/pop_up.png", (0.5, 0.5))
+        self.imgs[3].add_row("Material/GUI/pop_up.png", "Material/ColorMode/GUI/pop_up.png", (0.5, 0.5))
         
     def add_buttons(self):
         self.buttons[0].add_row("Material/Button/Lobby/create_lobby.png", "Material/Button/Lobby/create_lobby.png", (0.5, 0.5))
@@ -189,6 +188,13 @@ class MultiLobby():
         self.buttons[1].add_row("Material/Button/Lobby/string_bar.png", "Material/Button/Lobby/string_bar.png", (0.6, 0.4))
         self.buttons[1].add_row("Material/Button/Lobby/create_lobby.png", "Material/Button/Lobby/create_lobby.png", (0.5, 0.65))
         self.buttons[1].add_row("Material/Button/Lobby/back.png", "Material/Button/Lobby/back.png", (0.75, 0.2))
+        self.buttons[2].add_row("Material/Button/Lobby/string_bar.png", "Material/Button/Lobby/string_bar.png", (0.6, 0.4))
+        self.buttons[2].add_row("Material/Button/Lobby/enter_lobby.png", "Material/Button/Lobby/enter_lobby.png", (0.5, 0.65))
+        self.buttons[2].add_row("Material/Button/Lobby/back.png", "Material/Button/Lobby/back.png", (0.75, 0.2))
+        self.buttons[3].add_row("Material/Button/Lobby/string_bar.png", "Material/Button/Lobby/string_bar.png", (0.6, 0.4))
+        self.buttons[3].add_row("Material/Button/Lobby/enter_lobby.png", "Material/Button/Lobby/enter_lobby.png", (0.5, 0.65))
+        self.buttons[3].add_row("Material/Button/Lobby/back.png", "Material/Button/Lobby/back.png", (0.75, 0.2))
+        
         
     def add_texts(self):
         self.texts[1].add("", (0.4, 0.3), 30, "arial", "BLACK", "BLACK") 
@@ -199,7 +205,7 @@ class MultiLobby():
     def apply_screen_size(self):
         self.BG.apply_screen_size()
         # for i in range(len(self.imgs)):
-        for i in range(2):
+        for i in range(4):
             self.imgs[i].apply_screen_size()
             self.buttons[i].apply_screen_size()
             self.texts[i].apply_screen_size()
@@ -223,7 +229,7 @@ class MultiLobby():
         self.room_password = ""
         
         # for i in range(len(self.texts)):
-        for i in range(2):
+        for i in range(4):
             self.texts[i].reset()
         
     def exit(self):
@@ -234,7 +240,7 @@ class MultiLobby():
             case 1:
                 self.state = 1
             case 2:
-                self.state = 1
+                self.state = 0
             case 3:
                 self.state = 2
             case 4:
@@ -252,7 +258,7 @@ class MultiLobby():
         
     def check_lobby(self):  #TODO: ip주소로 방 접속 가능 여부 확인(1: 빈자리 여부(없으면 오류 메시지, 있으면 2로), 2: 비밀번호 여부 검사(있으면 self.state = 3설정, 비밀번호 입력 화면으로 이동 3으로, 없으면 self.state = 4 설정 후 로비 접속)
         if True:                # 로비의 빈자리 확인 (방장의 self.)
-            if True:            # 로비의 비밀번호 없는지 확인
+            if False:            # 로비의 비밀번호 없는지 확인
                 self.enter_lobby()
             else:
                 self.state = 3  # 비밀번호 입력 화면으로 이동
