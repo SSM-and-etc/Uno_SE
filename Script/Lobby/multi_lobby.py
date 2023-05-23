@@ -5,6 +5,10 @@ from System.statebuttons import StateButtons
 from System.texts import Texts
 from System.esc_menu import EscMenu
 
+import socket
+import pickle
+import time
+
 # texts[1] index
 PW_STRING    = 0
 # texts[2] index
@@ -17,6 +21,8 @@ PW_STRING    = 6
 IP_STRING    = 7
 # ...이후는 초기값으로 문자열 고정
 MAX_PLAYER_COUNT = 6
+
+PORT = 11223
 
 
 class MultiLobby():
@@ -38,8 +44,98 @@ class MultiLobby():
         self.add_assets()
         self.input_string_reset()
         self.ex_texts_counter = 0
+
+        self.is_server = False
+
+    def socket_handle(self):
+        if self.is_server and self.state == 4:
+            try:
+                client = self.sock.accept()
+                print(client)
+                client[0].setblocking(0)
+
+                self.sockets.append(client[0])
+                self.players.append("")
+
+                client[0].send(pickle.dumps({
+                    "action": "ASK_PASSWORD",
+                    "payload": {
+                        "full": False, # TODO: Full check
+                        "password": (self.get_pw() != ""),
+                    }
+                }))
+            except:
+                pass
+
+            for i, sock in enumerate(self.sockets[1:]):
+                idx = i+1
+                try:
+                    data = pickle.loads(sock.recv(4096))
+                    print("SERVER: ", data)
+
+                    if data["action"] == "CHECK_PASSWORD":
+                        if data["payload"]["password"] == self.get_pw():
+                            self.players[idx] = f"Player{len(self.players)-1}"
+
+                            sock.send(pickle.dumps({
+                                "action": "JOIN", 
+                                "payload": {
+                                    "state": True,
+                                    "players": self.players,
+                                    "player": idx
+                                }
+                            }))
+                            self.players_updated()
+
+                        else:
+                            sock.send(pickle.dumps({
+                                "action": "JOIN",
+                                "payload": {
+                                    "state": False,
+                                    "code": "WRONG_PASSWORD"
+                                }
+                            }))
+
+                    elif data["action"] == "CHANGE_NAME":
+                        self.players[idx] = data["payload"]["player"]
+                        self.players_updated()
+                
+                except:
+                    pass
+
+        elif not self.is_server and self.state == 4:
+            try:
+                data = pickle.loads(self.server.recv(4096))
+
+                print("CLIENT:", data)
+
+                if data["action"] == "UPDATE_PLAYERS":
+                    self.players = data["payload"]["players"]
+                    self.players_updated()
+
+                if data["action"] == "GAME_START":
+                    self.start_game_client()
+            except:
+                pass
+
+    def players_updated(self):
+        print(self.players)
+        for i in range(MAX_PLAYER_COUNT):
+            if i < len(self.players):
+                self.texts[4].change_text(i, self.players[i])
+                self.player_info[i] = -1
+            else:
+                self.texts[4].change_text(i, "")
+                self.player_info[i] = -2
+
+        if self.is_server:
+            pass
+        else:
+            pass
+
         
     def display(self, main):
+        self.socket_handle()
         self.draw(main.screen)
         if self.on_esc:
             self.on_esc = self.esc.display(main)
@@ -109,8 +205,10 @@ class MultiLobby():
                 match j:
                     case 0:
                         self.state = 1
+                        self.is_server = True
                     case 1:
                         self.state = 2
+                        self.is_server = False
             case 1:
                 self.exit()
         
@@ -195,12 +293,12 @@ class MultiLobby():
         if len(self.now_input_string) > 0 and event.key == pygame.K_BACKSPACE:
                 self.now_input_string = self.now_input_string[:-1]
                 self.texts[self.state].change_text(self.now_text_index, self.now_input_string)
-        elif len(self.now_input_string) <= 10:
+        elif len(self.now_input_string) <= 16:
             match event.key:
                 case self.user_data.key_enter:
                     self.apply_change_string()
                 case _:
-                    if event.unicode.isalnum():
+                    if event.unicode.isprintable():
                         self.now_input_string += event.unicode
                         self.texts[self.state].change_text(self.now_text_index, self.now_input_string)
 
@@ -389,17 +487,47 @@ class MultiLobby():
     
     def create_lobby(self):  #TODO: 방장의 로비 생성, 소켓 관련 연결, 
         self.state = 4
-        self.is_server = True
         self.lobby_index = 0
         self.players_index[0] = -1
         self.imgs[4].set_checked(0, 0, True)
         self.change_pw(self.now_input_string)
         self.set_default_name()
+
+        self.sockets = [None]
+        self.players = ["Host"]
         
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.bind(("0.0.0.0", PORT))
+        self.sock.listen()
+        self.sock.setblocking(0)
+
     def check_lobby(self):  #TODO: ip주소로 방 접속 가능 여부 확인(1: 빈자리 여부(없으면 오류 메시지, 있으면 2로), 2: 비밀번호 여부 검사(있으면 self.state = 3설정, 비밀번호 입력 화면으로 이동 3으로, 없으면 self.state = 4 설정 후 로비 접속)
-        if True:                # 로비의 빈자리 확인 (방장의 self.)
-            if False:            # 로비의 비밀번호 없는지 확인
-                self.enter_lobby()
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.connect((self.get_input_ip(), PORT))
+
+        data = pickle.loads(self.server.recv(4096))
+
+        assert data["action"] == "ASK_PASSWORD"
+
+        if data["payload"]["full"] == False:                # 로비의 빈자리 확인 (방장의 self.)
+            if data["payload"]["password"] == False:            # 로비의 비밀번호 없는지 확인
+                self.server.send(pickle.dumps({
+                    "action": "CHECK_PASSWORD",
+                    "payload": {
+                        "password": ""
+                    }
+                }))
+
+                data = pickle.loads(self.server.recv(4096))
+
+                assert data["action"] == "JOIN"
+
+                if data["payload"]["state"]:
+                    self.players = data["payload"]["players"]
+                    self.player_idx = data["payload"]["player"]
+                    self.players_updated()
+                    self.server.setblocking(0)
+                    self.enter_lobby()
             else:
                 self.state = 3  # 비밀번호 입력 화면으로 이동
         else:
@@ -415,7 +543,10 @@ class MultiLobby():
         return self.texts[2].get_only_text(0)
     
     def get_my_ip(self): #TODO: 자기 IP 반환
-        return "12.34.56.78"
+        try:
+            return socket.gethostbyname_ex(socket.gethostname())[-1][-1]
+        except:
+            return ""
     
     def get_empty_seat_count(self):
         return self.possible_player_count - self.exist_player_count
@@ -428,10 +559,22 @@ class MultiLobby():
             
     
     def check_pw(self):     # 방의 비밀번호와 맞는지 확인
-        ip = self.get_input_ip()
-        # pw = 방의 비밀번호
-        #if self.now_input_string == pw:
-        if True:
+        self.server.send(pickle.dumps({
+            "action": "CHECK_PASSWORD",
+            "payload": {
+                "password": self.now_input_string
+            }
+        }))
+
+        data = pickle.loads(self.server.recv(4096))
+
+        assert data["action"] == "JOIN"
+
+        if data["payload"]["state"]:
+            self.players = data["payload"]["players"]
+            self.player_idx = data["payload"]["player"]
+            self.players_updated()
+            self.server.setblocking(0)
             self.enter_lobby()
         else:
             self.ex_texts.change_text(0, "Invalid password.")
@@ -499,11 +642,31 @@ class MultiLobby():
         self.players_index[i] = story_index
         
     def start_game(self):
-        if self.exist_player_count < 2:
-            return
+        #if self.exist_player_count < 2:
+        #    return
         # TODO 멀티게임 시작
+
+        for sock in filter(None, self.sockets):
+            sock.send(pickle.dumps({
+                "action": "GAME_START",
+                "payload": "",
+            }))
+
         self.process_game_start()
-        self.main.scene_change(self.main.get_scene_index("multi game"))
+        self.main.sock = self.sock
+        self.main.sockets = self.sockets
+
+        self.main.players_name = self.players
+        while len(self.main.sockets) < len(self.players):
+            self.main.sockets.append(None)
+
+        time.sleep(3)
+        self.main.scene_change(self.main.get_scene_index("multi game server"))
+
+    def start_game_client(self):
+        self.process_game_start()
+        self.main.server = self.server
+        self.main.scene_change(self.main.get_scene_index("multi game client"))
         
     def process_game_start(self):
         self.main.set_player_info(self.get_players_name_list(), self.players_index)

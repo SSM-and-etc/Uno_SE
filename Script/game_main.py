@@ -11,6 +11,9 @@ from GamePlay.game_play import GamePlay
 from StoryMode.storymode import StoryMode
 from Sound.sound import Sound
 
+from GamePlay.game_play_server import GamePlayServer
+from GamePlay.game_play_client import GamePlayClient
+
 
 class GameMain():
     def __init__(self):
@@ -52,8 +55,10 @@ class GameMain():
                 return 4
             case "multi lobby":
                 return 5
-            case "multi game":
+            case "multi game server":
                 return 6
+            case "multi game client":
+                return 7
         return -1
         
     def get_scene_obj(self, scene_state):
@@ -71,7 +76,9 @@ class GameMain():
             case 5:
                 return self.multi_lobby
             case 6:
-               return self.multi_game
+                return self.multi_game_server
+            case 7:
+                return self.multi_game_client
             case _:
                 return None
 
@@ -90,8 +97,10 @@ class GameMain():
                 self.play_game_storymode = GamePlay(self, None, self.stage_index)
             case 5:
                 self.multi_lobby = MultiLobby(self)
-            # case 6:
-                #  ... # (self, playerlist=self.player_names, stage_index=0, playerAI_number=self.playerAI_number, players_idx=self.players_index)
+            case 6:
+                self.multi_game_server = GamePlayServer(self, self.sock, self.sockets, self.players_name)
+            case 7:
+                self.multi_game_client = GamePlayClient(self, self.server)
             case _:
                 pass
             
@@ -109,6 +118,10 @@ class GameMain():
                 self.play_game_storymode = None
             case 5:
                 self.multi_lobby = None
+            case 6:
+                self.multi_game_server = None
+            case 7:
+                self.multi_game_client = None
             case _:
                 pass
             
