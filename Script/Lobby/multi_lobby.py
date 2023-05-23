@@ -334,7 +334,7 @@ class MultiLobby():
     def reset(self):
         self.lobby_index = -1   # 0: 방장, 1 ~ 5: 참가 유저
         self.possible_invite = [False, False, False, False, False, False] # 각 자리에 접속 가능 여부
-        self.player_info        = [-2, -2, -2, -2, -2, -2] # -2: 빈 칸, -1: 유저, 0 ~ 4: 각 스테이지 ai(0은 defaultAI)
+        self.players_index        = [-2, -2, -2, -2, -2, -2] # -2: 빈 칸, -1: 유저, 0 ~ 4: 각 스테이지 ai(0은 defaultAI)
         self.possible_player_count = MAX_PLAYER_COUNT  # 최대 접속 가능 유저 수(닫힌 칸 제외)
         self.exist_player_count = 1     # 접속 유저 수(방장 포함)
         self.on_input_string = False
@@ -368,14 +368,14 @@ class MultiLobby():
     def set_default_name(self):
         self.texts[4].change_text(0, "Host")
         for i in range(1, MAX_PLAYER_COUNT):
-            if self.player_info[i] >= 0:
+            if self.players_index[i] >= 0:
                 self.texts[4].change_text(i, "Player" + str(i))
         self.texts[4].change_text(IP_STRING, self.get_my_ip())
         self.texts[4].change_text(PW_STRING, self.room_password)
                 
     def set_ai_default_name_all(self):
         for i in range(1, MAX_PLAYER_COUNT):
-            if self.player_info >= 0:
+            if self.players_index >= 0:
                 self.texts[4].change_text(i, "AiPlayer" + str(i))
                 
     def set_ai_default_name(self, i):
@@ -391,7 +391,7 @@ class MultiLobby():
         self.state = 4
         self.is_server = True
         self.lobby_index = 0
-        self.player_info[0] = -1
+        self.players_index[0] = -1
         self.imgs[4].set_checked(0, 0, True)
         self.change_pw(self.now_input_string)
         self.set_default_name()
@@ -422,7 +422,7 @@ class MultiLobby():
     
     def get_empty_set_index(self): # 빈 자리의 index 반환(1 ~ 5)
         for i in MAX_PLAYER_COUNT:
-            if self.player_info[i] == -2:
+            if self.players_index[i] == -2:
                 return i
         return -1 # error
             
@@ -455,14 +455,14 @@ class MultiLobby():
         self.room_member_exit(i)
         
     def is_ai(self, i):
-        return self.player_info[i] >= 0
+        return self.players_index[i] >= 0
     
     def is_user(self, i):
-        return self.player_info[i] == -1
+        return self.players_index[i] == -1
     
     def set_exist_players(self):
         for i in range(MAX_PLAYER_COUNT):
-            self.imgs[4].set_checked(i, 0, self.player_info[i] >= -1)
+            self.imgs[4].set_checked(i, 0, self.players_index[i] >= -1)
             
     def apply_change_string(self):
         self.on_input_string = False
@@ -485,18 +485,18 @@ class MultiLobby():
         self.texts[4].change_text(i, "")
         self.possible_player_count += 1
         self.exist_player_count -= 1
-        self.player_info[i] = -2
+        self.players_index[i] = -2
         
     def set_ai_player(self, i, story_index):
-        if self.player_info[i] == -1 or self.user_data.story_level < story_index: # 플레이어 존재시, stage 레벨 부족시 ai 설정 불가
+        if self.players_index[i] == -1 or self.user_data.story_level < story_index: # 플레이어 존재시, stage 레벨 부족시 ai 설정 불가
             return
-        if self.player_info[i] == -2: # 빈칸일 경우
+        if self.players_index[i] == -2: # 빈칸일 경우
             self.set_ai_default_name(i)
             self.imgs[4].set_checked(i, 0, True)
             self.possible_player_count -= 1
             self.exist_player_count += 1
         self.set_ai_story_index(i, story_index)
-        self.player_info[i] = story_index
+        self.players_index[i] = story_index
         
     def start_game(self):
         if self.exist_player_count < 2:
@@ -506,7 +506,7 @@ class MultiLobby():
         self.main.scene_change(self.main.get_scene_index("multi game"))
         
     def process_game_start(self):
-        self.main.player_info = self.player_info
+        self.main.set_player_info(self.get_players_name_list(), self.players_index)
     
     def get_players_name_list(self):
         name_list = []

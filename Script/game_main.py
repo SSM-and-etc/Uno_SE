@@ -2,10 +2,10 @@ import os
 
 import pygame
 
-from Lobby.lobby import Lobby
 from GameData.user_data import UserData
 from GameData.game_data import GameData
 from Title.title import Title
+from Lobby.single_lobby import SingleLobby
 from Lobby.multi_lobby import MultiLobby
 from GamePlay.game_play import GamePlay
 from StoryMode.storymode import StoryMode
@@ -61,7 +61,7 @@ class GameMain():
             case 0:
                 return self.title
             case 1:
-                return self.lobby
+                return self.single_lobby
             case 2:
                 return self.play_game
             case 3:
@@ -81,19 +81,17 @@ class GameMain():
                 self.title = Title(self)
             case 1:
                 # 인자) 일반 모드: 0, 대전 상대 수 n / 스토리: 스테이지 n 을 인자로 추가
-                self.player_info=[]
-                self.lobby = Lobby(self)
+                self.single_lobby = SingleLobby(self)
             case 2:
-                self.play_game = GamePlay(self, playerlist=self.player_info, stage_index=0, playerAI_number=self.playerAI_number)
+                self.play_game = GamePlay(self, playerlist=self.player_names, stage_index=0, playerAI_number=self.playerAI_number, players_idx=self.players_index)
             case 3:
                 self.storymode = StoryMode(self)
             case 4:
                 self.play_game_storymode = GamePlay(self, None, self.stage_index)
             case 5:
-                self.player_info=[]
                 self.multi_lobby = MultiLobby(self)
             # case 6:
-                #  ... # self.player_info 넣어주면 됨
+                #  ... # (self, playerlist=self.player_names, stage_index=0, playerAI_number=self.playerAI_number, players_idx=self.players_index)
             case _:
                 pass
             
@@ -146,6 +144,10 @@ class GameMain():
                 if player.clicked ==True:
                     self.playerAI_number+=1
                     self.player_info.append(player)
+                    
+    def set_player_info(self, names, indices):
+        self.player_names = [name for name in names]
+        self.players_index = [index for index in indices]
 if __name__ == "__main__":
     # pygame.mixer.pre_init(44100,-16,2,512)
     pygame.init()
