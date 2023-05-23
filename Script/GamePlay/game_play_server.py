@@ -12,6 +12,7 @@ import random
 
 import pickle
 
+import time
 import os
 
 class GamePlayServer(GamePlay):
@@ -68,9 +69,9 @@ class GamePlayServer(GamePlay):
         for p in players_name[1:]:
             self.players.append(Player(p))
 
-        print(self.players)
-
         self.sock = sock
+
+        time.sleep(3)
 
         while True:
             self.game = Game(self.players, 0, main.sound)
@@ -79,17 +80,17 @@ class GamePlayServer(GamePlay):
             for p in self.players:
                 p.hand.clear()
 
-        for idx, p in enumerate(self.players[1:]):
-            if self.sockets[idx]:
-                self.sockets[idx].send(pickle.dumps({
-                    "action": "START",
-                    "payload": {
-                        "player": p,
-                        "players": self.players,
-                        "table": self.game.table,
-                        "deck": self.game.deck,
-                    }
-                }))
+        for i, p in enumerate(self.players[1:]):
+            idx = i+1
+            self.sockets[idx].send(pickle.dumps({
+                "action": "START",
+                "payload": {
+                    "player": p,
+                    "players": self.players,
+                    "table": self.game.table,
+                    "deck": self.game.deck,
+                }
+            }))
 
         random.seed(len(self.players))
 

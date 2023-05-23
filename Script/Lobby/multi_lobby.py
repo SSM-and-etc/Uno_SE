@@ -7,7 +7,6 @@ from System.esc_menu import EscMenu
 
 import socket
 import pickle
-import time
 
 # texts[1] index
 PW_STRING    = 0
@@ -123,10 +122,10 @@ class MultiLobby():
         for i in range(MAX_PLAYER_COUNT):
             if i < len(self.players):
                 self.texts[4].change_text(i, self.players[i])
-                self.player_info[i] = -1
+                #self.player_info[i] = -1
             else:
                 self.texts[4].change_text(i, "")
-                self.player_info[i] = -2
+                #self.player_info[i] = -2
 
         if self.is_server:
             pass
@@ -652,7 +651,6 @@ class MultiLobby():
                 "payload": "",
             }))
 
-        self.process_game_start()
         self.main.sock = self.sock
         self.main.sockets = self.sockets
 
@@ -660,12 +658,11 @@ class MultiLobby():
         while len(self.main.sockets) < len(self.players):
             self.main.sockets.append(None)
 
-        time.sleep(3)
         self.main.scene_change(self.main.get_scene_index("multi game server"))
 
     def start_game_client(self):
-        self.process_game_start()
         self.main.server = self.server
+        print(self.main.get_scene_index("multi game client"))
         self.main.scene_change(self.main.get_scene_index("multi game client"))
         
     def process_game_start(self):
