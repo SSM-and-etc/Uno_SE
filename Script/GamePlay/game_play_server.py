@@ -55,6 +55,9 @@ class GamePlayServer(GamePlay):
         self.hand_assets = []
         self.animate_assets = []
 
+        self.popup_asset = None
+        self.popup_counter = 0
+
         self.font_resize() 
 
         self.multiplay = True
