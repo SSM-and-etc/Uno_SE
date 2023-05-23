@@ -112,8 +112,14 @@ class MultiLobby():
                     self.players = data["payload"]["players"]
                     self.players_updated()
 
-                if data["action"] == "GAME_START":
+                elif data["action"] == "GAME_START":
                     self.start_game_client()
+
+                elif data["action"] == "BANNED":
+                    self.state = 0
+                    self.exit()
+                    # TODO: Notice you are banned 
+                
             except:
                 pass
 
@@ -592,6 +598,18 @@ class MultiLobby():
     def ban_player(self, i): # i: 0(host), 1~5: 유저 or ai or 빈칸
         if i == 0:
             return
+        
+        self.sockets[i].send(pickle.dumps({
+            "action": "BANNED",
+            "payload": ""
+        }))
+        self.sockets[i].close()
+        self.players.pop(i)
+        self.sockets.pop(i)
+
+        self.players_updated()
+
+        '''
         if self.is_ai(i):
             self.set_ai_story_index(i)
             #TODO: i번쨰 AiPlayer 
@@ -601,6 +619,7 @@ class MultiLobby():
             return
         
         self.room_member_exit(i)
+        '''
         
     def is_ai(self, i):
         return self.players_index[i] >= 0
@@ -679,7 +698,6 @@ class MultiLobby():
 
     def start_game_client(self):
         self.main.server = self.server
-        print(self.main.get_scene_index("multi game client"))
         self.main.scene_change(self.main.get_scene_index("multi game client"))
         
     def process_game_start(self):
