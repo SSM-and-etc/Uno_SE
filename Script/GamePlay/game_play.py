@@ -463,7 +463,10 @@ class GamePlay:
         else: # user turn
             if self.counter == random.randint(10, 13):
                 if len(self.player.hand) <= 2 and not self.player.uno:
-                    self.play_uno(self.player, self.game.get_random_AIplayer())
+                    try:
+                        self.play_uno(self.player, self.game.get_random_AIplayer())
+                    except:
+                        pass
                     
 
     def play_player(self, player, card = None):
