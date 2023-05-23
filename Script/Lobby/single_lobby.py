@@ -297,7 +297,7 @@ class SingleLobby():
         if self.exist_player_count < 2:
             return
         self.process_game_start()
-        self.main.scene_change(self.main.get_scene_index("multi game"))
+        self.main.scene_change(self.main.get_scene_index("game start"))
         
     def process_game_start(self):
         self.main.set_player_info(self.get_players_name_list(), self.players_index)

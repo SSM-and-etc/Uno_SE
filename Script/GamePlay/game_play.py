@@ -153,10 +153,10 @@ class Selection:
             self.pos[0] = 0
 
 class GamePlay:
-    def __init__(self, main, playerlist, stage_index = 1, playerAI_number = 1, players_idx = [0, 0, 0, 0, 0, 0]):
+    def __init__(self, main, players_name, stage_index = 1, playerAI_number = 1, players_idx = [0, 0, 0, 0, 0, 0]):
         self.set_achi_data()
         self.main = main
-        self.playerlist=playerlist
+        self.players_name=players_name
         self.stage_index = stage_index
         self.user_data = main.user_data
         Asset.user_data = main.user_data
@@ -214,12 +214,17 @@ class GamePlay:
                 
 
     def player_setting(self, playerAI_number):
+        player = None
         if self.stage_index == 0:
-            self.player = Player(self.playerlist[0].namebox[1])        
+            self.player = Player(self.players_name[0])        
             self.players = [self.player]
-            for i in range(1, len(self.playerlist)):
-                self.playerlist[i] = PlayerAI(self.players_idx[i], self.playerlist[i].namebox[1])
-                self.players.append(self.playerlist[i])
+            for i in range(1, len(self.players_name)):
+                if self.players_idx[i] >= 0:
+                    player = PlayerAI(self.players_idx[i], self.players_name[i])
+                else:
+                    player = Player(self.players_name[i], False, -1)
+                if self.players_idx[i] >= -1:
+                    self.players.append(player)
 
         else:
             self.player = Player("ME")

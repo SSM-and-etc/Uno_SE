@@ -70,8 +70,8 @@ class GameMain():
                 return self.play_game_storymode
             case 5:
                 return self.multi_lobby
-            #case 6:
-            #    return self.multi_game
+            case 6:
+               return self.multi_game
             case _:
                 return None
 
@@ -83,7 +83,7 @@ class GameMain():
                 # 인자) 일반 모드: 0, 대전 상대 수 n / 스토리: 스테이지 n 을 인자로 추가
                 self.single_lobby = SingleLobby(self)
             case 2:
-                self.play_game = GamePlay(self, playerlist=self.player_names, stage_index=0, playerAI_number=self.playerAI_number, players_idx=self.players_index)
+                self.play_game = GamePlay(self, players_name=self.player_names, stage_index=0, playerAI_number=self.playerAI_number, players_idx=self.players_index)
             case 3:
                 self.storymode = StoryMode(self)
             case 4:

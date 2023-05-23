@@ -6,7 +6,7 @@ import random
 class PlayerAI(Player): 
     def __init__(self, index = 0, tag=None):
         self.index = index # 0: default, n: stage n (n > 0)
-        super().__init__(tag, True)
+        super().__init__(tag, True, index)
         
         
     def choose_card(self, table):
