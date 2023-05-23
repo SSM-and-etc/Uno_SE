@@ -122,9 +122,11 @@ class MultiLobby():
         for i in range(MAX_PLAYER_COUNT):
             if i < len(self.players):
                 self.texts[4].change_text(i, self.players[i])
+                self.imgs[4].set_checked(i, 0, True)
                 #self.player_info[i] = -1
             else:
                 self.texts[4].change_text(i, "")
+                self.imgs[4].set_checked(i, 0, False)
                 #self.player_info[i] = -2
 
         if self.is_server:
