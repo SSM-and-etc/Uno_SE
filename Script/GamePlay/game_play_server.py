@@ -15,7 +15,7 @@ import pickle
 import os
 
 class GamePlayServer(GamePlay):
-    def __init__(self, main, stage_index = 0):
+    def __init__(self, main, sock, sockets, players_name, stage_index = 0):
         self.set_achi_data()
         self.main = main
         self.stage_index = stage_index
@@ -58,28 +58,16 @@ class GamePlayServer(GamePlay):
         self.font_resize() 
 
         self.multiplay = True
-        self.sockets = []
-        self.player = Player("Server")
+        self.sockets = sockets
+        print(players_name)
+        self.player = Player(players_name[0])
         self.players = [self.player]
+        for p in players_name[1:]:
+            self.players.append(Player(p))
 
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.bind(("0.0.0.0", 12345))
-        self.sock.listen()
-        #self.sock.setblocking(0)
+        print(self.players)
 
-        client = self.sock.accept()
-        self.sockets.append(client[0])
-        self.players.append(Player("Client"))
-
-        self.sockets.append(None)
-        self.players.append(PlayerAI(tag="AI"))
-
-        '''
-        client = self.sock.accept()
-        self.sockets.append(client[0])
-        self.players.append(Player("Client3"))
-        print(self.sockets)
-        '''
+        self.sock = sock
 
         while True:
             self.game = Game(self.players, 0, main.sound)

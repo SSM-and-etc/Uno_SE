@@ -17,7 +17,7 @@ import pickle
 import os
 
 class GamePlayClient(GamePlay):
-    def __init__(self, main, stage_index = 0):
+    def __init__(self, main, server, stage_index = 0):
         self.set_achi_data()
         self.main = main
         self.stage_index = stage_index
@@ -59,11 +59,7 @@ class GamePlayClient(GamePlay):
 
         self.font_resize() 
 
-        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server.connect(("127.0.0.1", 12345))
-
         self.server = server
-        self.server.setblocking(0)
 
         self.multiplay = True
         self.game = None
