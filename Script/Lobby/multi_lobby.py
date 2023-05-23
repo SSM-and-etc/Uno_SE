@@ -133,10 +133,16 @@ class MultiLobby():
                 elif data["action"] == "BANNED":
                     self.state = 0
                     self.exit()
+                    self.ex_text_print("you have been banished.")
                     # TODO: Notice you are banned 
                 
             except:
                 pass
+
+    def ex_text_print(self, text):
+        self.ex_texts.change_text(0, text)
+        self.ex_texts_counter = 3
+        pygame.time.set_timer(pygame.USEREVENT, 1000)
 
     def players_updated(self):
         print(self.players)
@@ -623,6 +629,7 @@ class MultiLobby():
         self.sockets[i].close()
         self.players.pop(i)
         self.sockets.pop(i)
+        self.ex_text_print("Player"+str(i)+" has been kicked out.")
 
         self.players_updated()
 
