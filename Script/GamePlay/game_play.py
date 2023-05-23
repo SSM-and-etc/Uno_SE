@@ -10,6 +10,7 @@ import random
 
 import os
 
+
 USEREVENT2 = pygame.USEREVENT+1
 USEREVENT_POPUP = pygame.USEREVENT+2 
 
@@ -275,13 +276,16 @@ class GamePlay:
 
         if not only_asset:
             # uno버튼에 의한 드로우 처리
-            if len(self.game.turn().hand) == 1 and self.game.turn().uno != self.game.turn():
-                self.game.turn().uno = None
-                if self.game.deck.stack:
-                    self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.game.turn())], 50, 0))
-                    self.game.draw(self.game.turn(), 1)  
-                else:
-                    self.game.draw(self.game.turn(), 1) 
+            try:
+                if len(self.game.turn().hand) == 1 and self.game.turn().uno != self.game.turn():
+                    self.game.turn().uno = None
+                    if self.game.deck.stack:
+                        self.animate_assets.append((self.assets["deck"].clone(), self.pane_assets[self.game.players.index(self.game.turn())], 50, 0))
+                        self.game.draw(self.game.turn(), 1)  
+                    else:
+                        self.game.draw(self.game.turn(), 1) 
+            except:
+                pass
             
             pygame.time.set_timer(pygame.USEREVENT, 1000)
             self.counter = 15
@@ -459,7 +463,10 @@ class GamePlay:
         else: # user turn
             if self.counter == random.randint(10, 13):
                 if len(self.player.hand) <= 2 and not self.player.uno:
-                    self.play_uno(self.player, self.game.get_random_AIplayer())
+                    try:
+                        self.play_uno(self.player, self.game.get_random_AIplayer())
+                    except:
+                        pass
                     
 
     def play_player(self, player, card = None):

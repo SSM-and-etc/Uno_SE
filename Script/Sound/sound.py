@@ -32,6 +32,8 @@ class Sound():
             downtown,
             hey,
             downtown,
+            energy,
+            hey,
             hey
         ]
         

@@ -1,7 +1,5 @@
 import pygame
 
-import os
-
 from System.option import Option
 from System.images import Images
 from System.statebuttons import StateButtons
@@ -76,7 +74,7 @@ class Title():
             self.enter_state(main)
             
     def move_collide_title(self, main, mouse_pos):
-        clicked_button_idx = self.buttons.get_clicked_button_idx(mouse_pos)
+        clicked_button_idx = self.buttons.get_on_cursor_buttton_idx(mouse_pos)
         if clicked_button_idx != None:
             pass
             
@@ -99,7 +97,7 @@ class Title():
             case 1:
                 main.scene_change(main.get_scene_index("story mode"))
             case 2:
-                main.scene_change(main.get_scene_index("multi game"))
+                main.scene_change(main.get_scene_index("multi lobby"))
             case 3:
                 self.on_option = True
             case 4:

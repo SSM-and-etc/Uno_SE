@@ -54,11 +54,33 @@ class StateButtons(Images):
         for i in range(len(self.imgs)):
             for j in range(len(self.imgs[i])):
                 if self.rects[i][j].collidepoint(mouse_pos):
+                    if self.is_state_holding:
+                        if not self.state == [i, j]:
+                            self.is_state_holding = False
+                        return None
+                    self.state = [i, j]
+                    return i, j
+        if self.is_state_holding:
+            self.is_state_holding = False
+            
+        return None
+    
+    def get_on_cursor_buttton_idx(self, mouse_pos):
+        if self.is_state_holding:
+            return None
+        for i in range(len(self.imgs)):
+            for j in range(len(self.imgs[i])):
+                if self.rects[i][j].collidepoint(mouse_pos):
                     self.state = [i, j]
                     return i, j
         return None
     
     def key_down_state(self, key):
+        if self.is_state_holding:
+            if key == pygame.K_ESCAPE:
+                self.is_state_holding = False
+                return True
+            return False
         match key:
             case self.user_data.key_left: 
                 self.state[1] -= 1
@@ -74,11 +96,6 @@ class StateButtons(Images):
                 self.state_index_handling()
                 if self.state[1] >= len(self.imgs[self.state[0]]):
                     self.state[1] = len(self.imgs[self.state[0]]) 
-            case pygame.K_ESCAPE:
-                if self.is_state_holding:
-                    self.is_state_holding = False
-                else:
-                    return False
             case _:
                 return False
         

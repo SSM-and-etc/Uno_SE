@@ -28,7 +28,12 @@ class Texts():
         self.font_names = []
         self.design_size = (1280,720)
         
+        self.is_off = False
+        
     def draw(self, screen):
+        if self.is_off:
+            return
+        
         if self.user_data.color_blindness_mode:
             for i in range(len(self.texts)):
                 screen.blit(self.texts_c[i], self.poses[i])
@@ -38,6 +43,9 @@ class Texts():
                 
     def get_text_data(self, i):
         return (self.texts[i], self.poses[i]), (self.texts_c[i], self.poses[i])
+    
+    def get_only_text(self, i):
+        return self.default_texts[i]
             
     def add(self, text, pos, size = 30, font_name = "arial", font_color = "BLUE_MAGENTA", font_color_c = "REDDISH_PURPLE"):
         self.default_texts.append(text)
@@ -91,3 +99,8 @@ class Texts():
     
     def tup_div(self, tup1, tup2):
         return (tup1[0] / tup2[0], tup1[1] / tup2[1])
+    
+    def reset(self):
+        for i in range(len(self.texts)):
+            self.change_text(i, "")
+            

@@ -12,10 +12,11 @@ import random
 
 import pickle
 
+import time
 import os
 
 class GamePlayServer(GamePlay):
-    def __init__(self, main, stage_index = 0):
+    def __init__(self, main, sock, sockets, players_name, stage_index = 0):
         self.set_achi_data()
         self.main = main
         self.stage_index = stage_index
@@ -55,31 +56,22 @@ class GamePlayServer(GamePlay):
         self.hand_assets = []
         self.animate_assets = []
 
+        self.popup_asset = None
+        self.popup_counter = 0
+
         self.font_resize() 
 
         self.multiplay = True
-        self.sockets = []
-        self.player = Player("Server")
+        self.sockets = sockets
+        print(players_name)
+        self.player = Player(players_name[0])
         self.players = [self.player]
+        for p in players_name[1:]:
+            self.players.append(Player(p))
 
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.bind(("0.0.0.0", 12345))
-        self.sock.listen()
-        #self.sock.setblocking(0)
+        self.sock = sock
 
-        client = self.sock.accept()
-        self.sockets.append(client[0])
-        self.players.append(Player("Client"))
-
-        self.sockets.append(None)
-        self.players.append(PlayerAI(tag="AI"))
-
-        '''
-        client = self.sock.accept()
-        self.sockets.append(client[0])
-        self.players.append(Player("Client3"))
-        print(self.sockets)
-        '''
+        time.sleep(3)
 
         while True:
             self.game = Game(self.players, 0, main.sound)
@@ -88,17 +80,17 @@ class GamePlayServer(GamePlay):
             for p in self.players:
                 p.hand.clear()
 
-        for idx, p in enumerate(self.players[1:]):
-            if self.sockets[idx]:
-                self.sockets[idx].send(pickle.dumps({
-                    "action": "START",
-                    "payload": {
-                        "player": p,
-                        "players": self.players,
-                        "table": self.game.table,
-                        "deck": self.game.deck,
-                    }
-                }))
+        for i, p in enumerate(self.players[1:]):
+            idx = i+1
+            self.sockets[idx].send(pickle.dumps({
+                "action": "START",
+                "payload": {
+                    "player": p,
+                    "players": self.players,
+                    "table": self.game.table,
+                    "deck": self.game.deck,
+                }
+            }))
 
         random.seed(len(self.players))
 
@@ -150,7 +142,7 @@ class GamePlayServer(GamePlay):
             except socket.error as e:
                 if e.errno == errno.ECONNRESET:
                     print(e)
-                    idx = self.sockets.index(sock) + 1
+                    idx = self.sockets.index(sock)
                     player = self.players[idx]
                     print("DISCONNECTED:", sock)
                     print(player)

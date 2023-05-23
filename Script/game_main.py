@@ -2,13 +2,17 @@ import os
 
 import pygame
 
-from Lobby.lobby import Lobby
 from GameData.user_data import UserData
 from GameData.game_data import GameData
 from Title.title import Title
+from Lobby.single_lobby import SingleLobby
+from Lobby.multi_lobby import MultiLobby
 from GamePlay.game_play import GamePlay
 from StoryMode.storymode import StoryMode
 from Sound.sound import Sound
+
+from GamePlay.game_play_server import GamePlayServer
+from GamePlay.game_play_client import GamePlayClient
 
 
 class GameMain():
@@ -49,8 +53,12 @@ class GameMain():
                 return 3
             case "story mode game start":
                 return 4
-            case "multi game":
+            case "multi lobby":
                 return 5
+            case "multi game server":
+                return 6
+            case "multi game client":
+                return 7
         return -1
         
     def get_scene_obj(self, scene_state):
@@ -58,7 +66,7 @@ class GameMain():
             case 0:
                 return self.title
             case 1:
-                return self.lobby
+                return self.single_lobby
             case 2:
                 return self.play_game
             case 3:
@@ -66,7 +74,11 @@ class GameMain():
             case 4:
                 return self.play_game_storymode
             case 5:
-                pass # TODO: multi게임 진행 scene으로 연결 (로비 등등)
+                return self.multi_lobby
+            case 6:
+                return self.multi_game_server
+            case 7:
+                return self.multi_game_client
             case _:
                 return None
 
@@ -76,14 +88,19 @@ class GameMain():
                 self.title = Title(self)
             case 1:
                 # 인자) 일반 모드: 0, 대전 상대 수 n / 스토리: 스테이지 n 을 인자로 추가
-                self.player_info=[]
-                self.lobby = Lobby(self)
+                self.single_lobby = SingleLobby(self)
             case 2:
-                self.play_game = GamePlay(self,playerlist=self.player_info,stage_index=0,playerAI_number=self.playerAI_number)
+                self.play_game = GamePlay(self, players_name=self.player_names, stage_index=0, playerAI_number=self.playerAI_number, players_idx=self.players_index)
             case 3:
                 self.storymode = StoryMode(self)
             case 4:
                 self.play_game_storymode = GamePlay(self, None, self.stage_index)
+            case 5:
+                self.multi_lobby = MultiLobby(self)
+            case 6:
+                self.multi_game_server = GamePlayServer(self, self.sock, self.sockets, self.players_name)
+            case 7:
+                self.multi_game_client = GamePlayClient(self, self.server)
             case _:
                 pass
             
@@ -99,6 +116,12 @@ class GameMain():
                 self.storymode = None
             case 4:
                 self.play_game_storymode = None
+            case 5:
+                self.multi_lobby = None
+            case 6:
+                self.multi_game_server = None
+            case 7:
+                self.multi_game_client = None
             case _:
                 pass
             
@@ -134,6 +157,10 @@ class GameMain():
                 if player.clicked ==True:
                     self.playerAI_number+=1
                     self.player_info.append(player)
+                    
+    def set_player_info(self, names, indices):
+        self.player_names = [name for name in names]
+        self.players_index = [index for index in indices]
 if __name__ == "__main__":
     # pygame.mixer.pre_init(44100,-16,2,512)
     pygame.init()
