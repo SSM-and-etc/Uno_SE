@@ -673,8 +673,9 @@ class MultiLobby():
     
     def get_players_name_list(self):
         name_list = []
-        for i in MAX_PLAYER_COUNT:
+        for i in range(MAX_PLAYER_COUNT):
             name_list.append(self.texts[4].get_only_text(i))
+        return name_list
             
     def set_ai_story_index(self, i, story_index = -1):
         for j in range(2, 6):
