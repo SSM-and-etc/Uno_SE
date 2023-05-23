@@ -53,16 +53,31 @@ class MultiLobby():
                 print(client)
                 client[0].setblocking(0)
 
-                self.sockets.append(client[0])
-                self.players.append("")
+                if len(self.players) < MAX_PLAYER_COUNT:
+                    self.sockets.append(client[0])
+                    self.players.append("")
 
-                client[0].send(pickle.dumps({
-                    "action": "ASK_PASSWORD",
-                    "payload": {
-                        "full": False, # TODO: Full check
-                        "password": (self.get_pw() != ""),
-                    }
-                }))
+                    client[0].send(pickle.dumps({
+                        "action": "ASK_PASSWORD",
+                        "payload": {
+                            "full": False, 
+                            "password": (self.get_pw() != ""),
+                        }
+                    }))
+
+                else:
+                    client[0].send(pickle.dumps({
+                        "action": "ASK_PASSWORD",
+                        "payload": {
+                            "full": True, 
+                            "password": (self.get_pw() != ""),
+                        }
+                    }))
+
+                    self.ex_texts.change_text(0, "The room is full.")
+                    self.ex_texts_counter = 3
+                    pygame.time.set_timer(pygame.USEREVENT, 1000)
+                    
             except:
                 pass
 
