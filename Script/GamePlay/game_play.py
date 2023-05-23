@@ -10,8 +10,9 @@ import random
 
 import os
 
-USEREVENT2 = pygame.USEREVENT + 1
 
+USEREVENT2 = pygame.USEREVENT+1
+USEREVENT_POPUP = pygame.USEREVENT+2 
 
 class Asset:
     design_size = (1280, 720)
@@ -186,6 +187,9 @@ class GamePlay:
             "counter": FakeAsset((830, 450, 0, 0))
         }
 
+        self.popup_asset = None
+        self.popup_counter = 0
+
         self.on_game_gui = True
         self.winner = None
         self.result_asset = Asset("BG/result.png", (0, 0))
@@ -203,7 +207,7 @@ class GamePlay:
 
         self.pane_assets = [FakeAsset((10, 514, 876, 196))]
         for i in range(len(self.players)-1):
-            self.pane_assets.append(Asset("BG/player_panel.png", (906, 10 + 150 * i)))
+            self.pane_assets.append(Asset("BG/player_panel.png", (906, 10 + 140 * i)))
 
         self.selection = Selection(self.player, self.color_selection)
 
@@ -381,6 +385,12 @@ class GamePlay:
                     self.counter_event()
                 if event.type == USEREVENT2:
                     self.achi_comp_counter -= 1
+                if event.type == USEREVENT_POPUP:
+                    if self.popup_counter > 0:
+                        self.popup_counter -= 1
+                    else:
+                        pygame.time.set_timer(USEREVENT_POPUP, 0)
+                        self.popup_asset = None
                         
             self.main.screen.blit(*self.assets["background"].scaled())
 
@@ -454,6 +464,30 @@ class GamePlay:
                     
 
     def play_player(self, player, card = None):
+        if card and card.is_special():
+            match card.card_type:
+                case CardType.CARD_PLUS2:
+                    self.popup_asset = (self.players.index(self.game.players_turn.look_next()), "+2")
+                    self.popup_counter = 2
+                    pygame.time.set_timer(USEREVENT_POPUP, 1000)
+                case CardType.CARD_DRAW:
+                    self.popup_asset = (self.players.index(self.game.players_turn.look_next()), "+4")
+                    self.popup_counter = 2
+                    pygame.time.set_timer(USEREVENT_POPUP, 1000)
+                case CardType.CARD_REVERSE:
+                    self.popup_asset = (self.players.index(self.game.players_turn.current()), "Reverse")
+                    self.popup_counter = 2
+                    pygame.time.set_timer(USEREVENT_POPUP, 1000)
+                case CardType.CARD_SKIP:
+                    self.popup_asset = (self.players.index(self.game.players_turn.look_next()), "Skip")
+                    self.popup_counter = 2
+                    pygame.time.set_timer(USEREVENT_POPUP, 1000) 
+                case CardType.CARD_SWAP:
+                    self.popup_asset = (self.players.index(self.game.players_turn.current()), "Swap")
+                    self.popup_counter = 2
+                    pygame.time.set_timer(USEREVENT_POPUP, 1000) 
+                
+
         # self.game.play() 이후의 self.game.turn()은 순서를 넘겨 받은 플레이어가 됨에 주의
         self.game_turn_count += 1
         self.achi_put_card(card)
@@ -551,6 +585,9 @@ class GamePlay:
 
             if self.game.players[i] == self.game.turn():
                 pygame.draw.rect(self.main.screen, (255, 0, 0), pane_asset.scaled_rect(), 2)
+
+        if self.popup_asset:
+            self.main.screen.blit(self.counter_font.render(self.popup_asset[1], True, (255, 0, 0)), self.pane_assets[self.popup_asset[0]].scaled_rect().move(30, 5))
 
         for asset in self.animate_assets:
             self.main.screen.blit(*asset[0].scaled())
