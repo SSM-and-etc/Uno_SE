@@ -142,7 +142,7 @@ class GamePlayServer(GamePlay):
             except socket.error as e:
                 if e.errno == errno.ECONNRESET:
                     print(e)
-                    idx = self.sockets.index(sock) + 1
+                    idx = self.sockets.index(sock)
                     player = self.players[idx]
                     print("DISCONNECTED:", sock)
                     print(player)
