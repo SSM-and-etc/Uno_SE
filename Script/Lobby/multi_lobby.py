@@ -131,7 +131,6 @@ class MultiLobby():
                     self.start_game_client()
 
                 elif data["action"] == "BANNED":
-                    self.state = 0
                     self.exit()
                     self.ex_text_print("you have been banished.")
                     # TODO: Notice you are banned 
