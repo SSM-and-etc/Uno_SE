@@ -96,7 +96,7 @@ class MultiLobby():
                             }))
 
                     elif data["action"] == "CHANGE_NAME":
-                        self.players[idx] = data["payload"]["player"]
+                        self.players[idx] = data["payload"]
                         self.players_updated()
                 
                 except:
@@ -130,7 +130,13 @@ class MultiLobby():
                 #self.player_info[i] = -2
 
         if self.is_server:
-            pass
+            for sock in filter(None, self.sockets):
+                sock.send(pickle.dumps({
+                    "action": "UPDATE_PLAYERS",
+                    "payload": {
+                        "players": self.players
+                    }
+                }))
         else:
             pass
 
@@ -274,7 +280,7 @@ class MultiLobby():
         match j:
             case 1:
                 if i == self.lobby_index:
-                    self.enter_write_state(0)
+                    self.enter_write_state(i)
             case 6:
                 match i:
                     case 5:
@@ -525,7 +531,7 @@ class MultiLobby():
 
                 if data["payload"]["state"]:
                     self.players = data["payload"]["players"]
-                    self.player_idx = data["payload"]["player"]
+                    self.lobby_index = data["payload"]["player"]
                     self.players_updated()
                     self.server.setblocking(0)
                     self.enter_lobby()
@@ -573,7 +579,7 @@ class MultiLobby():
 
         if data["payload"]["state"]:
             self.players = data["payload"]["players"]
-            self.player_idx = data["payload"]["player"]
+            self.lobby_index = data["payload"]["player"]
             self.players_updated()
             self.server.setblocking(0)
             self.enter_lobby()
@@ -614,6 +620,17 @@ class MultiLobby():
             self.buttons[4].is_state_holding = False
             if self.now_text_index < MAX_PLAYER_COUNT:  #TODO: i번째 유저가 닉네임 변경, 변경한 이름은 self.now_input_string에 존재
                 self.now_input_string
+
+                if self.is_server:
+                    self.players[0] = self.now_input_string
+                    self.players_updated()
+
+                else:
+                    self.server.send(pickle.dumps({
+                        "action": "CHANGE_NAME",
+                        "payload": self.now_input_string
+                    }))
+
             elif self.now_text_index == PW_STRING:      #TODO: 방 비밀번호 변경 적용
                 self.room_password = self.now_input_string
                 
